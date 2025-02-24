@@ -163,10 +163,10 @@ const UserProfile = () => {
         initial="hidden"
         animate="visible"
         variants={contentVariants}
-        className="relative group w-full max-w-md"
+        className="relative group w-full max-w-xl"
       >
         <div
-          className={`relative p-8 rounded-lg border backdrop-blur-sm
+          className={`relative p-6 md:p-6 rounded-lg border backdrop-blur-sm
             ${
               isDark
                 ? "bg-black/80 border-indigo-500/30 group-hover:border-indigo-400"
@@ -243,7 +243,7 @@ const UserProfile = () => {
                 <input
                   type="email"
                   value={currentUser?.email || ""}
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-lg border text-sm
+                  className={`w-full pl-8 lg:pl-10 pr-4 py-2.5 rounded-lg border text-sm
                     ${
                       isDark
                         ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 placeholder-indigo-500/70"
