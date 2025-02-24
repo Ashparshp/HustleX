@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import {
   User,
   Mail,
@@ -10,12 +10,8 @@ import {
   LogOut,
   Check,
   X,
-  Camera,
   Shield,
-  AlertCircle,
-  ChevronRight,
-  Settings,
-  Bell,
+  ArrowRight,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -32,7 +28,6 @@ const UserProfile = () => {
   const { isDark } = useTheme();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState(null);
   const [formData, setFormData] = useState({
     name: currentUser?.name || "",
     phoneNumber: currentUser?.phoneNumber || "",
@@ -45,19 +40,6 @@ const UserProfile = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
 
-  const fileInputRef = useRef(null);
-
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -68,13 +50,16 @@ const UserProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (isSubmitting) return;
 
+    // Form validation
     if (!formData.name.trim()) {
       setFormError("Name is required");
       return;
     }
 
+    // Phone number validation (optional)
     if (
       formData.phoneNumber &&
       !/^\d{10,15}$/.test(formData.phoneNumber.replace(/[^0-9]/g, ""))
@@ -88,10 +73,11 @@ const UserProfile = () => {
     setIsSubmitting(true);
 
     try {
-      await updateProfile({ ...formData, avatar: avatarPreview });
+      await updateProfile(formData);
       setFormSuccess("Profile updated successfully");
       setIsEditing(false);
 
+      // Check if phone number was changed and needs verification
       if (
         formData.phoneNumber &&
         formData.phoneNumber !== currentUser.phoneNumber
@@ -107,6 +93,7 @@ const UserProfile = () => {
 
   const handleResendCode = async () => {
     if (isResendingCode) return;
+
     setIsResendingCode(true);
     setFormError("");
 
@@ -122,6 +109,7 @@ const UserProfile = () => {
 
   const handleVerifyPhone = async () => {
     if (isVerifying || !verificationCode) return;
+
     setIsVerifying(true);
     setFormError("");
 
@@ -146,520 +134,475 @@ const UserProfile = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.4, ease: "easeOut" },
+      transition: {
+        duration: 0.4,
+        ease: "easeOut",
+      },
     },
   };
 
-  const fadeInVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.3 } },
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: (custom) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: custom * 0.1,
+        duration: 0.3,
+      },
+    }),
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div
+      className={`min-h-screen flex items-center justify-center px-4 ${
+        isDark ? "bg-black" : "bg-gray-50"
+      }`}
+    >
       <motion.div
         initial="hidden"
         animate="visible"
         variants={contentVariants}
-        className="space-y-6"
+        className="relative group w-full max-w-md"
       >
-        {/* Profile Header */}
         <div
-          className={`rounded-xl overflow-hidden ${
-            isDark ? "bg-gray-800" : "bg-white"
-          } shadow-lg`}
-        >
-          {/* Cover Photo */}
-          <div
-            className={`h-32 bg-gradient-to-r ${
+          className={`relative p-8 rounded-lg border backdrop-blur-sm
+            ${
               isDark
-                ? "from-indigo-900/50 to-purple-900/50"
-                : "from-indigo-500/10 to-purple-500/10"
-            }`}
-          />
+                ? "bg-black/80 border-indigo-500/30 group-hover:border-indigo-400"
+                : "bg-white/80 border-indigo-300/50 group-hover:border-indigo-500"
+            }
+            transition-all duration-300
+          `}
+        >
+          <h2
+            className={`text-2xl font-bold mb-6 text-center flex items-center justify-center gap-2
+              ${isDark ? "text-white" : "text-gray-900"}
+            `}
+          >
+            <Shield
+              className={isDark ? "text-indigo-400" : "text-indigo-600"}
+              size={22}
+            />
+            User Profile
+          </h2>
 
-          {/* Profile Info */}
-          <div className="px-6 pb-6">
-            <div className="relative -mt-16 flex items-end space-x-4">
-              {/* Avatar */}
+          {formError && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`p-3 rounded-lg mb-4 text-sm text-center
+                ${
+                  isDark
+                    ? "bg-red-500/10 text-red-400 border border-red-500/30"
+                    : "bg-red-100 text-red-600 border border-red-200"
+                }
+              `}
+            >
+              {formError}
+            </motion.div>
+          )}
+
+          {formSuccess && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`p-3 rounded-lg mb-4 text-sm text-center
+                ${
+                  isDark
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                    : "bg-emerald-100 text-emerald-600 border border-emerald-200"
+                }
+              `}
+            >
+              {formSuccess}
+            </motion.div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email Field */}
+            <motion.div
+              custom={0}
+              variants={itemVariants}
+              className="group/input"
+            >
+              <label
+                className={`block mb-2 text-sm font-medium
+                  ${isDark ? "text-gray-300" : "text-gray-700"}
+                `}
+              >
+                Email Address
+              </label>
               <div className="relative">
-                <div
-                  className={`h-32 w-32 rounded-full border-4 ${
-                    isDark ? "border-gray-800" : "border-white"
-                  } overflow-hidden`}
-                >
-                  {avatarPreview || currentUser?.avatarUrl ? (
-                    <img
-                      src={avatarPreview || currentUser?.avatarUrl}
-                      alt="Profile"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div
-                      className={`h-full w-full grid place-items-center ${
-                        isDark ? "bg-gray-700" : "bg-gray-100"
-                      }`}
-                    >
-                      <User
-                        size={40}
-                        className={isDark ? "text-gray-500" : "text-gray-400"}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {isEditing && (
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`absolute bottom-0 right-0 p-2 rounded-full ${
-                      isDark
-                        ? "bg-gray-700 hover:bg-gray-600"
-                        : "bg-white hover:bg-gray-50"
-                    } shadow-lg transition duration-200`}
-                  >
-                    <Camera
-                      size={16}
-                      className={isDark ? "text-gray-300" : "text-gray-700"}
-                    />
-                  </button>
-                )}
+                <Mail
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4
+                    ${isDark ? "text-indigo-400" : "text-indigo-600"}
+                    transition-transform duration-300 group-hover/input:scale-110
+                  `}
+                />
                 <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  className="hidden"
+                  type="email"
+                  value={currentUser?.email || ""}
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-lg border text-sm
+                    ${
+                      isDark
+                        ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 placeholder-indigo-500/70"
+                        : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 placeholder-indigo-600/50"
+                    }
+                    focus:outline-none focus:ring-2 focus:ring-indigo-500/50
+                    transition-all duration-300
+                  `}
+                  disabled
+                />
+                {currentUser?.isEmailVerified ? (
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <span
+                      className={`text-xs font-medium px-2 py-1 rounded-full
+                        ${
+                          isDark
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                            : "bg-emerald-100 text-emerald-600 border border-emerald-200"
+                        }
+                      `}
+                    >
+                      Verified
+                    </span>
+                  </div>
+                ) : (
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <span
+                      className={`text-xs font-medium px-2 py-1 rounded-full
+                        ${
+                          isDark
+                            ? "bg-amber-500/10 text-amber-400 border border-amber-500/30"
+                            : "bg-amber-100 text-amber-600 border border-amber-200"
+                        }
+                      `}
+                    >
+                      Unverified
+                    </span>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Name Field */}
+            <motion.div
+              custom={1}
+              variants={itemVariants}
+              className="group/input"
+            >
+              <label
+                className={`block mb-2 text-sm font-medium
+                  ${isDark ? "text-gray-300" : "text-gray-700"}
+                `}
+              >
+                Full Name
+              </label>
+              <div className="relative">
+                <User
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4
+                    ${isDark ? "text-indigo-400" : "text-indigo-600"}
+                    transition-transform duration-300 group-hover/input:scale-110
+                  `}
+                />
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-lg border text-sm
+                    ${
+                      isDark
+                        ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 placeholder-indigo-500/70"
+                        : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 placeholder-indigo-600/50"
+                    }
+                    focus:outline-none focus:ring-2 focus:ring-indigo-500/50
+                    transition-all duration-300
+                    ${!isEditing ? "opacity-70" : ""}
+                  `}
+                  placeholder="John Doe"
+                  required
+                  disabled={!isEditing}
                 />
               </div>
+            </motion.div>
 
-              {/* User Info */}
-              <div className="flex-1 pt-16">
-                <h1
-                  className={`text-2xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {formData.name || "Your Name"}
-                </h1>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
-                  {currentUser?.email}
-                </p>
+            {/* Phone Number Field */}
+            <motion.div
+              custom={2}
+              variants={itemVariants}
+              className="group/input"
+            >
+              <label
+                className={`block mb-2 text-sm font-medium
+                  ${isDark ? "text-gray-300" : "text-gray-700"}
+                `}
+              >
+                Phone Number (Optional)
+              </label>
+              <div className="relative">
+                <Phone
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4
+                    ${isDark ? "text-indigo-400" : "text-indigo-600"}
+                    transition-transform duration-300 group-hover/input:scale-110
+                  `}
+                />
+                <input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="tel"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-lg border text-sm
+                    ${
+                      isDark
+                        ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 placeholder-indigo-500/70"
+                        : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 placeholder-indigo-600/50"
+                    }
+                    focus:outline-none focus:ring-2 focus:ring-indigo-500/50
+                    transition-all duration-300
+                    ${!isEditing ? "opacity-70" : ""}
+                  `}
+                  placeholder="123-456-7890"
+                  disabled={!isEditing}
+                />
+                {currentUser?.phoneNumber && currentUser?.isPhoneVerified && (
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <span
+                      className={`text-xs font-medium px-2 py-1 rounded-full
+                        ${
+                          isDark
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                            : "bg-emerald-100 text-emerald-600 border border-emerald-200"
+                        }
+                      `}
+                    >
+                      Verified
+                    </span>
+                  </div>
+                )}
               </div>
+            </motion.div>
 
-              {/* Action Buttons */}
-              <div className="pt-16 flex gap-2">
-                <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-                    isDark
-                      ? "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                      : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                  } transition duration-200`}
+            {/* Action buttons */}
+            <motion.div
+              custom={3}
+              variants={itemVariants}
+              className="flex gap-3 pt-2"
+            >
+              {!isEditing ? (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className={`flex-1 py-2.5 rounded-lg flex items-center justify-center gap-2 group
+                    ${
+                      isDark
+                        ? "bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/30"
+                        : "bg-indigo-100/50 text-indigo-600 hover:bg-indigo-200/70 border border-indigo-300/50"
+                    }
+                    transition-all duration-300
+                  `}
                 >
-                  {isEditing ? (
-                    <>
-                      <X size={18} />
-                      <span>Cancel</span>
-                    </>
+                  <Edit2 size={16} />
+                  Edit Profile
+                </motion.button>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={() => setIsEditing(false)}
+                  className={`flex-1 py-2.5 rounded-lg flex items-center justify-center gap-2 group
+                    ${
+                      isDark
+                        ? "bg-gray-500/10 text-gray-400 hover:bg-gray-500/20 border border-gray-500/30"
+                        : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/70 border border-gray-300/50"
+                    }
+                    transition-all duration-300
+                  `}
+                >
+                  <X size={16} />
+                  Cancel
+                </motion.button>
+              )}
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={handleLogout}
+                className={`flex-1 py-2.5 rounded-lg flex items-center justify-center gap-2 group
+                  ${
+                    isDark
+                      ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
+                      : "bg-red-100/50 text-red-600 hover:bg-red-200/70 border border-red-300/50"
+                  }
+                  transition-all duration-300
+                `}
+              >
+                <LogOut size={16} />
+                Logout
+              </motion.button>
+            </motion.div>
+
+            {/* Save button when editing */}
+            {isEditing && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                disabled={isSubmitting}
+                className={`w-full py-2.5 rounded-lg flex items-center justify-center gap-2 group
+                  ${
+                    isDark
+                      ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30"
+                      : "bg-emerald-100/50 text-emerald-600 hover:bg-emerald-200/70 border border-emerald-300/50"
+                  }
+                  ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}
+                  transition-all duration-300
+                `}
+              >
+                {isSubmitting ? (
+                  <div className="animate-spin h-4 w-4 border-2 border-current rounded-full border-t-transparent" />
+                ) : (
+                  <>
+                    <Save size={16} />
+                    Save Changes
+                  </>
+                )}
+              </motion.button>
+            )}
+          </form>
+
+          {/* Phone Verification Section */}
+          {(showVerification ||
+            (currentUser?.phoneNumber && !currentUser?.isPhoneVerified)) && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className={`mt-6 p-4 rounded-lg border
+                ${
+                  isDark
+                    ? "bg-indigo-500/5 border-indigo-500/20"
+                    : "bg-indigo-50 border-indigo-200/50"
+                }
+              `}
+            >
+              <h3
+                className={`text-lg font-medium mb-2
+                  ${isDark ? "text-indigo-300" : "text-indigo-700"}
+                `}
+              >
+                Verify Your Phone Number
+              </h3>
+              <p
+                className={`mb-4 text-sm
+                  ${isDark ? "text-gray-400" : "text-gray-600"}
+                `}
+              >
+                Enter the verification code sent to your phone number.
+              </p>
+
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  placeholder="Enter code"
+                  className={`flex-1 pl-4 pr-4 py-2.5 rounded-lg border text-sm
+                    ${
+                      isDark
+                        ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 placeholder-indigo-500/70"
+                        : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 placeholder-indigo-600/50"
+                    }
+                    focus:outline-none focus:ring-2 focus:ring-indigo-500/50
+                    transition-all duration-300
+                  `}
+                />
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={handleVerifyPhone}
+                  disabled={isVerifying || !verificationCode}
+                  className={`py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 group
+                    ${
+                      isDark
+                        ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30"
+                        : "bg-emerald-100/50 text-emerald-600 hover:bg-emerald-200/70 border border-emerald-300/50"
+                    }
+                    ${
+                      isVerifying || !verificationCode
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }
+                    transition-all duration-300
+                  `}
+                >
+                  {isVerifying ? (
+                    <div className="animate-spin h-4 w-4 border-2 border-current rounded-full border-t-transparent" />
                   ) : (
                     <>
-                      <Edit2 size={18} />
-                      <span>Edit</span>
+                      <Check size={16} />
+                      Verify
                     </>
                   )}
-                </button>
+                </motion.button>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Alert Messages */}
-        <AnimatePresence>
-          {(formError || formSuccess) && (
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              variants={fadeInVariants}
-              className="space-y-2"
-            >
-              {formError && (
-                <div
-                  className={`p-4 rounded-lg ${
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={handleResendCode}
+                disabled={isResendingCode}
+                className={`mt-3 text-sm font-medium inline-flex items-center gap-1
+                  ${
                     isDark
-                      ? "bg-red-900/30 text-red-300"
-                      : "bg-red-50 text-red-700"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <AlertCircle size={18} />
-                    <span>{formError}</span>
-                  </div>
-                </div>
-              )}
-
-              {formSuccess && (
-                <div
-                  className={`p-4 rounded-lg ${
-                    isDark
-                      ? "bg-green-900/30 text-green-300"
-                      : "bg-green-50 text-green-700"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Check size={18} />
-                    <span>{formSuccess}</span>
-                  </div>
-                </div>
-              )}
+                      ? "text-indigo-400 hover:text-indigo-300"
+                      : "text-indigo-600 hover:text-indigo-700"
+                  }
+                  transition duration-200
+                `}
+              >
+                {isResendingCode ? "Sending..." : "Resend verification code"}
+                <ArrowRight
+                  size={14}
+                  className="inline-block transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </motion.button>
             </motion.div>
           )}
-        </AnimatePresence>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left Column - Profile Form */}
-          <div className="md:col-span-2">
-            <motion.div
-              className={`rounded-xl p-6 ${
-                isDark ? "bg-gray-800" : "bg-white"
-              } shadow-lg`}
+          {/* Change Password Link */}
+          <div className="text-center mt-6 pt-4 border-t border-indigo-500/10">
+            <motion.a
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              href="/change-password"
+              className={`inline-flex items-center gap-1 py-2 px-4 rounded-lg text-sm font-medium
+                ${
+                  isDark
+                    ? "bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/30"
+                    : "bg-indigo-100/50 text-indigo-600 hover:bg-indigo-200/70 border border-indigo-300/50"
+                }
+                transition duration-200
+              `}
             >
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name Field */}
-                <div>
-                  <label
-                    className={`block mb-2 text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
-                    Full Name
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User
-                        size={18}
-                        className={isDark ? "text-gray-500" : "text-gray-400"}
-                      />
-                    </div>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      disabled={!isEditing}
-                      className={`w-full pl-10 pr-4 py-2.5 rounded-lg ${
-                        isDark
-                          ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                          : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
-                      } border focus:ring-2 focus:ring-indigo-500/20 transition duration-200`}
-                      placeholder="Your full name"
-                    />
-                  </div>
-                </div>
-
-                {/* Phone Field */}
-                <div>
-                  <label
-                    className={`block mb-2 text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
-                    Phone Number
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Phone
-                        size={18}
-                        className={isDark ? "text-gray-500" : "text-gray-400"}
-                      />
-                    </div>
-                    <input
-                      type="tel"
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleChange}
-                      disabled={!isEditing}
-                      className={`w-full pl-10 pr-4 py-2.5 rounded-lg ${
-                        isDark
-                          ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                          : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
-                      } border focus:ring-2 focus:ring-indigo-500/20 transition duration-200`}
-                      placeholder="Your phone number"
-                    />
-                  </div>
-                </div>
-
-                {isEditing && (
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg ${
-                      isDark
-                        ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                        : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                    } transition duration-200`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <LoadingSpinner size="sm" />
-                        <span>Saving...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Save size={18} />
-                        <span>Save Changes</span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </form>
-            </motion.div>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-6">
-            {/* Verification Status */}
-            <motion.div
-              className={`rounded-xl p-6 ${
-                isDark ? "bg-gray-800" : "bg-white"
-              } shadow-lg`}
-            >
-              <h3
-                className={`text-lg font-medium mb-4 ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                Verification Status
-              </h3>
-
-              <div className="space-y-3">
-                {/* Email Status */}
-                <div
-                  className={`flex items-center justify-between p-3 rounded-lg ${
-                    isDark ? "bg-gray-700/50" : "bg-gray-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Shield
-                      size={20}
-                      className={
-                        currentUser?.isEmailVerified
-                          ? "text-green-500"
-                          : "text-amber-500"
-                      }
-                    />
-                    <span
-                      className={isDark ? "text-gray-300" : "text-gray-700"}
-                    >
-                      Email
-                    </span>
-                  </div>
-                  <span
-                    className={`text-sm ${
-                      currentUser?.isEmailVerified
-                        ? isDark
-                          ? "text-green-400"
-                          : "text-green-600"
-                        : isDark
-                        ? "text-amber-400"
-                        : "text-amber-600"
-                    }`}
-                  >
-                    {currentUser?.isEmailVerified ? "Verified" : "Unverified"}
-                  </span>
-                </div>
-
-                {/* Phone Status */}
-                <div
-                  className={`flex items-center justify-between p-3 rounded-lg ${
-                    isDark ? "bg-gray-700/50" : "bg-gray-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Shield
-                      size={20}
-                      className={
-                        currentUser?.isPhoneVerified
-                          ? "text-green-500"
-                          : "text-amber-500"
-                      }
-                    />
-                    <span
-                      className={isDark ? "text-gray-300" : "text-gray-700"}
-                    >
-                      Phone
-                    </span>
-                  </div>
-                  <span
-                    className={`text-sm ${
-                      currentUser?.isPhoneVerified
-                        ? isDark
-                          ? "text-green-400"
-                          : "text-green-600"
-                        : isDark
-                        ? "text-amber-400"
-                        : "text-amber-600"
-                    }`}
-                  >
-                    {currentUser?.isPhoneVerified ? "Verified" : "Unverified"}
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Quick Actions */}
-            <motion.div
-              className={`rounded-xl p-6 ${
-                isDark ? "bg-gray-800" : "bg-white"
-              } shadow-lg`}
-            >
-              <h3
-                className={`text-lg font-medium mb-4 ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                Quick Actions
-              </h3>
-
-              <div className="space-y-2">
-                <button
-                  onClick={() => {}} // Add navigation to settings
-                  className={`w-full flex items-center justify-between p-3 rounded-lg ${
-                    isDark
-                      ? "hover:bg-gray-700/50 text-gray-300"
-                      : "hover:bg-gray-50 text-gray-700"
-                  } transition duration-200`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Settings size={18} />
-                    <span>Account Settings</span>
-                  </div>
-                  <ChevronRight size={18} />
-                </button>
-
-                <button
-                  onClick={() => {}} // Add navigation to notifications
-                  className={`w-full flex items-center justify-between p-3 rounded-lg ${
-                    isDark
-                      ? "hover:bg-gray-700/50 text-gray-300"
-                      : "hover:bg-gray-50 text-gray-700"
-                  } transition duration-200`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Bell size={18} />
-                    <span>Notifications</span>
-                  </div>
-                  <ChevronRight size={18} />
-                </button>
-
-                <button
-                  onClick={handleLogout}
-                  className={`w-full flex items-center justify-between p-3 rounded-lg ${
-                    isDark
-                      ? "hover:bg-red-900/20 text-red-400"
-                      : "hover:bg-red-50 text-red-600"
-                  } transition duration-200`}
-                >
-                  <div className="flex items-center gap-3">
-                    <LogOut size={18} />
-                    <span>Sign Out</span>
-                  </div>
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-            </motion.div>
+              <Key size={16} />
+              Change Password
+              <ArrowRight
+                size={14}
+                className="ml-1 transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </motion.a>
           </div>
         </div>
-
-        {/* Phone Verification Modal */}
-        <AnimatePresence>
-          {showVerification && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${
-                isDark ? "bg-black/50" : "bg-gray-600/20"
-              }`}
-            >
-              <div
-                className={`w-full max-w-md rounded-xl p-6 ${
-                  isDark ? "bg-gray-800" : "bg-white"
-                } shadow-xl`}
-              >
-                <h3
-                  className={`text-lg font-medium mb-4 ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  Verify Your Phone Number
-                </h3>
-
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                    placeholder="Enter verification code"
-                    className={`w-full px-4 py-2.5 rounded-lg ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                        : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
-                    } border focus:ring-2 focus:ring-indigo-500/20 transition duration-200`}
-                  />
-
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setShowVerification(false)}
-                      className={`flex-1 py-2.5 rounded-lg ${
-                        isDark
-                          ? "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                      } transition duration-200`}
-                    >
-                      Cancel
-                    </button>
-
-                    <button
-                      onClick={handleVerifyPhone}
-                      disabled={isVerifying || !verificationCode}
-                      className={`flex-1 py-2.5 rounded-lg ${
-                        isDark
-                          ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                          : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                      } ${
-                        (isVerifying || !verificationCode) &&
-                        "opacity-50 cursor-not-allowed"
-                      } 
-                      transition duration-200`}
-                    >
-                      {isVerifying ? "Verifying..." : "Verify"}
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={handleResendCode}
-                    disabled={isResendingCode}
-                    className={`w-full text-sm ${
-                      isDark
-                        ? "text-indigo-400 hover:text-indigo-300"
-                        : "text-indigo-600 hover:text-indigo-700"
-                    } transition duration-200`}
-                  >
-                    {isResendingCode
-                      ? "Sending..."
-                      : "Resend verification code"}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </motion.div>
     </div>
   );
