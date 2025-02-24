@@ -1,4 +1,3 @@
-// src/components/Layout/Navbar.jsx
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -97,50 +96,95 @@ const Navbar = () => {
     },
   ];
 
-  // Animation variants
+  // IMPROVED ANIMATION VARIANTS
+  // Mobile menu animations - smoother easing and transform
   const menuVariants = {
     closed: {
       opacity: 0,
-      x: "-100%",
+      height: 0,
       transition: {
-        duration: 0.3,
-        when: "beforeChildren",
+        opacity: { duration: 0.2, ease: "easeInOut" },
+        height: { duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] },
+        when: "afterChildren",
         staggerChildren: 0.05,
+        staggerDirection: -1,
       },
     },
     open: {
       opacity: 1,
-      x: 0,
+      height: "auto",
       transition: {
-        duration: 0.3,
-        when: "afterChildren",
-        staggerChildren: 0.05,
+        opacity: { duration: 0.25, ease: "easeInOut" },
+        height: { duration: 0.35, ease: [0.04, 0.62, 0.23, 0.98] },
+        when: "beforeChildren",
+        staggerChildren: 0.07,
+        delayChildren: 0.05,
       },
     },
   };
 
+  // Link item animations - improved spring physics
   const linkVariants = {
-    closed: { opacity: 0, x: -20 },
-    open: { opacity: 1, x: 0 },
+    closed: { 
+      opacity: 0, 
+      y: 15,
+      transition: {
+        duration: 0.2,
+        ease: "easeIn"
+      }
+    },
+    open: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.3,
+        ease: [0.25, 0.1, 0.25, 1.0] // Cubic bezier for a natural motion
+      }
+    },
   };
 
+  // User menu dropdown - enhanced with spring physics
   const userMenuVariants = {
     hidden: {
       opacity: 0,
-      y: -10,
-      scale: 0.95,
+      y: -5,
+      scale: 0.98,
+      transformOrigin: "top right",
       transition: {
-        duration: 0.2,
+        duration: 0.15,
+        ease: "easeIn"
       },
     },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
+      transformOrigin: "top right",
       transition: {
-        duration: 0.2,
+        type: "spring",
+        stiffness: 350,
+        damping: 25,
+        mass: 0.8
       },
     },
+  };
+  
+  // Button hover animation - smoother scale
+  const buttonHoverAnimation = {
+    whileHover: { 
+      scale: 1.05, 
+      transition: { 
+        duration: 0.2, 
+        ease: "easeOut" 
+      } 
+    },
+    whileTap: { 
+      scale: 0.97, 
+      transition: { 
+        duration: 0.1,
+        ease: "easeIn"
+      } 
+    }
   };
 
   // Theme specific styling with added shadow on scroll
@@ -177,7 +221,9 @@ const Navbar = () => {
               to={isAuthenticated ? "/dashboard" : "/login"}
               className="flex-shrink-0 flex items-center"
             >
-              <span
+              <motion.span
+                initial={{ opacity: 0.9 }}
+                animate={{ opacity: 1 }}
                 className={`text-xl font-bold ${
                   isDark ? "text-white" : "text-indigo-600"
                 } transition-colors duration-300`}
@@ -190,7 +236,7 @@ const Navbar = () => {
                 >
                   Pro
                 </span>
-              </span>
+              </motion.span>
             </Link>
           </div>
 
@@ -200,14 +246,18 @@ const Navbar = () => {
               navLinks
                 .filter((link) => link.authRequired === isAuthenticated)
                 .map((link) => (
-                  <Link
+                  <motion.div 
                     key={link.path}
-                    to={link.path}
-                    className={`px-3 py-2 ${linkClass(isActive(link.path))}`}
+                    {...buttonHoverAnimation}
                   >
-                    {link.icon}
-                    <span>{link.text}</span>
-                  </Link>
+                    <Link
+                      to={link.path}
+                      className={`px-3 py-2 ${linkClass(isActive(link.path))}`}
+                    >
+                      {link.icon}
+                      <span>{link.text}</span>
+                    </Link>
+                  </motion.div>
                 ))}
           </div>
 
@@ -215,8 +265,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-1">
             {/* Theme toggle */}
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              {...buttonHoverAnimation}
               onClick={toggleTheme}
               className={`p-2 rounded-full ${
                 isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"
@@ -224,17 +273,28 @@ const Navbar = () => {
               aria-label="Toggle theme"
             >
               {isDark ? (
-                <Sun size={20} className="text-yellow-300" />
+                <motion.div
+                  initial={{ rotate: -30, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Sun size={20} className="text-yellow-300" />
+                </motion.div>
               ) : (
-                <Moon size={20} className="text-indigo-600" />
+                <motion.div
+                  initial={{ rotate: 30, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Moon size={20} className="text-indigo-600" />
+                </motion.div>
               )}
             </motion.button>
 
             {/* Notifications button - for authenticated users only */}
             {isAuthenticated && (
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                {...buttonHoverAnimation}
                 className={`p-2 rounded-full relative ${
                   isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"
                 } transition duration-200`}
@@ -243,7 +303,17 @@ const Navbar = () => {
                   size={20}
                   className={isDark ? "text-gray-300" : "text-gray-600"}
                 />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                <motion.span 
+                  className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"
+                  animate={{ 
+                    scale: [1, 1.15, 1], 
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatType: "loop"
+                  }}
+                ></motion.span>
               </motion.button>
             )}
 
@@ -251,8 +321,7 @@ const Navbar = () => {
               /* User menu (desktop) */
               <div className="hidden md:relative md:block">
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
+                  {...buttonHoverAnimation}
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className={`flex items-center gap-2 p-1.5 rounded-full ${
                     isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"
@@ -286,12 +355,15 @@ const Navbar = () => {
                       Account
                     </p>
                   </div>
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform duration-300 ${
-                      showUserMenu ? "rotate-180" : ""
-                    } ${isDark ? "text-gray-400" : "text-gray-500"}`}
-                  />
+                  <motion.div
+                    animate={{ rotate: showUserMenu ? 180 : 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  >
+                    <ChevronDown
+                      size={16}
+                      className={`${isDark ? "text-gray-400" : "text-gray-500"}`}
+                    />
+                  </motion.div>
                 </motion.button>
 
                 <AnimatePresence>
@@ -329,53 +401,69 @@ const Navbar = () => {
                         </p>
                       </div>
 
-                      <Link
-                        to="/profile"
-                        className={`block px-4 py-2 text-sm ${
-                          isDark
-                            ? "hover:bg-gray-800 text-gray-300"
-                            : "hover:bg-gray-50 text-gray-700"
-                        } transition-colors duration-200`}
-                        onClick={() => setShowUserMenu(false)}
+                      <motion.div
+                        whileHover={{ x: 3 }}
+                        transition={{ duration: 0.2 }}
                       >
-                        <div className="flex items-center gap-2">
-                          <User size={16} />
-                          <span>Your Profile</span>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/settings"
-                        className={`block px-4 py-2 text-sm ${
-                          isDark
-                            ? "hover:bg-gray-800 text-gray-300"
-                            : "hover:bg-gray-50 text-gray-700"
-                        } transition-colors duration-200`}
-                        onClick={() => setShowUserMenu(false)}
+                        <Link
+                          to="/profile"
+                          className={`block px-4 py-2 text-sm ${
+                            isDark
+                              ? "hover:bg-gray-800 text-gray-300"
+                              : "hover:bg-gray-50 text-gray-700"
+                          } transition-colors duration-200`}
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <div className="flex items-center gap-2">
+                            <User size={16} />
+                            <span>Your Profile</span>
+                          </div>
+                        </Link>
+                      </motion.div>
+                      
+                      <motion.div
+                        whileHover={{ x: 3 }}
+                        transition={{ duration: 0.2 }}
                       >
-                        <div className="flex items-center gap-2">
-                          <Settings size={16} />
-                          <span>Settings</span>
-                        </div>
-                      </Link>
+                        <Link
+                          to="/settings"
+                          className={`block px-4 py-2 text-sm ${
+                            isDark
+                              ? "hover:bg-gray-800 text-gray-300"
+                              : "hover:bg-gray-50 text-gray-700"
+                          } transition-colors duration-200`}
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Settings size={16} />
+                            <span>Settings</span>
+                          </div>
+                        </Link>
+                      </motion.div>
 
                       <div
                         className={`mt-1 pt-1 border-t ${
                           isDark ? "border-gray-800" : "border-gray-100"
                         }`}
                       >
-                        <button
-                          onClick={handleLogout}
-                          className={`block w-full text-left px-4 py-2 text-sm ${
-                            isDark
-                              ? "hover:bg-red-900/20 text-red-400"
-                              : "hover:bg-red-50 text-red-600"
-                          } transition-colors duration-200`}
+                        <motion.div
+                          whileHover={{ x: 3 }}
+                          transition={{ duration: 0.2 }}
                         >
-                          <div className="flex items-center gap-2">
-                            <LogOut size={16} />
-                            <span>Sign out</span>
-                          </div>
-                        </button>
+                          <button
+                            onClick={handleLogout}
+                            className={`block w-full text-left px-4 py-2 text-sm ${
+                              isDark
+                                ? "hover:bg-red-900/20 text-red-400"
+                                : "hover:bg-red-50 text-red-600"
+                            } transition-colors duration-200`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <LogOut size={16} />
+                              <span>Sign out</span>
+                            </div>
+                          </button>
+                        </motion.div>
                       </div>
                     </motion.div>
                   )}
@@ -384,10 +472,7 @@ const Navbar = () => {
             ) : (
               /* Login / Register buttons (desktop) */
               <div className="hidden md:flex md:items-center md:space-x-2">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <motion.div {...buttonHoverAnimation}>
                   <Link
                     to="/login"
                     className={`px-4 py-2 rounded-md text-sm font-medium ${
@@ -399,10 +484,7 @@ const Navbar = () => {
                     Sign in
                   </Link>
                 </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <motion.div {...buttonHoverAnimation}>
                   <Link
                     to="/register"
                     className={`px-4 py-2 rounded-md text-sm font-medium ${
@@ -420,8 +502,7 @@ const Navbar = () => {
             {/* Mobile menu button */}
             <div className="flex md:hidden">
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                {...buttonHoverAnimation}
                 onClick={() => setIsOpen(!isOpen)}
                 className={`inline-flex items-center justify-center p-2 rounded-md ${
                   isDark
@@ -431,11 +512,29 @@ const Navbar = () => {
                 aria-expanded="false"
               >
                 <span className="sr-only">Open main menu</span>
-                {isOpen ? (
-                  <X className="block h-6 w-6" aria-hidden="true" />
-                ) : (
-                  <Menu className="block h-6 w-6" aria-hidden="true" />
-                )}
+                <AnimatePresence mode="wait">
+                  {isOpen ? (
+                    <motion.div
+                      key="close"
+                      initial={{ rotate: -90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: 90, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <X className="block h-6 w-6" aria-hidden="true" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="menu"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Menu className="block h-6 w-6" aria-hidden="true" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.button>
             </div>
           </div>
