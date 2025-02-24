@@ -1,0 +1,38 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+.dark {
+  color-scheme: dark;
+}
+
+.light {
+  color-scheme: light;
+}
+
+body {
+  @apply antialiased;
+}
+
+/* Date picker customization */
+.react-datepicker-wrapper {
+  @apply w-full;
+}
+
+.react-datepicker {
+  @apply border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg;
+}
+
+.react-datepicker__header {
+  @apply bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600;
+}
+
+.react-datepicker__day {
+  @apply hover:bg-gray-100 dark:hover:bg-gray-600;
+}
+
+.react-datepicker__day--selected {
+  @apply bg-indigo-500 hover:bg-indigo-600 text-white;
+}

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="#D1E8FF"/>
+  
+  <!-- Abstract Shapes -->
+  <path d="M60 100 Q100 40 140 100" stroke="#2171B5" stroke-width="8" fill="none"/>
+  <path d="M60 100 Q100 160 140 100" stroke="#08519C" stroke-width="8" fill="none"/>
+  
+  <!-- Central Element -->
+  <circle cx="100" cy="100" r="15" fill="#08306B"/>
+  
+  <!-- Decorative Elements -->
+  <circle cx="60" cy="100" r="8" fill="#4292C6"/>
+  <circle cx="140" cy="100" r="8" fill="#6DB5E9"/>
+  
+  <!-- Dynamic Lines -->
+  <path d="M75 70 Q100 60 125 70" stroke="#6BAED6" stroke-width="3" fill="none"/>
+  <path d="M75 130 Q100 140 125 130" stroke="#84C1EE" stroke-width="3" fill="none"/>
+</svg>
