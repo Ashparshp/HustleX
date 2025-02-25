@@ -1,9 +1,13 @@
-import React from 'react'
+import React from "react";
+import Timetable from "../Timetable/Timetable";
 
 const Dashboard = () => {
   return (
-    <div>Dashboard</div>
-  )
-}
+    <div>
+      Dashboard
+      <Timetable />
+    </div>
+  );
+};
 
-export default Dashboard
+export default Dashboard;
