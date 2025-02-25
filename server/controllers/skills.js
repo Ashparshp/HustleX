@@ -217,7 +217,7 @@ exports.deleteSkill = async (req, res) => {
       });
     }
 
-    await skill.remove();
+    await skill.deleteOne();
 
     res.json({
       success: true,
