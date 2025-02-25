@@ -33,6 +33,7 @@ import ChangePassword from "./components/Profile/ChangePassword";
 // App Feature Pages
 import WorkingHoursPage from "./pages/WorkingHoursPage";
 import SkillsPage from "./pages/SkillsPage";
+import TimetablePage from "./pages/TimetablePage";
 
 function AppContent() {
   const { isDark } = useTheme();
@@ -107,6 +108,25 @@ function AppContent() {
             }
           />
 
+          {/* Skills Feature */}
+          <Route
+            path="/skills"
+            element={
+              <ProtectedRoute>
+                <SkillsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* TimeTable Feature */}
+          <Route
+            path="/timetable"
+            element={
+              <ProtectedRoute>
+                <TimetablePage />
+              </ProtectedRoute>
+            }
+          />
           {/* Skills Feature */}
           <Route
             path="/skills"
