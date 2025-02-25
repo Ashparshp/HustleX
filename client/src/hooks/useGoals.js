@@ -1,40 +1,51 @@
-// src/hooks/useGoals.js (previously useContests.js)
+// src/hooks/useGoals.js
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
 import { useAuth } from "../context/AuthContext";
 
+// This replaces the old useContests hook
 const useGoals = () => {
   const [goals, setGoals] = useState([]);
-  const [platforms, setPlatforms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(null);
+  const [platforms, setPlatforms] = useState([]);
 
   const { isAuthenticated } = useAuth();
 
-  // Fetch all goals/contests
+  // Fetch all goals (contests)
   const fetchGoals = useCallback(
-    async (filters = {}) => {
+    async (platform, participated, startDate, endDate, sort = "date") => {
       if (!isAuthenticated) return;
 
-      setLoading(true);
-      setError(null);
-
       try {
-        const response = await apiClient.get("/contests", { params: filters });
+        setLoading(true);
+        const params = {};
+
+        if (platform) params.platform = platform;
+        if (participated !== undefined)
+          params.participated = participated.toString();
+        if (startDate) params.startDate = startDate;
+        if (endDate) params.endDate = endDate;
+        if (sort) params.sort = sort;
+
+        const response = await apiClient.get("/contests", { params });
 
         setGoals(response.data || []);
 
+        // Set stats if available
         if (response.stats) {
           setStats(response.stats);
         }
 
+        setError(null);
         return response;
-      } catch (error) {
-        console.error("Error fetching goals:", error);
-        setError(error.message);
-        throw error;
+      } catch (err) {
+        console.error("Error fetching goals:", err);
+        setError(err.message);
+        toast.error("Failed to fetch goals");
+        return [];
       } finally {
         setLoading(false);
       }
@@ -42,145 +53,127 @@ const useGoals = () => {
     [isAuthenticated]
   );
 
-  // Fetch platforms
-  const fetchPlatforms = useCallback(async () => {
-    if (!isAuthenticated) return;
-
-    try {
-      const response = await apiClient.get("/contests/platforms");
-      setPlatforms(response.platforms || []);
-      return response.platforms;
-    } catch (error) {
-      console.error("Error fetching platforms:", error);
-      return [];
-    }
-  }, [isAuthenticated]);
-
-  // Add a new goal/contest
+  // Add a new goal
   const addGoal = useCallback(
     async (goalData) => {
       if (!isAuthenticated) return;
 
       try {
-        if (!goalData.platform || !goalData.name || !goalData.date) {
-          throw new Error("Platform, name, and date are required");
-        }
+        const response = await apiClient.post("/contests", goalData);
 
-        // Ensure date is in ISO format
-        const formattedData = {
-          ...goalData,
-          date: new Date(goalData.date).toISOString(),
-        };
-
-        const response = await apiClient.post("/contests", formattedData);
-
-        // Refresh goals list
+        // Refresh goals
         await fetchGoals();
+
         toast.success("Goal added successfully");
-        return response;
-      } catch (error) {
-        console.error("Error adding goal:", error);
-        setError(error.message);
-        toast.error(error.message || "Failed to add goal");
-        throw error;
+        return response.data;
+      } catch (err) {
+        console.error("Error adding goal:", err);
+        toast.error(err.message || "Failed to add goal");
+        throw err;
       }
     },
     [isAuthenticated, fetchGoals]
   );
 
-  // Update a goal/contest
+  // Update a goal
   const updateGoal = useCallback(
     async (id, updateData) => {
       if (!isAuthenticated) return;
 
       try {
-        if (!id) throw new Error("Goal ID is required");
+        const response = await apiClient.put(`/contests/${id}`, updateData);
 
-        // Format date if provided
-        const formattedData = { ...updateData };
-        if (updateData.date) {
-          formattedData.date = new Date(updateData.date).toISOString();
-        }
-
-        const response = await apiClient.put(`/contests/${id}`, formattedData);
-
-        // Refresh goals list
+        // Refresh goals
         await fetchGoals();
+
         toast.success("Goal updated successfully");
-        return response;
-      } catch (error) {
-        console.error("Error updating goal:", error);
-        setError(error.message);
-        toast.error(error.message || "Failed to update goal");
-        throw error;
+        return response.data;
+      } catch (err) {
+        console.error("Error updating goal:", err);
+        toast.error(err.message || "Failed to update goal");
+        throw err;
       }
     },
     [isAuthenticated, fetchGoals]
   );
 
-  // Delete a goal/contest
+  // Delete a goal
   const deleteGoal = useCallback(
     async (id) => {
       if (!isAuthenticated) return;
 
       try {
-        if (!id) throw new Error("Goal ID is required");
-
         await apiClient.delete(`/contests/${id}`);
 
-        // Refresh goals list
+        // Refresh goals
         await fetchGoals();
+
         toast.success("Goal deleted successfully");
-      } catch (error) {
-        console.error("Error deleting goal:", error);
-        setError(error.message);
-        toast.error(error.message || "Failed to delete goal");
-        throw error;
+      } catch (err) {
+        console.error("Error deleting goal:", err);
+        toast.error(err.message || "Failed to delete goal");
+        throw err;
       }
     },
     [isAuthenticated, fetchGoals]
   );
 
-  // Get goal/contest statistics
-  const getStats = useCallback(
-    async (filters = {}) => {
-      if (!isAuthenticated) return;
+  // Get platforms
+  const fetchPlatforms = useCallback(async () => {
+    if (!isAuthenticated) return [];
+
+    try {
+      const response = await apiClient.get("/contests/platforms");
+      setPlatforms(response.platforms || []);
+      return response.platforms;
+    } catch (err) {
+      console.error("Error fetching platforms:", err);
+      return [];
+    }
+  }, [isAuthenticated]);
+
+  // Get goal statistics
+  const getGoalStats = useCallback(
+    async (startDate, endDate) => {
+      if (!isAuthenticated) return null;
 
       try {
-        const response = await apiClient.get("/contests/stats", {
-          params: filters,
-        });
+        const params = {};
+        if (startDate) params.startDate = startDate;
+        if (endDate) params.endDate = endDate;
+
+        const response = await apiClient.get("/contests/stats", { params });
         setStats(response.stats);
         return response.stats;
-      } catch (error) {
-        console.error("Error fetching goal stats:", error);
+      } catch (err) {
+        console.error("Error fetching goal stats:", err);
         toast.error("Failed to fetch goal statistics");
-        throw error;
+        return null;
       }
     },
     [isAuthenticated]
   );
 
-  // Initialize data on auth change
+  // Load initial data
   useEffect(() => {
     if (isAuthenticated) {
-      fetchGoals().catch(console.error);
-      fetchPlatforms().catch(console.error);
+      fetchGoals();
+      fetchPlatforms();
     }
   }, [isAuthenticated, fetchGoals, fetchPlatforms]);
 
   return {
     goals,
-    platforms,
     loading,
     error,
     stats,
+    platforms,
     fetchGoals,
-    fetchPlatforms,
     addGoal,
     updateGoal,
     deleteGoal,
-    getStats,
+    fetchPlatforms,
+    getGoalStats,
   };
 };
 

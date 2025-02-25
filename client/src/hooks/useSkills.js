@@ -6,62 +6,57 @@ import { useAuth } from "../context/AuthContext";
 
 const useSkills = () => {
   const [skills, setSkills] = useState({});
-  const [allSkills, setAllSkills] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(null);
 
   const { isAuthenticated } = useAuth();
 
-  // Fetch all skills for the authenticated user
-  const fetchSkills = useCallback(async () => {
-    if (!isAuthenticated) return;
+  // Fetch all skills
+  const fetchSkills = useCallback(
+    async (category, status) => {
+      if (!isAuthenticated) return;
 
-    setLoading(true);
-    setError(null);
+      try {
+        setLoading(true);
+        const params = {};
+        if (category) params.category = category;
+        if (status) params.status = status;
 
-    try {
-      const response = await apiClient.get("/skills");
+        const response = await apiClient.get("/skills", { params });
 
-      // Store all skills in a flat array
-      setAllSkills(response.data || []);
-
-      // Group skills by category
-      const groupedSkills = (response.data || []).reduce((acc, skill) => {
-        if (!acc[skill.category]) {
-          acc[skill.category] = [];
+        if (response.groupedSkills) {
+          setSkills(response.groupedSkills);
+        } else {
+          // Group skills by category if not already grouped
+          const groupedData = (response.data || []).reduce((acc, skill) => {
+            if (!acc[skill.category]) {
+              acc[skill.category] = [];
+            }
+            acc[skill.category].push(skill);
+            return acc;
+          }, {});
+          setSkills(groupedData);
         }
-        acc[skill.category].push(skill);
-        return acc;
-      }, {});
 
-      setSkills(groupedSkills);
-      return response;
-    } catch (error) {
-      console.error("Error fetching skills:", error);
-      setError(error.message);
-      toast.error("Failed to fetch skills");
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
+        // Set stats if available
+        if (response.stats) {
+          setStats(response.stats);
+        }
 
-  // Fetch skill categories
-  const fetchCategories = useCallback(async () => {
-    if (!isAuthenticated) return;
-
-    try {
-      const response = await apiClient.get("/skills/categories");
-      setCategories(response.categories || []);
-      return response.categories;
-    } catch (error) {
-      console.error("Error fetching skill categories:", error);
-      toast.error("Failed to fetch skill categories");
-      return [];
-    }
-  }, [isAuthenticated]);
+        setError(null);
+        return response;
+      } catch (err) {
+        console.error("Error fetching skills:", err);
+        setError(err.message);
+        toast.error("Failed to fetch skills");
+        return {};
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isAuthenticated]
+  );
 
   // Add a new skill
   const addSkill = useCallback(
@@ -69,21 +64,17 @@ const useSkills = () => {
       if (!isAuthenticated) return;
 
       try {
-        if (!skillData.name || !skillData.category) {
-          throw new Error("Name and category are required");
-        }
-
         const response = await apiClient.post("/skills", skillData);
 
-        // Refresh skills list
+        // Refresh skills
         await fetchSkills();
+
         toast.success("Skill added successfully");
         return response.data;
-      } catch (error) {
-        console.error("Error adding skill:", error);
-        setError(error.message);
-        toast.error(error.message || "Failed to add skill");
-        throw error;
+      } catch (err) {
+        console.error("Error adding skill:", err);
+        toast.error(err.message || "Failed to add skill");
+        throw err;
       }
     },
     [isAuthenticated, fetchSkills]
@@ -95,19 +86,17 @@ const useSkills = () => {
       if (!isAuthenticated) return;
 
       try {
-        if (!id) throw new Error("Skill ID is required");
-
         const response = await apiClient.put(`/skills/${id}`, updateData);
 
-        // Refresh skills list
+        // Refresh skills
         await fetchSkills();
+
         toast.success("Skill updated successfully");
         return response.data;
-      } catch (error) {
-        console.error("Error updating skill:", error);
-        setError(error.message);
-        toast.error(error.message || "Failed to update skill");
-        throw error;
+      } catch (err) {
+        console.error("Error updating skill:", err);
+        toast.error(err.message || "Failed to update skill");
+        throw err;
       }
     },
     [isAuthenticated, fetchSkills]
@@ -119,60 +108,67 @@ const useSkills = () => {
       if (!isAuthenticated) return;
 
       try {
-        if (!id) throw new Error("Skill ID is required");
-
         await apiClient.delete(`/skills/${id}`);
 
-        // Refresh skills list
+        // Refresh skills
         await fetchSkills();
+
         toast.success("Skill deleted successfully");
-      } catch (error) {
-        console.error("Error deleting skill:", error);
-        setError(error.message);
-        toast.error(error.message || "Failed to delete skill");
-        throw error;
+      } catch (err) {
+        console.error("Error deleting skill:", err);
+        toast.error(err.message || "Failed to delete skill");
+        throw err;
       }
     },
     [isAuthenticated, fetchSkills]
   );
 
+  // Get skills categories
+  const getSkillCategories = useCallback(async () => {
+    if (!isAuthenticated) return [];
+
+    try {
+      const response = await apiClient.get("/skills/categories");
+      return response.categories || [];
+    } catch (err) {
+      console.error("Error fetching skill categories:", err);
+      return [];
+    }
+  }, [isAuthenticated]);
+
   // Get skill statistics
-  const getStats = useCallback(async () => {
-    if (!isAuthenticated) return;
+  const getSkillStats = useCallback(async () => {
+    if (!isAuthenticated) return null;
 
     try {
       const response = await apiClient.get("/skills/stats");
       setStats(response.stats);
       return response.stats;
-    } catch (error) {
-      console.error("Error fetching skill stats:", error);
+    } catch (err) {
+      console.error("Error fetching skill stats:", err);
       toast.error("Failed to fetch skill statistics");
-      throw error;
+      return null;
     }
   }, [isAuthenticated]);
 
-  // Initialize skills and categories on auth change
+  // Load initial data
   useEffect(() => {
     if (isAuthenticated) {
-      fetchSkills().catch(console.error);
-      fetchCategories().catch(console.error);
-      getStats().catch(console.error);
+      fetchSkills();
     }
-  }, [isAuthenticated, fetchSkills, fetchCategories, getStats]);
+  }, [isAuthenticated, fetchSkills]);
 
   return {
     skills,
-    allSkills,
-    categories,
     loading,
     error,
     stats,
     fetchSkills,
-    fetchCategories,
     addSkill,
     updateSkill,
     deleteSkill,
-    getStats,
+    getSkillCategories,
+    getSkillStats,
   };
 };
 

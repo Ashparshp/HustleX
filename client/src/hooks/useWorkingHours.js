@@ -28,24 +28,23 @@ const useWorkingHours = () => {
 
       try {
         setLoading(true);
-
         const params = {};
+
         if (startDate) params.startDate = startDate;
         if (endDate) params.endDate = endDate;
         if (category) params.category = category;
 
-        const response = await apiClient.get("/working-hours", { params });
+        const data = await apiClient.get("/working-hours", { params });
 
-        setWorkingHours(response.workingHours || []);
-        setStats(response.stats || defaultStats);
+        setWorkingHours(data.workingHours || []);
+        setStats(data.stats || defaultStats);
         setError(null);
-
-        return response;
+        return data;
       } catch (err) {
         console.error("Error fetching working hours:", err);
         setError(err.message);
         setStats(defaultStats);
-        throw err;
+        toast.error("Failed to fetch working hours data");
       } finally {
         setLoading(false);
       }
@@ -59,7 +58,7 @@ const useWorkingHours = () => {
       if (!isAuthenticated) return;
 
       try {
-        // Format date to ISO string
+        // Ensure date is in ISO format
         const formattedData = {
           ...data,
           date: new Date(data.date).toISOString(),
@@ -81,19 +80,16 @@ const useWorkingHours = () => {
     [isAuthenticated, fetchWorkingHours]
   );
 
-  // Update working hours
+  // Update existing working hours
   const updateWorkingHours = useCallback(
     async (id, data) => {
       if (!isAuthenticated) return;
 
       try {
-        // Format date to ISO string if provided
-        const formattedData = {
-          ...data,
-        };
-
-        if (data.date) {
-          formattedData.date = new Date(data.date).toISOString();
+        // Ensure date is in ISO format if present
+        const formattedData = { ...data };
+        if (formattedData.date) {
+          formattedData.date = new Date(formattedData.date).toISOString();
         }
 
         const response = await apiClient.put(
@@ -136,32 +132,33 @@ const useWorkingHours = () => {
     [isAuthenticated, fetchWorkingHours]
   );
 
-  // Get working hours statistics
+  // Get statistics
   const getStats = useCallback(
     async (startDate, endDate) => {
-      if (!isAuthenticated) return defaultStats;
+      if (!isAuthenticated) return;
 
       try {
         const params = {};
+
         if (startDate) params.startDate = startDate;
         if (endDate) params.endDate = endDate;
 
         const response = await apiClient.get("/working-hours/stats", {
           params,
         });
-        return response.stats;
+        return response;
       } catch (err) {
         console.error("Error fetching stats:", err);
-        toast.error("Failed to fetch statistics");
-        return defaultStats;
+        toast.error("Failed to fetch working hours statistics");
+        throw err;
       }
     },
     [isAuthenticated]
   );
 
-  // Get categories
-  const getCategories = useCallback(async () => {
-    if (!isAuthenticated) return [];
+  // Fetch categories
+  const fetchCategories = useCallback(async () => {
+    if (!isAuthenticated) return;
 
     try {
       const response = await apiClient.get("/working-hours/categories");
@@ -169,17 +166,18 @@ const useWorkingHours = () => {
       return response.categories;
     } catch (err) {
       console.error("Error fetching categories:", err);
+      toast.error("Failed to fetch categories");
       return [];
     }
   }, [isAuthenticated]);
 
-  // Initial data loading
+  // Load initial data
   useEffect(() => {
     if (isAuthenticated) {
-      fetchWorkingHours().catch(console.error);
-      getCategories().catch(console.error);
+      fetchWorkingHours();
+      fetchCategories();
     }
-  }, [isAuthenticated, fetchWorkingHours, getCategories]);
+  }, [isAuthenticated, fetchWorkingHours, fetchCategories]);
 
   return {
     workingHours,
@@ -192,7 +190,7 @@ const useWorkingHours = () => {
     updateWorkingHours,
     deleteWorkingHours,
     getStats,
-    getCategories,
+    fetchCategories,
   };
 };
 

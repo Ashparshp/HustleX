@@ -1,4 +1,4 @@
-// src/App.jsx
+// src/App.jsx (Updated for Working Hours)
 import { useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -30,6 +30,10 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import UserProfile from "./components/Profile/UserProfile";
 import ChangePassword from "./components/Profile/ChangePassword";
 
+// App Feature Pages
+import WorkingHoursPage from "./pages/WorkingHoursPage";
+import SkillsPage from "./pages/SkillsPage";
+
 function AppContent() {
   const { isDark } = useTheme();
   const { isAuthenticated, currentUser } = useAuth();
@@ -38,18 +42,18 @@ function AppContent() {
   useEffect(() => {
     // Set body background and text color based on theme
     if (isDark) {
-      document.body.classList.add("bg-black", "text-white");
+      document.body.classList.add("bg-gray-900", "text-white");
       document.body.classList.remove("bg-gray-50", "text-gray-900");
     } else {
       document.body.classList.add("bg-gray-50", "text-gray-900");
-      document.body.classList.remove("bg-black", "text-white");
+      document.body.classList.remove("bg-gray-900", "text-white");
     }
   }, [isDark]);
 
   return (
     <div
       className={`min-h-screen flex flex-col ${
-        isDark ? "bg-black text-white" : "bg-gray-50 text-gray-900"
+        isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
       }`}
     >
       <Navbar />
@@ -93,6 +97,27 @@ function AppContent() {
             }
           />
 
+          {/* Working Hours Feature */}
+          <Route
+            path="/working-hours"
+            element={
+              <ProtectedRoute>
+                <WorkingHoursPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Skills Feature */}
+          <Route
+            path="/skills"
+            element={
+              <ProtectedRoute>
+                <SkillsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* User Profile Routes */}
           <Route
             path="/profile"
             element={

@@ -23,7 +23,7 @@ const useLeetCode = () => {
 
   const { isAuthenticated } = useAuth();
 
-  // Fetch LeetCode stats
+  // Fetch current LeetCode stats
   const fetchStats = useCallback(async () => {
     if (!isAuthenticated) return;
 
@@ -31,20 +31,47 @@ const useLeetCode = () => {
       setLoading(true);
       const response = await apiClient.get("/leetcode/stats");
 
-      if (response.data) {
+      if (response && response.data) {
         setStats(response.data);
       }
 
       setError(null);
       return response.data;
-    } catch (error) {
-      console.error("Error fetching LeetCode stats:", error);
-      setError(error.message);
-      throw error;
+    } catch (err) {
+      console.error("Error fetching LeetCode stats:", err);
+      setError(err.message);
+      toast.error("Failed to fetch LeetCode stats");
+      return null;
     } finally {
       setLoading(false);
     }
   }, [isAuthenticated]);
+
+  // Update LeetCode stats
+  const updateStats = useCallback(
+    async (newStats) => {
+      if (!isAuthenticated) return;
+
+      try {
+        setLoading(true);
+        const response = await apiClient.post("/leetcode/stats", newStats);
+
+        if (response && response.data) {
+          setStats(response.data);
+          toast.success("LeetCode stats updated successfully");
+        }
+
+        return response.data;
+      } catch (err) {
+        console.error("Error updating LeetCode stats:", err);
+        toast.error(err.message || "Failed to update LeetCode stats");
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isAuthenticated]
+  );
 
   // Fetch LeetCode history
   const fetchHistory = useCallback(
@@ -56,38 +83,15 @@ const useLeetCode = () => {
           params: { limit },
         });
 
-        if (response.data) {
+        if (response && response.data) {
           setHistory(response.data);
         }
 
         return response.data;
-      } catch (error) {
-        console.error("Error fetching LeetCode history:", error);
+      } catch (err) {
+        console.error("Error fetching LeetCode history:", err);
         toast.error("Failed to fetch LeetCode history");
-        throw error;
-      }
-    },
-    [isAuthenticated]
-  );
-
-  // Update LeetCode stats
-  const updateStats = useCallback(
-    async (newStats) => {
-      if (!isAuthenticated) return;
-
-      try {
-        const response = await apiClient.post("/leetcode/stats", newStats);
-
-        if (response.data) {
-          setStats(response.data);
-        }
-
-        toast.success("LeetCode stats updated successfully");
-        return response.data;
-      } catch (error) {
-        console.error("Error updating LeetCode stats:", error);
-        toast.error(error.message || "Failed to update LeetCode stats");
-        throw error;
+        return [];
       }
     },
     [isAuthenticated]
@@ -103,101 +107,59 @@ const useLeetCode = () => {
 
         // Refresh history
         await fetchHistory();
-        await fetchStats();
 
         toast.success("Stats entry deleted successfully");
-      } catch (error) {
-        console.error("Error deleting LeetCode stats entry:", error);
-        toast.error("Failed to delete stats entry");
-        throw error;
+      } catch (err) {
+        console.error("Error deleting stats entry:", err);
+        toast.error(err.message || "Failed to delete stats entry");
+        throw err;
       }
     },
-    [isAuthenticated, fetchHistory, fetchStats]
+    [isAuthenticated, fetchHistory]
   );
 
-  // Calculate progress metrics
+  // Calculate progress metrics from stats
   const getProgressMetrics = useCallback(() => {
-    if (!history || history.length < 2) {
-      return {
-        dailyAverage: 0,
-        weeklyAverage: 0,
-        improvementRate: 0,
-      };
-    }
+    // Calculate solve percentages
+    const easyPercentage =
+      stats.totalEasy > 0 ? (stats.easySolved / stats.totalEasy) * 100 : 0;
 
-    // Sort by date (newest first)
-    const sortedHistory = [...history].sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
+    const mediumPercentage =
+      stats.totalMedium > 0
+        ? (stats.mediumSolved / stats.totalMedium) * 100
+        : 0;
 
-    // Calculate daily average (last 7 days)
-    const last7Days = sortedHistory.slice(0, Math.min(7, sortedHistory.length));
-    if (last7Days.length < 2)
-      return { dailyAverage: 0, weeklyAverage: 0, improvementRate: 0 };
+    const hardPercentage =
+      stats.totalHard > 0 ? (stats.hardSolved / stats.totalHard) * 100 : 0;
 
-    const newest = last7Days[0];
-    const oldest7Day = last7Days[last7Days.length - 1];
-    const daysDiff7 = Math.max(
-      1,
-      Math.ceil(
-        (new Date(newest.createdAt) - new Date(oldest7Day.createdAt)) /
-          (1000 * 60 * 60 * 24)
-      )
-    );
-    const problemsDiff7 = newest.totalSolved - oldest7Day.totalSolved;
-    const dailyAverage = problemsDiff7 / daysDiff7;
+    const totalPercentage =
+      stats.totalEasy + stats.totalMedium + stats.totalHard > 0
+        ? (stats.totalSolved /
+            (stats.totalEasy + stats.totalMedium + stats.totalHard)) *
+          100
+        : 0;
 
-    // Calculate weekly average (last 4 weeks)
-    const last4Weeks = sortedHistory.slice(
-      0,
-      Math.min(28, sortedHistory.length)
-    );
-    if (last4Weeks.length < 2)
-      return { dailyAverage, weeklyAverage: 0, improvementRate: 0 };
-
-    const oldestWeek = last4Weeks[last4Weeks.length - 1];
-    const weeksDiff = Math.max(
-      1,
-      Math.ceil(
-        (new Date(newest.createdAt) - new Date(oldestWeek.createdAt)) /
-          (1000 * 60 * 60 * 24 * 7)
-      )
-    );
-    const problemsDiff = newest.totalSolved - oldestWeek.totalSolved;
-    const weeklyAverage = problemsDiff / weeksDiff;
-
-    // Calculate improvement rate
-    let improvementRate = 0;
-    if (sortedHistory.length >= 6) {
-      // Need at least 6 entries to calculate improvement
-      const midPoint = Math.floor(sortedHistory.length / 2);
-      const olderHalf = sortedHistory.slice(midPoint);
-      const newerHalf = sortedHistory.slice(0, midPoint);
-
-      const olderAvg =
-        olderHalf.reduce((sum, entry) => sum + entry.totalSolved, 0) /
-        olderHalf.length;
-      const newerAvg =
-        newerHalf.reduce((sum, entry) => sum + entry.totalSolved, 0) /
-        newerHalf.length;
-
-      if (olderAvg > 0) {
-        improvementRate = ((newerAvg - olderAvg) / olderAvg) * 100;
-      }
-    }
+    // Calculate distribution
+    const distribution = {
+      easy: stats.easySolved,
+      medium: stats.mediumSolved,
+      hard: stats.hardSolved,
+    };
 
     return {
-      dailyAverage,
-      weeklyAverage,
-      improvementRate,
+      easyPercentage,
+      mediumPercentage,
+      hardPercentage,
+      totalPercentage,
+      distribution,
     };
-  }, [history]);
+  }, [stats]);
 
-  // Initialize data on auth change
+  // Initial data load
   useEffect(() => {
     if (isAuthenticated) {
-      fetchStats().catch(console.error);
-      fetchHistory().catch(console.error);
+      fetchStats();
+      fetchHistory();
     }
   }, [isAuthenticated, fetchStats, fetchHistory]);
 
@@ -207,8 +169,8 @@ const useLeetCode = () => {
     loading,
     error,
     fetchStats,
-    fetchHistory,
     updateStats,
+    fetchHistory,
     deleteStatsEntry,
     getProgressMetrics,
   };
