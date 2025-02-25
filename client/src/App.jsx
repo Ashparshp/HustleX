@@ -33,6 +33,8 @@ import ChangePassword from "./components/Profile/ChangePassword";
 // App Feature Pages
 import WorkingHoursPage from "./pages/WorkingHoursPage";
 import SkillsPage from "./pages/SkillsPage";
+import GoalsPage from "./pages/GoalsPage";
+import SchedulePage from "./pages/SchedulePage";
 
 function AppContent() {
   const { isDark } = useTheme();
@@ -117,12 +119,22 @@ function AppContent() {
             }
           />
 
-          {/* Skills Feature */}
+          {/* Goals Feature */}
           <Route
-            path="/skills"
+            path="/goals"
             element={
               <ProtectedRoute>
-                <SkillsPage />
+                <GoalsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Schedule Feature */}
+          <Route
+            path="/schedule"
+            element={
+              <ProtectedRoute>
+                <SchedulePage />
               </ProtectedRoute>
             }
           />

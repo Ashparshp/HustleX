@@ -1,4 +1,3 @@
-// src/components/Categories/CategoryManagement.jsx
 import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import {
@@ -109,7 +108,7 @@ const CategoryManagement = ({
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
+    if (window.confirm("Are you sure you want to delete this platform?")) {
       try {
         await onDelete(id);
       } catch (error) {
@@ -130,7 +129,7 @@ const CategoryManagement = ({
       case "schedule":
         return "Schedule";
       case "goals":
-        return "Goals";
+        return "Platforms";
       default:
         return type;
     }
@@ -144,7 +143,7 @@ const CategoryManagement = ({
             isDark ? "text-white" : "text-gray-900"
           }`}
         >
-          {getCategoryTypeText()} Categories
+          {getCategoryTypeText()}
         </h2>
 
         <div className="flex space-x-2">
@@ -158,7 +157,7 @@ const CategoryManagement = ({
             disabled={isAdding || editingId !== null}
           >
             <Plus size={16} />
-            Add Category
+            Add Platform
           </button>
 
           <button
@@ -168,7 +167,7 @@ const CategoryManagement = ({
                 ? "hover:bg-gray-700 text-gray-300"
                 : "hover:bg-gray-200 text-gray-700"
             }`}
-            title="Refresh categories"
+            title="Refresh platforms"
           >
             <RefreshCw size={16} />
           </button>
@@ -188,7 +187,7 @@ const CategoryManagement = ({
                   isDark ? "text-gray-300" : "text-gray-700"
                 }`}
               >
-                Category Name
+                Platform Name
               </label>
               <input
                 type="text"
@@ -200,7 +199,7 @@ const CategoryManagement = ({
                     ? "bg-gray-700 border-gray-600 text-white"
                     : "bg-white border-gray-300 text-gray-900"
                 }`}
-                placeholder="Enter category name"
+                placeholder="Enter platform name (e.g., LeetCode, CodeForces)"
                 required
               />
             </div>
@@ -287,7 +286,7 @@ const CategoryManagement = ({
                     ? "bg-gray-700 border-gray-600 text-white"
                     : "bg-white border-gray-300 text-gray-900"
                 }`}
-                placeholder="Enter description"
+                placeholder="Enter description (e.g., Competitive coding platform)"
               />
             </div>
 
@@ -320,7 +319,7 @@ const CategoryManagement = ({
                 ) : (
                   <>
                     <Save size={16} className="inline mr-1" />
-                    {isAdding ? "Add" : "Update"} Category
+                    {isAdding ? "Add" : "Update"} Platform
                   </>
                 )}
               </button>
@@ -332,7 +331,7 @@ const CategoryManagement = ({
       {/* Categories list */}
       {loading ? (
         <div className="flex justify-center py-6">
-          <LoadingSpinner size="md" text="Loading categories..." />
+          <LoadingSpinner size="md" text="Loading platforms..." />
         </div>
       ) : categories.length === 0 ? (
         <div
@@ -340,7 +339,7 @@ const CategoryManagement = ({
             isDark ? "bg-gray-800" : "bg-gray-100"
           }`}
         >
-          <p className="mb-2">No custom categories found.</p>
+          <p className="mb-2">No custom platforms found.</p>
           <button
             onClick={handleStartAdd}
             className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm ${
@@ -350,7 +349,7 @@ const CategoryManagement = ({
             }`}
           >
             <Plus size={16} />
-            Add Your First Category
+            Add Your First Platform
           </button>
         </div>
       ) : (
@@ -412,14 +411,14 @@ const CategoryManagement = ({
       )}
 
       {/* Default categories */}
-      {defaultCategories.length > 0 && (
+      {defaultCategories && defaultCategories.length > 0 && (
         <div className="mt-6">
           <h3
             className={`text-lg font-medium mb-2 ${
               isDark ? "text-gray-300" : "text-gray-700"
             }`}
           >
-            Default Categories
+            Default Platforms
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -451,6 +450,32 @@ const CategoryManagement = ({
           </div>
         </div>
       )}
+
+      {/* Tips section */}
+      <div
+        className={`mt-6 p-4 rounded-lg text-sm ${
+          isDark ? "bg-gray-700 text-gray-300" : "bg-gray-100 text-gray-700"
+        }`}
+      >
+        <h4 className="font-medium mb-2">Tips:</h4>
+        <ul className="list-disc list-inside space-y-1">
+          <li>
+            Add platforms for different coding competition sites like LeetCode,
+            CodeForces, etc.
+          </li>
+          <li>
+            You can also add other goal sources like "Personal Projects" or
+            "Learning".
+          </li>
+          <li>
+            Customize colors to help visually distinguish between different
+            platforms.
+          </li>
+          <li>
+            Add descriptions to provide context about what each platform is for.
+          </li>
+        </ul>
+      </div>
     </div>
   );
 };

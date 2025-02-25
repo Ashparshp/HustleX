@@ -1,31 +1,25 @@
 // src/hooks/useTimetable.js
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
 import { useAuth } from "../context/AuthContext";
 
-// This hook replaces the old useActivityTracker hook
-const useTimetable = (timetableId = null) => {
-  const [currentWeek, setCurrentWeek] = useState(null);
+const useTimetable = () => {
   const [timetables, setTimetables] = useState([]);
+  const [currentWeek, setCurrentWeek] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTimetable, setActiveTimetable] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [historyMeta, setHistoryMeta] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalWeeks: 0,
+  });
   const [stats, setStats] = useState(null);
 
-  const weekCheckIntervalRef = useRef(null);
-  const updateInProgress = useRef(false);
-
   const { isAuthenticated } = useAuth();
-
-  // Check if we need to transition to a new week
-  const checkWeekTransition = useCallback(() => {
-    if (!currentWeek?.weekEndDate) return false;
-
-    const now = new Date();
-    const weekEndDate = new Date(currentWeek.weekEndDate);
-    return now > weekEndDate;
-  }, [currentWeek?.weekEndDate]);
 
   // Fetch all timetables
   const fetchTimetables = useCallback(async () => {
@@ -35,408 +29,280 @@ const useTimetable = (timetableId = null) => {
       setLoading(true);
       const response = await apiClient.get("/timetables");
       setTimetables(response.data || []);
-
-      // Find active timetable
-      const active = response.data.find((t) => t.isActive);
-      if (active) {
-        setActiveTimetable(active);
-      }
-
+      setError(null);
       return response.data;
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      console.error("Error fetching timetables:", err);
+      setError(err.message || "Failed to fetch timetables");
       toast.error("Failed to fetch timetables");
-      throw error;
     } finally {
       setLoading(false);
     }
   }, [isAuthenticated]);
 
-  // Fetch history for a specific timetable
-  const fetchHistory = useCallback(
-    async (id, page = 1, limit = 10) => {
-      if (!isAuthenticated) return;
-
-      try {
-        const timetableIdToUse = id || timetableId || activeTimetable?.id;
-        if (!timetableIdToUse) {
-          throw new Error("No timetable ID specified");
-        }
-
-        const response = await apiClient.get(
-          `/timetables/${timetableIdToUse}/history`,
-          {
-            params: { page, limit },
-          }
-        );
-        return response;
-      } catch (error) {
-        console.error("Fetch history error:", error);
-        toast.error("Failed to fetch timetable history");
-        throw error;
-      }
-    },
-    [isAuthenticated, timetableId, activeTimetable?.id]
-  );
-
-  // Fetch current week data
+  // Fetch current week for active timetable
   const fetchCurrentWeek = useCallback(async () => {
     if (!isAuthenticated) return;
-    if (updateInProgress.current) {
-      console.log("Update already in progress, skipping fetch...");
-      return;
-    }
 
     try {
       setLoading(true);
-      updateInProgress.current = true;
-
-      // If a specific timetable ID is provided, use it
-      const endpoint = timetableId
-        ? `/timetables/${timetableId}`
-        : "/timetables/current-week";
-
-      const response = await apiClient.get(endpoint);
-
-      // If a specific timetable was fetched, extract the current week
-      const weekData = timetableId ? response.data.currentWeek : response.data;
-
-      setCurrentWeek(weekData);
+      const response = await apiClient.get("/timetables/current-week");
+      setCurrentWeek(response.data || null);
       setError(null);
-      return weekData;
-    } catch (error) {
-      console.error("Error fetching current week:", error);
-      setError(error.message);
-      toast.error("Failed to fetch current week data");
-      throw error;
+      return response.data;
+    } catch (err) {
+      console.error("Error fetching current week:", err);
+      setError(err.message || "Failed to fetch current week");
+      toast.error("Failed to fetch current week");
     } finally {
       setLoading(false);
-      updateInProgress.current = false;
     }
-  }, [isAuthenticated, timetableId]);
+  }, [isAuthenticated]);
 
-  // Toggle activity status
-  const toggleActivityStatus = useCallback(
-    async (activityId, dayIndex) => {
-      if (!isAuthenticated) return;
-      if (updateInProgress.current) {
-        console.log("Update already in progress, skipping toggle...");
-        return;
-      }
-
-      const previousWeek = currentWeek;
-      updateInProgress.current = true;
-
-      try {
-        // Optimistic update
-        setCurrentWeek((prevWeek) => {
-          if (!prevWeek) return prevWeek;
-          return {
-            ...prevWeek,
-            activities: prevWeek.activities.map((activity) =>
-              activity._id === activityId
-                ? {
-                    ...activity,
-                    dailyStatus: activity.dailyStatus.map((status, i) =>
-                      i === dayIndex ? !status : status
-                    ),
-                  }
-                : activity
-            ),
-          };
-        });
-
-        // Determine which timetable ID to use
-        const id = timetableId || activeTimetable?.id;
-        if (!id) {
-          throw new Error("No active timetable found");
-        }
-
-        const response = await apiClient.post(`/timetables/${id}/toggle`, {
-          activityId,
-          dayIndex,
-        });
-
-        setCurrentWeek(response.data);
-        setError(null);
-        return response.data;
-      } catch (error) {
-        // Rollback on error
-        setCurrentWeek(previousWeek);
-        setError(error.message);
-        toast.error("Failed to update activity status");
-        throw error;
-      } finally {
-        updateInProgress.current = false;
-      }
-    },
-    [isAuthenticated, currentWeek, timetableId, activeTimetable?.id]
-  );
-
-  // Get statistics for a timetable
-  const getStats = useCallback(
+  // Fetch specific timetable
+  const fetchTimetable = useCallback(
     async (id) => {
-      if (!isAuthenticated) return;
-      if (updateInProgress.current) {
-        console.log("Update in progress, skipping stats fetch...");
-        return;
-      }
-
-      try {
-        updateInProgress.current = true;
-
-        // Determine which timetable ID to use
-        const timetableIdToUse = id || timetableId || activeTimetable?.id;
-        if (!timetableIdToUse) {
-          throw new Error("No timetable ID specified");
-        }
-
-        const response = await apiClient.get(
-          `/timetables/${timetableIdToUse}/stats`
-        );
-        setStats(response.data);
-        setError(null);
-        return response.data;
-      } catch (error) {
-        console.error("Error fetching stats:", error);
-        setError(error.message);
-        toast.error("Failed to fetch timetable statistics");
-        throw error;
-      } finally {
-        updateInProgress.current = false;
-      }
-    },
-    [isAuthenticated, timetableId, activeTimetable?.id]
-  );
-
-  // Create a new timetable
-  const createTimetable = useCallback(
-    async (timetableData) => {
-      if (!isAuthenticated) return;
+      if (!isAuthenticated || !id) return;
 
       try {
         setLoading(true);
-        const response = await apiClient.post("/timetables", timetableData);
-
-        // Refresh timetables list
-        await fetchTimetables();
-
-        toast.success("Timetable created successfully");
+        const response = await apiClient.get(`/timetables/${id}`);
+        setError(null);
         return response.data;
-      } catch (error) {
-        setError(error.message);
-        toast.error(error.message || "Failed to create timetable");
-        throw error;
+      } catch (err) {
+        console.error("Error fetching timetable:", err);
+        setError(err.message || "Failed to fetch timetable");
+        toast.error("Failed to fetch timetable");
       } finally {
         setLoading(false);
+      }
+    },
+    [isAuthenticated]
+  );
+
+  // Create new timetable
+  const createTimetable = useCallback(
+    async (data) => {
+      if (!isAuthenticated) return;
+
+      try {
+        const response = await apiClient.post("/timetables", data);
+        await fetchTimetables();
+        toast.success("Timetable created successfully");
+        return response.data;
+      } catch (err) {
+        console.error("Error creating timetable:", err);
+        toast.error(err.message || "Failed to create timetable");
+        throw err;
       }
     },
     [isAuthenticated, fetchTimetables]
   );
 
-  // Update a timetable
+  // Update timetable
   const updateTimetable = useCallback(
-    async (id, updates) => {
-      if (!isAuthenticated) return;
+    async (id, data) => {
+      if (!isAuthenticated || !id) return;
 
       try {
-        setLoading(true);
-        const response = await apiClient.put(`/timetables/${id}`, updates);
-
-        // Refresh timetables list
+        const response = await apiClient.put(`/timetables/${id}`, data);
         await fetchTimetables();
-
-        // If this is the active timetable or we're updating the currently viewed timetable
-        if (
-          (activeTimetable && id === activeTimetable.id) ||
-          id === timetableId
-        ) {
-          await fetchCurrentWeek();
-        }
-
         toast.success("Timetable updated successfully");
         return response.data;
-      } catch (error) {
-        setError(error.message);
-        toast.error(error.message || "Failed to update timetable");
-        throw error;
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error("Error updating timetable:", err);
+        toast.error(err.message || "Failed to update timetable");
+        throw err;
       }
     },
-    [
-      isAuthenticated,
-      fetchTimetables,
-      fetchCurrentWeek,
-      activeTimetable,
-      timetableId,
-    ]
+    [isAuthenticated, fetchTimetables]
   );
 
-  // Delete a timetable
+  // Delete timetable
   const deleteTimetable = useCallback(
     async (id) => {
-      if (!isAuthenticated) return;
+      if (!isAuthenticated || !id) return;
 
       try {
-        setLoading(true);
         await apiClient.delete(`/timetables/${id}`);
-
-        // Refresh timetables list
         await fetchTimetables();
-
-        // If we deleted the active timetable, fetch the new active one
-        if (activeTimetable && id === activeTimetable.id) {
-          await fetchCurrentWeek();
-        }
-
         toast.success("Timetable deleted successfully");
-      } catch (error) {
-        setError(error.message);
-        toast.error(error.message || "Failed to delete timetable");
-        throw error;
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error("Error deleting timetable:", err);
+        toast.error(err.message || "Failed to delete timetable");
+        throw err;
       }
     },
-    [isAuthenticated, fetchTimetables, fetchCurrentWeek, activeTimetable]
+    [isAuthenticated, fetchTimetables]
+  );
+
+  // Toggle activity status
+  const toggleActivityStatus = useCallback(
+    async (timetableId, activityId, dayIndex) => {
+      if (!isAuthenticated || !timetableId || !activityId) return;
+
+      try {
+        const response = await apiClient.post(
+          `/timetables/${timetableId}/toggle`,
+          {
+            activityId,
+            dayIndex,
+          }
+        );
+        setCurrentWeek(response.data || null);
+        return response.data;
+      } catch (err) {
+        console.error("Error toggling activity status:", err);
+        toast.error("Failed to update activity status");
+        throw err;
+      }
+    },
+    [isAuthenticated]
   );
 
   // Update default activities
   const updateDefaultActivities = useCallback(
-    async (id, activities) => {
-      if (!isAuthenticated) return;
+    async (timetableId, activities) => {
+      if (!isAuthenticated || !timetableId) return;
 
       try {
-        setLoading(true);
-
-        const timetableIdToUse = id || timetableId || activeTimetable?.id;
-        if (!timetableIdToUse) {
-          throw new Error("No timetable ID specified");
-        }
-
         const response = await apiClient.put(
-          `/timetables/${timetableIdToUse}/activities`,
+          `/timetables/${timetableId}/activities`,
           {
             activities,
           }
         );
-
-        // Refresh current week
-        await fetchCurrentWeek();
-
+        setCurrentWeek(response.data.currentWeek || null);
         toast.success("Activities updated successfully");
         return response.data;
-      } catch (error) {
-        setError(error.message);
-        toast.error(error.message || "Failed to update activities");
-        throw error;
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error("Error updating activities:", err);
+        toast.error("Failed to update activities");
+        throw err;
       }
     },
-    [isAuthenticated, fetchCurrentWeek, timetableId, activeTimetable?.id]
+    [isAuthenticated]
   );
 
-  // Force start a new week
+  // Start a new week
   const startNewWeek = useCallback(
-    async (id) => {
-      if (!isAuthenticated) return;
+    async (timetableId) => {
+      if (!isAuthenticated || !timetableId) return;
 
       try {
-        setLoading(true);
-
-        const timetableIdToUse = id || timetableId || activeTimetable?.id;
-        if (!timetableIdToUse) {
-          throw new Error("No timetable ID specified");
-        }
-
         const response = await apiClient.post(
-          `/timetables/${timetableIdToUse}/new-week`
+          `/timetables/${timetableId}/new-week`
         );
-
-        // Refresh current week
-        await fetchCurrentWeek();
-
+        setCurrentWeek(response.data.data || null);
         toast.success("New week started successfully");
         return response.data;
-      } catch (error) {
-        setError(error.message);
-        toast.error(error.message || "Failed to start new week");
-        throw error;
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error("Error starting new week:", err);
+        toast.error("Failed to start new week");
+        throw err;
       }
     },
-    [isAuthenticated, fetchCurrentWeek, timetableId, activeTimetable?.id]
+    [isAuthenticated]
   );
 
-  // Get categories for timetables
-  const getCategories = useCallback(async () => {
-    if (!isAuthenticated) return [];
+  // Fetch timetable history
+  const fetchHistory = useCallback(
+    async (timetableId, page = 1, limit = 10) => {
+      if (!isAuthenticated || !timetableId) return;
+
+      try {
+        setHistoryLoading(true);
+        const response = await apiClient.get(
+          `/timetables/${timetableId}/history`,
+          {
+            params: { page, limit },
+          }
+        );
+
+        setHistory(response.data.history || []);
+        setHistoryMeta({
+          currentPage: response.data.currentPage || 1,
+          totalPages: response.data.totalPages || 1,
+          totalWeeks: response.data.totalWeeks || 0,
+        });
+
+        return response.data;
+      } catch (err) {
+        console.error("Error fetching history:", err);
+        toast.error("Failed to fetch history");
+        throw err;
+      } finally {
+        setHistoryLoading(false);
+      }
+    },
+    [isAuthenticated]
+  );
+
+  // Get timetable statistics
+  const getStats = useCallback(
+    async (timetableId) => {
+      if (!isAuthenticated || !timetableId) return;
+
+      try {
+        const response = await apiClient.get(
+          `/timetables/${timetableId}/stats`
+        );
+        setStats(response.data.data || null);
+        return response.data.data;
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+        toast.error("Failed to fetch statistics");
+        throw err;
+      }
+    },
+    [isAuthenticated]
+  );
+
+  // Fetch timetable categories
+  const fetchCategories = useCallback(async () => {
+    if (!isAuthenticated) return;
 
     try {
       const response = await apiClient.get("/timetables/categories");
-      return response.categories || [];
-    } catch (error) {
-      console.error("Error fetching timetable categories:", error);
+      setCategories(response.data.categories || []);
+      return response.data.categories;
+    } catch (err) {
+      console.error("Error fetching categories:", err);
       return [];
     }
   }, [isAuthenticated]);
 
-  // Set up auto-check for week transition and initial data load
+  // Load initial data
   useEffect(() => {
     if (isAuthenticated) {
-      // Initial data load
-      fetchTimetables()
-        .then(() => fetchCurrentWeek())
-        .catch(console.error);
-
-      // Set up weekly check
-      const checkAndUpdateWeek = async () => {
-        if (checkWeekTransition()) {
-          console.log("Week transition detected, refreshing data");
-          try {
-            await fetchCurrentWeek();
-            toast.success("New week started!");
-          } catch (err) {
-            console.error("Failed to update week:", err);
-          }
-        }
-      };
-
-      // Check immediately
-      checkAndUpdateWeek();
-
-      // Set up periodic check (every hour)
-      weekCheckIntervalRef.current = setInterval(checkAndUpdateWeek, 3600000);
-
-      return () => {
-        if (weekCheckIntervalRef.current) {
-          clearInterval(weekCheckIntervalRef.current);
-        }
-      };
+      fetchTimetables();
+      fetchCurrentWeek();
+      fetchCategories();
     }
-  }, [isAuthenticated, fetchTimetables, fetchCurrentWeek, checkWeekTransition]);
+  }, [isAuthenticated, fetchTimetables, fetchCurrentWeek, fetchCategories]);
 
   return {
-    currentWeek,
     timetables,
-    activeTimetable,
+    currentWeek,
     loading,
     error,
+    categories,
+    history,
+    historyLoading,
+    historyMeta,
     stats,
     fetchTimetables,
-    fetchHistory,
     fetchCurrentWeek,
-    toggleActivityStatus,
-    getStats,
+    fetchTimetable,
     createTimetable,
     updateTimetable,
     deleteTimetable,
+    toggleActivityStatus,
     updateDefaultActivities,
     startNewWeek,
-    getCategories,
+    fetchHistory,
+    getStats,
+    fetchCategories,
   };
 };
 
