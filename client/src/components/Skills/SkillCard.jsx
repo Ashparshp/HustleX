@@ -32,18 +32,18 @@ const SkillCard = ({ skill, onEdit }) => {
     });
   };
 
-  // Status color mapping
+  // Status color mapping - Blackish indigo with yellow/green/gray
   const getStatusColors = (status) => {
     const statusMap = {
       upcoming: isDark
-        ? "text-blue-400 bg-blue-500/10 border-blue-500/20"
-        : "text-blue-600 bg-blue-100 border-blue-200",
+        ? "text-gray-300 bg-gray-800 border-gray-700"
+        : "text-gray-700 bg-gray-200 border-gray-300",
       "in-progress": isDark
-        ? "text-yellow-400 bg-yellow-500/10 border-yellow-500/20"
-        : "text-yellow-600 bg-yellow-100 border-yellow-200",
+        ? "text-yellow-300 bg-indigo-900/60 border-yellow-600/30"
+        : "text-yellow-600 bg-indigo-50 border-yellow-400",
       completed: isDark
-        ? "text-green-400 bg-green-500/10 border-green-500/20"
-        : "text-green-600 bg-green-100 border-green-200",
+        ? "text-green-300 bg-indigo-900/60 border-green-600/30"
+        : "text-green-600 bg-indigo-50 border-green-400",
     };
     return statusMap[status] || statusMap.upcoming;
   };
@@ -52,25 +52,49 @@ const SkillCard = ({ skill, onEdit }) => {
   const getPriorityColors = (priority) => {
     const priorityMap = {
       high: isDark
-        ? "text-red-400 bg-red-500/10 border-red-500/20"
-        : "text-red-600 bg-red-100 border-red-200",
+        ? "text-red-300 bg-indigo-900/60 border-red-700/30"
+        : "text-red-600 bg-indigo-50 border-red-400",
       medium: isDark
-        ? "text-yellow-400 bg-yellow-500/10 border-yellow-500/20"
-        : "text-yellow-600 bg-yellow-100 border-yellow-200",
+        ? "text-yellow-300 bg-indigo-900/60 border-yellow-600/30"
+        : "text-yellow-600 bg-indigo-50 border-yellow-400",
       low: isDark
-        ? "text-blue-400 bg-blue-500/10 border-blue-500/20"
-        : "text-blue-600 bg-blue-100 border-blue-200",
+        ? "text-gray-300 bg-indigo-900/60 border-gray-600/30"
+        : "text-gray-600 bg-indigo-50 border-gray-400",
     };
     return priorityMap[priority] || priorityMap.medium;
   };
 
-  // Progress bar color
-  const getProgressColor = (progress) => {
+  // Progress bar color - Blackish indigo with yellow/green/gray
+  const getProgressColor = (progress, status) => {
+    // Base color on both progress and status
+    if (status === "completed") return "bg-green-500";
+    if (status === "in-progress") {
+      if (progress >= 75) return "bg-yellow-400";
+      if (progress >= 50) return "bg-yellow-500";
+      if (progress >= 25) return "bg-yellow-600";
+      return "bg-yellow-700";
+    }
+    if (status === "upcoming") {
+      if (progress >= 50) return "bg-gray-400";
+      if (progress >= 25) return "bg-gray-500";
+      return "bg-gray-600";
+    }
+    // Fallback based on just progress
     if (progress >= 100) return "bg-green-500";
-    if (progress >= 75) return "bg-blue-500";
+    if (progress >= 75) return "bg-yellow-400";
     if (progress >= 50) return "bg-yellow-500";
-    if (progress >= 25) return "bg-orange-500";
-    return "bg-red-500";
+    if (progress >= 25) return "bg-gray-400";
+    return "bg-indigo-900";
+  };
+
+  // Get gradient colors based on status
+  const getGradientColors = (status) => {
+    const gradientMap = {
+      upcoming: "from-indigo-900 to-gray-800",
+      "in-progress": "from-indigo-900 to-yellow-800",
+      completed: "from-indigo-900 to-green-800",
+    };
+    return gradientMap[status] || gradientMap.upcoming;
   };
 
   // Handle edit button click - Ensure we pass the skill data correctly
@@ -120,6 +144,7 @@ const SkillCard = ({ skill, onEdit }) => {
   const isCompleted = skill.status === "completed";
   const statusColors = getStatusColors(skill.status);
   const priorityColors = getPriorityColors(skill.priority);
+  const gradientColors = getGradientColors(skill.status);
 
   return (
     <>
@@ -131,19 +156,14 @@ const SkillCard = ({ skill, onEdit }) => {
         className="relative group"
       >
         <div
-          className={`absolute -inset-0.5 bg-gradient-to-r rounded-lg blur opacity-30 
-                   group-hover:opacity-50 transition duration-300
-                   ${
-                     isCompleted
-                       ? "from-green-500 to-emerald-500"
-                       : "from-indigo-500 to-blue-500"
-                   }`}
+          className={`absolute -inset-0.5 bg-gradient-to-r rounded-lg blur opacity-40 
+                   group-hover:opacity-60 transition duration-300 ${gradientColors}`}
         />
         <div
           className={`relative p-6 rounded-lg border backdrop-blur-sm transition-all duration-300
           ${
             isDark
-              ? "bg-black border-indigo-500/30 group-hover:border-indigo-400"
+              ? "bg-black border-indigo-900/50 group-hover:border-indigo-700"
               : "bg-white border-indigo-300/50 group-hover:border-indigo-500"
           }`}
         >
@@ -161,7 +181,7 @@ const SkillCard = ({ skill, onEdit }) => {
                   )}
                   <span
                     className={`font-medium text-lg ${
-                      isDark ? "text-indigo-400" : "text-indigo-600"
+                      isDark ? "text-indigo-300" : "text-indigo-800"
                     }`}
                   >
                     {skill.name}
@@ -188,8 +208,8 @@ const SkillCard = ({ skill, onEdit }) => {
                   onClick={handleEditClick}
                   className={`p-2 rounded-lg transition-colors ${
                     isDark
-                      ? "hover:bg-indigo-500/10 text-indigo-400"
-                      : "hover:bg-indigo-50 text-indigo-600"
+                      ? "hover:bg-indigo-900/20 text-indigo-300"
+                      : "hover:bg-indigo-50 text-indigo-700"
                   }`}
                   title="Edit skill"
                 >
@@ -201,7 +221,7 @@ const SkillCard = ({ skill, onEdit }) => {
                   onClick={handleDeleteClick}
                   className={`p-2 rounded-lg transition-colors ${
                     isDark
-                      ? "hover:bg-red-500/10 text-red-400"
+                      ? "hover:bg-red-900/20 text-red-400"
                       : "hover:bg-red-50 text-red-600"
                   }`}
                   title="Delete skill"
@@ -232,13 +252,14 @@ const SkillCard = ({ skill, onEdit }) => {
                   {skill.progress}%
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+              <div className="w-full bg-indigo-950 rounded-full h-2.5 dark:bg-indigo-950/70">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${skill.progress}%` }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
                   className={`h-2.5 rounded-full transition-colors ${getProgressColor(
-                    skill.progress
+                    skill.progress,
+                    skill.status
                   )}`}
                 />
               </div>
@@ -281,7 +302,7 @@ const SkillCard = ({ skill, onEdit }) => {
             {skill.description && (
               <div
                 className={`p-3 rounded-lg ${
-                  isDark ? "bg-gray-900" : "bg-gray-50"
+                  isDark ? "bg-indigo-950/50" : "bg-indigo-50"
                 }`}
               >
                 <div className="flex items-start gap-2">
@@ -292,7 +313,7 @@ const SkillCard = ({ skill, onEdit }) => {
                   />
                   <p
                     className={`text-sm ${
-                      isDark ? "text-gray-400" : "text-gray-600"
+                      isDark ? "text-gray-300" : "text-gray-700"
                     }`}
                   >
                     {skill.description}
@@ -326,7 +347,7 @@ const SkillCard = ({ skill, onEdit }) => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`text-xs block truncate transition hover:underline ${
-                        isDark ? "text-indigo-400" : "text-indigo-600"
+                        isDark ? "text-indigo-300" : "text-indigo-700"
                       }`}
                     >
                       {resource.title || resource.url}
