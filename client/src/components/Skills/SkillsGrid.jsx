@@ -31,56 +31,79 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
     return expandedCategories[category] !== false; // Default to expanded (true)
   };
 
-  // If no skills, show empty state
   if (!skills || Object.keys(skills).length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`relative group p-8 text-center rounded-lg`}
+        className="relative w-full max-w-md mx-auto"
       >
+        {/* Subtle gradient background with improved blur */}
         <div
-          className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-lg blur opacity-20 
-                    group-hover:opacity-30 transition duration-300"
+          className="absolute inset-0 bg-gradient-to-r from-indigo-500/30 via-purple-500/20 to-blue-500/30 rounded-xl blur-xl opacity-25 
+          group-hover:opacity-35 transition-all duration-300"
         />
+
+        {/* Main content card with refined border styling */}
         <div
-          className={`relative p-12 rounded-lg border backdrop-blur-sm transition-all duration-300
-          ${
-            isDark
-              ? "bg-black border-indigo-500/30 group-hover:border-indigo-400"
-              : "bg-white border-indigo-300/50 group-hover:border-indigo-500"
-          }`}
+          className={`relative p-8 rounded-xl border-2 backdrop-blur-sm transition-all duration-300 shadow-lg
+            ${
+              isDark
+                ? "bg-gray-900/80 border-indigo-500/40 hover:border-indigo-400/60"
+                : "bg-white/90 border-indigo-300/60 hover:border-indigo-500/70"
+            }`}
         >
-          <BookOpen
-            className={`w-16 h-16 mx-auto mb-4 ${
-              isDark
-                ? "text-indigo-400 opacity-50"
-                : "text-indigo-600 opacity-50"
-            }`}
-          />
-          <h3
-            className={`text-xl font-medium mb-2 ${
-              isDark ? "text-gray-200" : "text-gray-700"
-            }`}
-          >
-            No skills added yet
-          </h3>
-          <p className={`mb-6 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-            Start tracking your skills and progress by adding your first skill.
-          </p>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onAddSkill}
-            className={`px-6 py-3 rounded-lg inline-flex items-center ${
-              isDark
-                ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                : "bg-indigo-600 hover:bg-indigo-700 text-white"
-            }`}
-          >
-            <Plus size={20} className="mr-2" />
-            Add Your First Skill
-          </motion.button>
+          {/* Inner content with improved spacing */}
+          <div className="flex flex-col items-center space-y-6 py-4">
+            <div
+              className={`p-4 rounded-full ${
+                isDark ? "bg-indigo-900/30" : "bg-indigo-100"
+              }`}
+            >
+              <BookOpen
+                className={`w-12 h-12 ${
+                  isDark ? "text-indigo-400" : "text-indigo-600"
+                }`}
+              />
+            </div>
+
+            <div className="text-center space-y-3">
+              <h3
+                className={`text-xl font-semibold ${
+                  isDark ? "text-white" : "text-gray-800"
+                }`}
+              >
+                No skills added yet
+              </h3>
+
+              <p
+                className={`max-w-sm ${
+                  isDark ? "text-gray-300" : "text-gray-600"
+                }`}
+              >
+                Start tracking your skills and progress by adding your first
+                skill.
+              </p>
+            </div>
+
+            <motion.button
+              whileHover={{
+                scale: 1.03,
+                boxShadow: "0 10px 25px -5px rgba(79, 70, 229, 0.4)",
+              }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onAddSkill}
+              className={`px-6 py-3 rounded-lg font-medium inline-flex items-center shadow-md transition-all
+                ${
+                  isDark
+                    ? "bg-indigo-600 hover:bg-indigo-500 text-white"
+                    : "bg-indigo-600 hover:bg-indigo-500 text-white"
+                }`}
+            >
+              <Plus size={18} className="mr-2" />
+              Add Your First Skill
+            </motion.button>
+          </div>
         </div>
       </motion.div>
     );
