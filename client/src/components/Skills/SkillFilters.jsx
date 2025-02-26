@@ -1,160 +1,449 @@
-// src/components/Skills/SkillFilters.jsx
-import { useState } from "react";
-import { Tag, Activity, Search, Clock, Award, BookOpen } from "lucide-react";
+import { useState, useMemo } from "react";
+import { motion } from "framer-motion";
+import {
+  Search,
+  Filter,
+  Tag,
+  Clock,
+  Award,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  X,
+} from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 
 const SkillFilters = ({
   categories,
   selectedCategory,
   selectedStatus,
+  searchQuery,
+  skills, // Add skills prop
   onSelectCategory,
   onSelectStatus,
+  onSearchChange,
 }) => {
   const { isDark } = useTheme();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedSections, setExpandedSections] = useState({
+    categories: true,
+    status: true,
+  });
 
-  // Filter statuses
+  // Calculate category and status counts based on current skills
+  const categoryCounts = useMemo(() => {
+    if (!skills) return {};
+
+    return Object.entries(skills).reduce(
+      (counts, [category, categorySkills]) => {
+        counts[category] = categorySkills.length;
+        return counts;
+      },
+      {}
+    );
+  }, [skills]);
+
+  // Calculate filtered counts based on current filters
+  const filteredCounts = useMemo(() => {
+    if (!skills) return {};
+
+    return Object.entries(skills).reduce(
+      (counts, [category, categorySkills]) => {
+        // Filter skills within the category
+        const filteredSkills = categorySkills.filter((skill) => {
+          // Category filter
+          const categoryMatch =
+            !selectedCategory || category === selectedCategory;
+
+          // Status filter
+          const statusMatch =
+            !selectedStatus || skill.status === selectedStatus;
+
+          // Search filter
+          const searchMatch =
+            !searchQuery ||
+            skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (skill.description &&
+              skill.description
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()));
+
+          return categoryMatch && statusMatch && searchMatch;
+        });
+
+        counts[category] = filteredSkills.length;
+        return counts;
+      },
+      {}
+    );
+  }, [skills, selectedCategory, selectedStatus, searchQuery]);
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        delayChildren: 0.1,
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+  // Status options
   const statuses = [
-    { value: "completed", label: "Completed", icon: Award },
-    { value: "in-progress", label: "In Progress", icon: Clock },
-    { value: "upcoming", label: "Upcoming", icon: BookOpen },
+    {
+      value: "completed",
+      label: "Completed",
+      icon: Award,
+      color: isDark ? "text-green-400" : "text-green-600",
+    },
+    {
+      value: "in-progress",
+      label: "In Progress",
+      icon: Clock,
+      color: isDark ? "text-yellow-400" : "text-yellow-600",
+    },
+    {
+      value: "upcoming",
+      label: "Upcoming",
+      icon: BookOpen,
+      color: isDark ? "text-blue-400" : "text-blue-600",
+    },
   ];
 
-  // Base styling classes
-  const cardClass = `p-4 rounded-lg ${
-    isDark ? "bg-gray-800" : "bg-white"
-  } border ${isDark ? "border-gray-700" : "border-gray-200"}`;
+  // Toggle section expansion
+  const toggleSection = (section) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
 
-  const sectionHeadingClass = `text-lg font-medium mb-4 ${
-    isDark ? "text-gray-200" : "text-gray-800"
-  } flex items-center gap-2`;
+  // Helper to get category color
+  const getCategoryColor = (category) => {
+    const colorMap = {
+      "MERN Stack": isDark ? "text-blue-400" : "text-blue-600",
+      "Java & Ecosystem": isDark ? "text-yellow-400" : "text-yellow-600",
+      DevOps: isDark ? "text-red-400" : "text-red-600",
+      "Data Science & ML": isDark ? "text-purple-400" : "text-purple-600",
+      "Mobile Development": isDark ? "text-green-400" : "text-green-600",
+      "Go Backend": isDark ? "text-cyan-400" : "text-cyan-600",
+    };
 
-  const badgeClass = `px-3 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer`;
-
-  // Styling for selected badges
-  const selectedCategoryClass = `${badgeClass} ${
-    isDark ? "bg-indigo-600 text-white" : "bg-indigo-600 text-white"
-  }`;
-
-  const unselectedCategoryClass = `${badgeClass} ${
-    isDark
-      ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-  }`;
-
-  const selectedStatusClass = `${badgeClass} ${
-    isDark ? "bg-green-600 text-white" : "bg-green-600 text-white"
-  }`;
-
-  const unselectedStatusClass = `${badgeClass} ${
-    isDark
-      ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-  }`;
-
-  // Handle search input
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    // TODO: Implement search functionality - this would need to be passed up to the parent
+    return (
+      colorMap[category] || (isDark ? "text-indigo-400" : "text-indigo-600")
+    );
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
       {/* Search Section */}
-      <div className={cardClass}>
-        <div className={sectionHeadingClass}>
-          <Search size={20} />
-          Search Skills
+      <motion.div
+        variants={itemVariants}
+        className={`p-6 rounded-lg border ${
+          isDark
+            ? "bg-black/80 border-indigo-500/30 hover:border-indigo-500/60"
+            : "bg-white border-indigo-300/30 hover:border-indigo-300/60"
+        } transition-all duration-300`}
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <Search
+            className={isDark ? "text-indigo-400" : "text-indigo-600"}
+            size={20}
+          />
+          <h3
+            className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}
+          >
+            Search Skills
+          </h3>
         </div>
+
         <div className="relative">
           <input
             type="text"
+            placeholder="Search by skill name, description..."
             value={searchQuery}
-            onChange={handleSearchChange}
-            placeholder="Search by skill name or description..."
-            className={`w-full py-2 pl-10 pr-4 rounded-lg border ${
+            onChange={(e) => onSearchChange(e.target.value)}
+            className={`w-full pl-10 pr-4 py-2 rounded-lg border ${
               isDark
-                ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                ? "bg-gray-900 text-white border-gray-700 focus:border-indigo-500"
+                : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500"
             } focus:outline-none focus:ring-2 ${
               isDark ? "focus:ring-indigo-500/30" : "focus:ring-indigo-500/30"
             }`}
           />
           <Search
             size={18}
-            className={`absolute left-3 top-2.5 ${
-              isDark ? "text-gray-400" : "text-gray-500"
+            className={`absolute left-3 top-3 ${
+              isDark ? "text-gray-500" : "text-gray-400"
             }`}
           />
-        </div>
-      </div>
-
-      {/* Filter by Category */}
-      <div className={cardClass}>
-        <div className={sectionHeadingClass}>
-          <Tag size={20} />
-          Filter by Category
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {categories && categories.length > 0 ? (
-            categories.map((category, index) => {
-              const categoryName =
-                typeof category === "string" ? category : category.name;
-              return (
-                <button
-                  key={index}
-                  onClick={() => onSelectCategory(categoryName)}
-                  className={
-                    categoryName === selectedCategory
-                      ? selectedCategoryClass
-                      : unselectedCategoryClass
-                  }
-                >
-                  {categoryName}
-                </button>
-              );
-            })
-          ) : (
-            <p
-              className={`text-sm ${
-                isDark ? "text-gray-400" : "text-gray-600"
+          {searchQuery && (
+            <button
+              onClick={() => onSearchChange("")}
+              className={`absolute right-3 top-3 ${
+                isDark
+                  ? "text-gray-400 hover:text-white"
+                  : "text-gray-500 hover:text-gray-800"
               }`}
             >
-              No categories available
-            </p>
+              <X size={18} />
+            </button>
           )}
         </div>
-      </div>
+      </motion.div>
 
-      {/* Filter by Status */}
-      <div className={cardClass}>
-        <div className={sectionHeadingClass}>
-          <Activity size={20} />
-          Filter by Status
+      {/* Categories Section */}
+      <motion.div
+        variants={itemVariants}
+        className={`p-6 rounded-lg border ${
+          isDark
+            ? "bg-black/80 border-indigo-500/30 hover:border-indigo-500/60"
+            : "bg-white border-indigo-300/30 hover:border-indigo-300/60"
+        } transition-all duration-300`}
+      >
+        <div
+          className="flex items-center justify-between mb-4 cursor-pointer"
+          onClick={() => toggleSection("categories")}
+        >
+          <div className="flex items-center gap-2">
+            <Tag
+              className={isDark ? "text-indigo-400" : "text-indigo-600"}
+              size={20}
+            />
+            <h3
+              className={`font-medium ${
+                isDark ? "text-white" : "text-gray-900"
+              }`}
+            >
+              Categories
+            </h3>
+          </div>
+          {expandedSections.categories ? (
+            <ChevronUp className={isDark ? "text-gray-400" : "text-gray-600"} />
+          ) : (
+            <ChevronDown
+              className={isDark ? "text-gray-400" : "text-gray-600"}
+            />
+          )}
         </div>
-        <div className="flex flex-wrap gap-2">
-          {statuses.map((status) => {
-            const StatusIcon = status.icon;
-            return (
-              <button
-                key={status.value}
-                onClick={() => onSelectStatus(status.value)}
-                className={
-                  status.value === selectedStatus
-                    ? selectedStatusClass
-                    : unselectedStatusClass
-                }
+
+        {expandedSections.categories && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {categories.length > 0 ? (
+              categories.map((category, index) => {
+                const categoryName =
+                  typeof category === "string" ? category : category.name;
+                const isSelected = categoryName === selectedCategory;
+                const totalCount = categoryCounts[categoryName] || 0;
+                const filteredCount = filteredCounts[categoryName] || 0;
+
+                return (
+                  <motion.button
+                    key={index}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => onSelectCategory(categoryName)}
+                    className={`p-3 rounded-lg flex items-center justify-between transition-all duration-300 ${
+                      isSelected
+                        ? `${
+                            isDark
+                              ? "bg-indigo-500/20 border-indigo-500/30"
+                              : "bg-indigo-100 border-indigo-200"
+                          } border`
+                        : `${
+                            isDark
+                              ? "bg-gray-900 hover:bg-gray-800 border-gray-800"
+                              : "bg-white hover:bg-gray-50 border-gray-200"
+                          } border`
+                    }`}
+                  >
+                    <span
+                      className={`font-medium ${
+                        isSelected
+                          ? `${getCategoryColor(categoryName)}`
+                          : `${isDark ? "text-gray-300" : "text-gray-700"}`
+                      }`}
+                    >
+                      {categoryName}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <span
+                        className={`text-xs rounded-full px-2 py-0.5 ${
+                          isSelected
+                            ? `${
+                                isDark
+                                  ? "bg-indigo-600/50 text-white"
+                                  : "bg-indigo-200 text-indigo-800"
+                              }`
+                            : `${
+                                isDark
+                                  ? "bg-gray-800 text-gray-400"
+                                  : "bg-gray-100 text-gray-600"
+                              }`
+                        }`}
+                      >
+                        {filteredCount}/{totalCount}
+                      </span>
+                    </div>
+                  </motion.button>
+                );
+              })
+            ) : (
+              <p
+                className={`text-sm ${
+                  isDark ? "text-gray-400" : "text-gray-600"
+                }`}
               >
-                <div className="flex items-center gap-1.5">
-                  <StatusIcon size={16} />
-                  {status.label}
-                </div>
-              </button>
-            );
-          })}
+                No categories available
+              </p>
+            )}
+          </div>
+        )}
+      </motion.div>
+
+      {/* Status Section */}
+      <motion.div
+        variants={itemVariants}
+        className={`p-6 rounded-lg border ${
+          isDark
+            ? "bg-black/80 border-indigo-500/30 hover:border-indigo-500/60"
+            : "bg-white border-indigo-300/30 hover:border-indigo-300/60"
+        } transition-all duration-300`}
+      >
+        <div
+          className="flex items-center justify-between mb-4 cursor-pointer"
+          onClick={() => toggleSection("status")}
+        >
+          <div className="flex items-center gap-2">
+            <Filter
+              className={isDark ? "text-indigo-400" : "text-indigo-600"}
+              size={20}
+            />
+            <h3
+              className={`font-medium ${
+                isDark ? "text-white" : "text-gray-900"
+              }`}
+            >
+              Status
+            </h3>
+          </div>
+          {expandedSections.status ? (
+            <ChevronUp className={isDark ? "text-gray-400" : "text-gray-600"} />
+          ) : (
+            <ChevronDown
+              className={isDark ? "text-gray-400" : "text-gray-600"}
+            />
+          )}
         </div>
-      </div>
-    </div>
+
+        {expandedSections.status && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {statuses.map((status) => {
+              const StatusIcon = status.icon;
+              const isSelected = status.value === selectedStatus;
+
+              // Calculate status counts
+              const totalStatusCount = Object.values(skills || {})
+                .flat()
+                .filter((skill) => skill.status === status.value).length;
+
+              const filteredStatusCount = Object.values(skills || {})
+                .flat()
+                .filter(
+                  (skill) =>
+                    skill.status === status.value &&
+                    (!selectedCategory ||
+                      skill.category === selectedCategory) &&
+                    (!searchQuery ||
+                      skill.name
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()) ||
+                      (skill.description &&
+                        skill.description
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase())))
+                ).length;
+
+              return (
+                <motion.button
+                  key={status.value}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => onSelectStatus(status.value)}
+                  className={`p-3 rounded-lg flex items-center justify-between transition-all duration-300 ${
+                    isSelected
+                      ? `${
+                          isDark
+                            ? "bg-indigo-500/20 border-indigo-500/30"
+                            : "bg-indigo-100 border-indigo-200"
+                        } border`
+                      : `${
+                          isDark
+                            ? "bg-gray-900 hover:bg-gray-800 border-gray-800"
+                            : "bg-white hover:bg-gray-50 border-gray-200"
+                        } border`
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <StatusIcon
+                      size={18}
+                      className={`${
+                        isSelected
+                          ? status.color
+                          : isDark
+                          ? "text-gray-500"
+                          : "text-gray-400"
+                      }`}
+                    />
+                    <span
+                      className={`font-medium ${
+                        isSelected
+                          ? status.color
+                          : isDark
+                          ? "text-gray-300"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      {status.label}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span
+                      className={`text-xs rounded-full px-2 py-0.5 ${
+                        isSelected
+                          ? `${
+                              isDark
+                                ? "bg-indigo-600/50 text-white"
+                                : "bg-indigo-200 text-indigo-800"
+                            }`
+                          : `${
+                              isDark
+                                ? "bg-gray-800 text-gray-400"
+                                : "bg-gray-100 text-gray-600"
+                            }`
+                      }`}
+                    >
+                      {filteredStatusCount}/{totalStatusCount}
+                    </span>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
   );
 };
 
