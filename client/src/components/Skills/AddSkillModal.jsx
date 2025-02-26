@@ -226,15 +226,16 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
         animate="visible"
         exit="exit"
         variants={modalVariants}
-        className="fixed inset-0 flex items-center justify-center z-50 p-4"
+        className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-auto"
       >
         <div
-          className={`w-full max-w-md p-6 rounded-xl shadow-2xl ${modalBgClass} backdrop-blur-sm border ${
+          className={`w-full sm:max-w-lg lg:max-w-xl p-6 rounded-xl shadow-2xl ${modalBgClass} backdrop-blur-sm border ${
             isDark ? "border-indigo-500/20" : "border-indigo-300/20"
-          }`}
+          } max-h-[90vh] overflow-y-auto my-4`}
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Header with improved styling */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6 sticky top-0 z-10 backdrop-blur-md bg-opacity-90 pb-2 -mx-6 px-6 pt-2">
             <h2 className={`text-2xl font-bold ${headingClass}`}>
               Add New Skill
             </h2>
@@ -379,39 +380,79 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
                 )}
               </div>
 
-              {/* Status with color indicators */}
-              <div>
-                <label htmlFor="status" className={labelClass}>
-                  Status
-                </label>
-                <div className="relative">
-                  <select
-                    id="status"
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    className={`${selectClass} ${getStatusColor(
-                      formData.status
-                    )}`}
-                  >
-                    <option value="upcoming">Upcoming</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <svg
-                      className={`w-4 h-4 ${secondaryTextClass}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+              {/* Grid layout for form fields on larger screens */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Status with color indicators */}
+                <div>
+                  <label htmlFor="status" className={labelClass}>
+                    Status
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="status"
+                      name="status"
+                      value={formData.status}
+                      onChange={handleChange}
+                      className={`${selectClass} ${getStatusColor(
+                        formData.status
+                      )}`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 9l-7 7-7-7"
-                      ></path>
-                    </svg>
+                      <option value="upcoming">Upcoming</option>
+                      <option value="in-progress">In Progress</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <svg
+                        className={`w-4 h-4 ${secondaryTextClass}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Priority with color indicators */}
+                <div>
+                  <label htmlFor="priority" className={labelClass}>
+                    Priority
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="priority"
+                      name="priority"
+                      value={formData.priority}
+                      onChange={handleChange}
+                      className={`${selectClass} ${getPriorityColor(
+                        formData.priority
+                      )}`}
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <svg
+                        className={`w-4 h-4 ${secondaryTextClass}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        ></path>
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -446,43 +487,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
                 </div>
               </div>
 
-              {/* Priority with color indicators */}
-              <div>
-                <label htmlFor="priority" className={labelClass}>
-                  Priority
-                </label>
-                <div className="relative">
-                  <select
-                    id="priority"
-                    name="priority"
-                    value={formData.priority}
-                    onChange={handleChange}
-                    className={`${selectClass} ${getPriorityColor(
-                      formData.priority
-                    )}`}
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <svg
-                      className={`w-4 h-4 ${secondaryTextClass}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 9l-7 7-7-7"
-                      ></path>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
               {/* Description with improved styling */}
               <div>
                 <label htmlFor="description" className={labelClass}>
@@ -499,7 +503,7 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
               </div>
 
               {/* Form Actions with improved buttons */}
-              <div className="flex justify-end space-x-3 mt-6">
+              <div className="flex justify-end space-x-3 mt-6 sticky bottom-0 pb-2 pt-4 -mx-6 px-6 backdrop-blur-md bg-opacity-90">
                 <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.98 }}

@@ -73,6 +73,27 @@ const SkillCard = ({ skill, onEdit }) => {
     return "bg-red-500";
   };
 
+  // Handle edit button click - Ensure we pass the skill data correctly
+  const handleEditClick = () => {
+    // Create a complete copy of the skill object to ensure all properties are passed correctly
+    const skillData = {
+      ...skill,
+      // Ensure these critical fields exist
+      id: skill.id || skill._id,
+      name: skill.name || "",
+      category: skill.category || "",
+      status: skill.status || "upcoming",
+      progress: skill.progress || 0,
+      description: skill.description || "",
+      priority: skill.priority || "medium",
+      startDate: skill.startDate || "",
+      completionDate: skill.completionDate || "",
+    };
+    // Pass the complete skill object to the edit handler
+    console.log("Passing skill data to edit modal:", skillData);
+    onEdit(skillData);
+  };
+
   // Handle delete button click
   const handleDeleteClick = () => {
     setShowDeleteConfirm(true);
@@ -82,7 +103,7 @@ const SkillCard = ({ skill, onEdit }) => {
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
-      await deleteSkill(skill._id);
+      await deleteSkill(skill._id || skill.id);
       setShowDeleteConfirm(false);
     } catch (error) {
       console.error("Error deleting skill:", error);
@@ -164,7 +185,7 @@ const SkillCard = ({ skill, onEdit }) => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={onEdit}
+                  onClick={handleEditClick}
                   className={`p-2 rounded-lg transition-colors ${
                     isDark
                       ? "hover:bg-indigo-500/10 text-indigo-400"
