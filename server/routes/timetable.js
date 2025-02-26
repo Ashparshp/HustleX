@@ -36,7 +36,10 @@ router.get("/categories", getCategories);
 // Timetable-specific routes
 router.get("/:id/history", getHistory);
 router.post("/:id/toggle", toggleActivityStatus);
+
+// Add this route for updating activities
 router.put("/:id/activities", updateDefaultActivities);
+
 router.get("/:id/stats", getStats);
 router.post("/:id/new-week", startNewWeek);
 

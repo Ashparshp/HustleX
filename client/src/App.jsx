@@ -35,6 +35,7 @@ import WorkingHoursPage from "./pages/WorkingHoursPage";
 import SkillsPage from "./pages/SkillsPage";
 import GoalsPage from "./pages/GoalsPage";
 import SchedulePage from "./pages/SchedulePage";
+import TimetablePage from "./pages/TimetablePage";
 
 function AppContent() {
   const { isDark } = useTheme();
@@ -115,6 +116,16 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <SkillsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Timetable Feature */}
+          <Route
+            path="/timetable"
+            element={
+              <ProtectedRoute>
+                <TimetablePage />
               </ProtectedRoute>
             }
           />
