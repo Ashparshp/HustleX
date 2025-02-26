@@ -82,7 +82,7 @@ function AppContent() {
 
       <Navbar />
 
-      <main className="relative z-10 flex-grow container mx-auto px-4 py-8">
+      <main className="relative">
         <Routes>
           {/* Public Routes */}
           <Route
@@ -243,7 +243,7 @@ function AppContent() {
         </Routes>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
 
       {/* Toast notifications */}
       <Toaster

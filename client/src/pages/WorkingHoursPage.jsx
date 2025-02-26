@@ -193,7 +193,7 @@ const WorkingHoursPage = () => {
         }`}
       />
 
-      <div className="mx-auto px-4 max-w-6xl relative z-10">
+      <div className="mx-auto px-6 relative z-10">
         {/* Header and Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <motion.h2
@@ -532,12 +532,20 @@ const WorkingHoursPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <AnimatePresence>
                 {filteredWorkingHours.map((entry) => (
-                  <WorkingHoursCard
+                  <motion.div
                     key={entry._id}
-                    entry={entry}
-                    onEdit={() => handleEdit(entry)}
-                    onDelete={() => handleDelete(entry)}
-                  />
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <WorkingHoursCard
+                      key={entry._id}
+                      entry={entry}
+                      onEdit={() => handleEdit(entry)}
+                      onDelete={() => handleDelete(entry)}
+                    />
+                  </motion.div>
                 ))}
               </AnimatePresence>
             </div>
