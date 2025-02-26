@@ -1,4 +1,3 @@
-// src/App.jsx (Updated for Working Hours)
 import { useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -7,6 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { motion } from "framer-motion";
 
 // Context Providers
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
@@ -45,23 +45,44 @@ function AppContent() {
   useEffect(() => {
     // Set body background and text color based on theme
     if (isDark) {
-      document.body.classList.add("bg-gray-900", "text-white");
+      document.body.classList.add("bg-black", "text-white");
       document.body.classList.remove("bg-gray-50", "text-gray-900");
     } else {
-      document.body.classList.add("bg-gray-50", "text-gray-900");
-      document.body.classList.remove("bg-gray-900", "text-white");
+      document.body.classList.add("bg-white", "text-gray-900");
+      document.body.classList.remove("bg-black", "text-white");
     }
   }, [isDark]);
 
   return (
     <div
-      className={`min-h-screen flex flex-col ${
-        isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
+      className={`relative min-h-screen flex flex-col ${
+        isDark ? "bg-black text-white" : "bg-white text-gray-900"
       }`}
     >
+      {/* Gradient Background */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0 overflow-hidden"
+        style={{
+          background: isDark
+            ? "linear-gradient(135deg, rgba(30,41,59,0.5) 0%, rgba(17,24,39,0.5) 100%)"
+            : "linear-gradient(135deg, rgba(229,231,235,0.5) 0%, rgba(255,255,255,0.5) 100%)",
+          opacity: 0.5,
+        }}
+      />
+
+      {/* Blurred Overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{
+          backdropFilter: "blur(75px)",
+          WebkitBackdropFilter: "blur(75px)",
+          opacity: 0.5,
+        }}
+      />
+
       <Navbar />
 
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className="relative z-10 flex-grow container mx-auto px-4 py-8">
         <Routes>
           {/* Public Routes */}
           <Route
@@ -185,22 +206,38 @@ function AppContent() {
           <Route
             path="*"
             element={
-              <div className="text-center py-10">
-                <h2 className="text-2xl font-bold mb-2">404: Page Not Found</h2>
-                <p className="mb-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-10"
+              >
+                <h2
+                  className={`text-2xl font-bold mb-2 ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  404: Page Not Found
+                </h2>
+                <p
+                  className={`mb-4 ${
+                    isDark ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
                   The page you're looking for doesn't exist.
                 </p>
-                <a
+                <motion.a
                   href={isAuthenticated ? "/dashboard" : "/login"}
-                  className={`inline-block py-2 px-4 rounded-lg ${
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`inline-block py-2 px-4 rounded-lg transition duration-300 ${
                     isDark
-                      ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                  } transition duration-200`}
+                      ? "bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20"
+                      : "bg-indigo-100/50 border border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70"
+                  }`}
                 >
                   Go to {isAuthenticated ? "Dashboard" : "Login"}
-                </a>
-              </div>
+                </motion.a>
+              </motion.div>
             }
           />
         </Routes>
@@ -214,20 +251,24 @@ function AppContent() {
         toastOptions={{
           duration: 4000,
           style: {
-            background: isDark ? "#1F2937" : "#FFFFFF",
+            background: isDark ? "#111827" : "#FFFFFF", // Darker background for dark mode
             color: isDark ? "#F3F4F6" : "#1F2937",
-            border: `1px solid ${isDark ? "#374151" : "#E5E7EB"}`,
+            border: `1px solid ${isDark ? "#1F2937" : "#E5E7EB"}`,
+            boxShadow: isDark
+              ? "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+              : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+            borderRadius: "0.75rem", // Rounded corners
           },
           success: {
             iconTheme: {
-              primary: "#10B981",
-              secondary: isDark ? "#1F2937" : "#FFFFFF",
+              primary: "#10B981", // Emerald green
+              secondary: isDark ? "#111827" : "#FFFFFF",
             },
           },
           error: {
             iconTheme: {
-              primary: "#EF4444",
-              secondary: isDark ? "#1F2937" : "#FFFFFF",
+              primary: "#EF4444", // Red
+              secondary: isDark ? "#111827" : "#FFFFFF",
             },
           },
         }}
