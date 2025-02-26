@@ -222,11 +222,17 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2"
                 >
                   {categorySkills.map((skill) => (
-                    <SkillCard
-                      key={skill._id}
-                      skill={skill}
-                      onEdit={() => handleEditSkill(skill)}
-                    />
+                    <motion.div
+                      key={skill.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      <SkillCard
+                        skill={skill}
+                        onEdit={handleEditSkill}
+                        categories={categories}
+                      />
+                    </motion.div>
                   ))}
                 </motion.div>
               </motion.div>
