@@ -197,8 +197,8 @@ const TimetablePage = () => {
     }
   };
 
-  const openCreateTimetableModal = () => {
-    setActiveModal("createTimetable");
+  const openCreateTimetableModal = (mode) => {
+    setActiveModal(mode === "edit" ? "editTimetable" : "createTimetable");
   };
 
   const openCategoryManagementModal = () => {
@@ -864,12 +864,19 @@ const TimetablePage = () => {
 
         {/* Create Timetable Modal */}
         <ModalWrapper
-          isOpen={activeModal === "createTimetable"}
+          isOpen={
+            activeModal === "createTimetable" || activeModal === "editTimetable"
+          }
           onClose={closeAllModals}
         >
           <CreateTimetableModal
             onClose={closeAllModals}
-            onSubmit={handleCreateTimetable}
+            onSubmit={
+              activeModal === "edit" && localCurrentTimetable
+                ? (data) =>
+                    handleUpdateTimetable(localCurrentTimetable.id, data)
+                : handleCreateTimetable
+            }
             initialData={
               activeModal === "edit" && localCurrentTimetable
                 ? localCurrentTimetable
