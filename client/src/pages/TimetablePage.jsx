@@ -71,6 +71,7 @@ const TimetablePage = () => {
   const [timetableCategories, setTimetableCategories] = useState([]);
   const [showTimetableSelector, setShowTimetableSelector] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); // Added for forcing re-renders
+  const [localCurrentTimetable, setLocalCurrentTimetable] = useState(null); // Local state for immediate UI updates
 
   // Log state for debugging
   useEffect(() => {
@@ -78,6 +79,22 @@ const TimetablePage = () => {
     console.log("Current timetable:", currentTimetable);
     console.log("Current week:", currentWeek);
   }, [timetables, currentTimetable, currentWeek]);
+
+  // Sync local current timetable with the hook's current timetable
+  useEffect(() => {
+    if (currentTimetable) {
+      setLocalCurrentTimetable(currentTimetable);
+    }
+  }, [currentTimetable]);
+
+  // Effect to specifically watch for changes to current timetable
+  useEffect(() => {
+    if (localCurrentTimetable) {
+      console.log("Current timetable updated:", localCurrentTimetable.name);
+      // Force component re-render when current timetable changes
+      setRefreshKey((prev) => prev + 1);
+    }
+  }, [localCurrentTimetable?.id, localCurrentTimetable?.name]);
 
   // Fetch activities and categories when timetable changes
   useEffect(() => {
@@ -241,16 +258,30 @@ const TimetablePage = () => {
       closeAllModals();
       toast.success("Timetable created successfully");
 
-      // Force re-render the component
-      setRefreshKey((prevKey) => prevKey + 1);
+      // Find the newly created timetable in the updated list and set it as current
+      const newTimetable = fetchedTimetables.find(
+        (t) =>
+          t.name === data.name ||
+          t.id === createdTimetable?.id ||
+          t.id === createdTimetable?._id
+      );
 
-      // If this timetable is set to active, fetch its data
-      if (data.isActive) {
-        const timetableId = createdTimetable?._id || createdTimetable?.id;
-        if (timetableId) {
-          await fetchCurrentWeek(timetableId);
+      if (newTimetable) {
+        console.log(
+          "Setting newly created timetable as current:",
+          newTimetable
+        );
+        // Update both hook state and local state
+        setLocalCurrentTimetable(newTimetable);
+
+        // If this timetable is set to active, fetch its data
+        if (data.isActive) {
+          await fetchCurrentWeek(newTimetable.id);
         }
       }
+
+      // Force re-render the component
+      setRefreshKey((prevKey) => prevKey + 1);
 
       return createdTimetable;
     } catch (error) {
@@ -263,7 +294,16 @@ const TimetablePage = () => {
   const handleUpdateTimetable = async (id, data) => {
     try {
       await updateTimetable(id, data);
-      await fetchTimetables();
+      const updatedTimetables = await fetchTimetables();
+
+      // If updating the current timetable, update the local state
+      if (localCurrentTimetable && localCurrentTimetable.id === id) {
+        const updatedTimetable = updatedTimetables.find((t) => t.id === id);
+        if (updatedTimetable) {
+          setLocalCurrentTimetable(updatedTimetable);
+        }
+      }
+
       closeAllModals();
       toast.success("Timetable updated successfully");
     } catch (error) {
@@ -296,6 +336,9 @@ const TimetablePage = () => {
       console.log("Selected timetable:", selected);
 
       if (selected) {
+        // Immediately update the local current timetable for UI
+        setLocalCurrentTimetable(selected);
+
         // If not active, make it active
         if (!selected.isActive) {
           await updateTimetable(id, { isActive: true });
@@ -487,6 +530,10 @@ const TimetablePage = () => {
                     "Showing timetable selector, current timetables:",
                     timetables
                   );
+                  console.log(
+                    "Local current timetable:",
+                    localCurrentTimetable
+                  );
                   setShowTimetableSelector(!showTimetableSelector);
                 }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border
@@ -497,7 +544,9 @@ const TimetablePage = () => {
                   }`}
               >
                 <Calendar className="w-4 h-4" />
-                {currentTimetable ? currentTimetable.name : "Select Timetable"}
+                {localCurrentTimetable
+                  ? localCurrentTimetable.name
+                  : "Select Timetable"}
               </button>
 
               {showTimetableSelector && (
@@ -564,7 +613,7 @@ const TimetablePage = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              {currentTimetable && (
+              {localCurrentTimetable && (
                 <>
                   <button
                     onClick={() => openCreateTimetableModal("edit")}
@@ -579,7 +628,9 @@ const TimetablePage = () => {
                   </button>
 
                   <button
-                    onClick={() => handleDeleteTimetable(currentTimetable.id)}
+                    onClick={() =>
+                      handleDeleteTimetable(localCurrentTimetable.id)
+                    }
                     className={`p-2 rounded-lg ${
                       isDark
                         ? "hover:bg-gray-900 text-red-400"
@@ -802,7 +853,7 @@ const TimetablePage = () => {
           <TimetableHistory
             onClose={closeAllModals}
             fetchHistory={fetchHistory}
-            currentTimetable={currentTimetable}
+            currentTimetable={localCurrentTimetable || currentTimetable}
           />
         </ModalWrapper>
 
@@ -820,8 +871,8 @@ const TimetablePage = () => {
             onClose={closeAllModals}
             onSubmit={handleCreateTimetable}
             initialData={
-              activeModal === "edit" && currentTimetable
-                ? currentTimetable
+              activeModal === "edit" && localCurrentTimetable
+                ? localCurrentTimetable
                 : null
             }
           />

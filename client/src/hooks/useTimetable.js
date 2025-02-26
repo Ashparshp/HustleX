@@ -150,7 +150,7 @@ const useTimetable = (timetableId = null) => {
           throw new Error(data.message || "Failed to update timetable");
         }
 
-        toast.success("Timetable updated successfully");
+        toast.success("Switched!");
         await fetchTimetables();
         return data.data;
       } catch (err) {
