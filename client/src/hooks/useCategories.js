@@ -18,10 +18,20 @@ const useCategories = (type = "working-hours") => {
 
     try {
       setLoading(true);
-      const response = await apiClient.get(`/categories?type=${type}`);
-      setCategories(response.data || []);
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      const response = await apiClient.get(
+        `/categories?type=${type}&t=${timestamp}`
+      );
+
+      if (response.data && Array.isArray(response.data)) {
+        setCategories(response.data);
+      } else {
+        setCategories(response.data?.data || []);
+      }
+
       setError(null);
-      return response.data;
+      return response.data?.data || response.data || [];
     } catch (err) {
       console.error("Error fetching categories:", err);
       setError(err.message);
@@ -37,9 +47,19 @@ const useCategories = (type = "working-hours") => {
     if (!isAuthenticated) return;
 
     try {
-      const response = await apiClient.get(`/categories/defaults/${type}`);
-      setDefaultCategories(response.data || []);
-      return response.data;
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      const response = await apiClient.get(
+        `/categories/defaults/${type}?t=${timestamp}`
+      );
+
+      if (response.data && Array.isArray(response.data)) {
+        setDefaultCategories(response.data);
+      } else {
+        setDefaultCategories(response.data?.data || []);
+      }
+
+      return response.data?.data || response.data || [];
     } catch (err) {
       console.error("Error fetching default categories:", err);
       return [];
@@ -57,11 +77,11 @@ const useCategories = (type = "working-hours") => {
 
         const response = await apiClient.post("/categories", data);
 
-        // Refresh categories
+        // Refresh categories immediately
         await fetchCategories();
 
         toast.success("Category added successfully");
-        return response.data;
+        return response.data?.data || response.data;
       } catch (err) {
         console.error("Error adding category:", err);
         toast.error(err.message || "Failed to add category");
@@ -79,11 +99,11 @@ const useCategories = (type = "working-hours") => {
       try {
         const response = await apiClient.put(`/categories/${id}`, categoryData);
 
-        // Refresh categories
+        // Refresh categories immediately
         await fetchCategories();
 
         toast.success("Category updated successfully");
-        return response.data;
+        return response.data?.data || response.data;
       } catch (err) {
         console.error("Error updating category:", err);
         toast.error(err.message || "Failed to update category");
@@ -101,7 +121,7 @@ const useCategories = (type = "working-hours") => {
       try {
         await apiClient.delete(`/categories/${id}`);
 
-        // Refresh categories
+        // Refresh categories immediately
         await fetchCategories();
 
         toast.success("Category deleted successfully");

@@ -116,7 +116,8 @@ const useTimetable = (timetableId = null) => {
         }
 
         toast.success("Timetable created successfully");
-        await fetchTimetables();
+
+        // Always return the created timetable data
         return data.data;
       } catch (err) {
         console.error("Error creating timetable:", err);
@@ -124,7 +125,7 @@ const useTimetable = (timetableId = null) => {
         throw err;
       }
     },
-    [API_URL, fetchTimetables, getAuthHeaders, token]
+    [API_URL, getAuthHeaders, token]
   );
 
   // Update a timetable
@@ -225,43 +226,6 @@ const useTimetable = (timetableId = null) => {
             headers: getAuthHeaders(),
           }
         );
-
-        // Handle 404 - timetable exists but no current week
-        if (response.status === 404) {
-          // If no current week, we might need to start a new week
-          try {
-            console.log(
-              "No current week found, attempting to start a new week"
-            );
-            const newWeekResponse = await fetch(
-              `${API_URL}/api/timetables/${timetableIdToUse}/new-week`,
-              {
-                method: "POST",
-                headers: getAuthHeaders(),
-              }
-            );
-
-            if (newWeekResponse.ok) {
-              const newWeekData = await newWeekResponse.json();
-              if (newWeekData.success) {
-                setCurrentWeek(newWeekData.data);
-                setError(null);
-                setLoading(false);
-                updateInProgress.current = false;
-                return newWeekData.data;
-              }
-            }
-          } catch (newWeekErr) {
-            console.error("Failed to start new week:", newWeekErr);
-          }
-
-          // Still couldn't get a current week, set appropriate error
-          setError("No activity data found. Create some activities first.");
-          setCurrentWeek(null);
-          setLoading(false);
-          updateInProgress.current = false;
-          return null;
-        }
 
         if (!response.ok) {
           throw new Error("Failed to fetch current week");
@@ -461,6 +425,7 @@ const useTimetable = (timetableId = null) => {
     if (!token) return [];
 
     try {
+      // Add timestamp to prevent caching
       const timestamp = new Date().getTime();
       const response = await fetch(
         `${API_URL}/api/timetables/categories?t=${timestamp}`,
@@ -479,7 +444,8 @@ const useTimetable = (timetableId = null) => {
         throw new Error(data.message || "Failed to fetch categories");
       }
 
-      return data.categories;
+      // Make sure we return an array even if the API returns null or undefined
+      return Array.isArray(data.categories) ? data.categories : [];
     } catch (err) {
       console.error("Error fetching categories:", err);
       return [];

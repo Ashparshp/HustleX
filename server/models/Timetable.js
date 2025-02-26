@@ -5,7 +5,7 @@ const activitySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   time: {
     type: String,
@@ -13,7 +13,7 @@ const activitySchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    required: true
+    required: true,
   },
 });
 
@@ -54,30 +54,30 @@ const weekSchema = new mongoose.Schema({
   },
   notes: {
     type: String,
-    trim: true
-  }
+    trim: true,
+  },
 });
 
 const timetableSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
+      ref: "User",
+      required: true,
     },
     name: {
       type: String,
       required: true,
       trim: true,
-      default: 'Default Timetable'
+      default: "Default Timetable",
     },
     description: {
       type: String,
-      trim: true
+      trim: true,
     },
     isActive: {
       type: Boolean,
-      default: true
+      default: true,
     },
     currentWeek: {
       type: weekSchema,
@@ -148,13 +148,10 @@ timetableSchema.methods.startNewWeek = async function () {
 
   // Calculate Monday (start of week)
   const monday = new Date(now);
-  if (currentDay === 0) {
-    // If today is Sunday, go back 6 days to previous Monday
-    monday.setDate(now.getDate() - 6);
-  } else {
-    // Otherwise, go back to Monday of current week
-    monday.setDate(now.getDate() - (currentDay - 1));
-  }
+  // If Sunday (0), subtract 6 days to get to Monday
+  // If any other day, subtract (currentDay - 1) to get to Monday
+  const daysToSubtract = currentDay === 0 ? 6 : currentDay - 1;
+  monday.setDate(now.getDate() - daysToSubtract);
   monday.setHours(0, 0, 0, 0);
 
   // Calculate Sunday (end of week)
@@ -185,7 +182,7 @@ timetableSchema.methods.startNewWeek = async function () {
     this.currentWeek.activities.length
   );
 
-  return this.save();
+  return this; // Return this instead of this.save() to let the controller handle saving
 };
 
 // Compound index for user and timetable name uniqueness

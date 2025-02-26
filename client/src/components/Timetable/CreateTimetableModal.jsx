@@ -47,11 +47,17 @@ const CreateTimetableModal = ({ onClose, onSubmit, initialData = null }) => {
     try {
       setIsSubmitting(true);
       setError(null);
-      await onSubmit(formData);
+
+      // Make a copy of the data to avoid reference issues
+      const dataToSubmit = { ...formData };
+
+      // Debug log
+      console.log("Submitting timetable data:", dataToSubmit);
+
+      await onSubmit(dataToSubmit);
       onClose();
     } catch (err) {
       setError(err.message || "Failed to save timetable");
-    } finally {
       setIsSubmitting(false);
     }
   };

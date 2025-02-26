@@ -222,9 +222,10 @@ const AddActivityModal = ({
               }`}
               required
             >
-              {categories.length > 0 ? (
-                categories.map((category) => (
-                  <option key={category} value={category}>
+              {categories && categories.length > 0 ? (
+                // Map through the provided categories
+                categories.map((category, index) => (
+                  <option key={`${category}-${index}`} value={category}>
                     {category}
                   </option>
                 ))

@@ -75,33 +75,42 @@ exports.createTimetable = async (req, res) => {
     // Prepare default activities
     let activities = defaultActivities || [];
 
-    // If no activities provided, use default ones
-    if (!activities.length) {
-      activities = [
-        { name: "DS & Algo", time: "18:00-00:00", category: "Core" },
-        { name: "MERN Stack", time: "00:00-05:00", category: "Frontend" },
-        { name: "Go Backend", time: "10:00-12:00", category: "Backend" },
-        { name: "Java & Spring", time: "12:00-14:00", category: "Backend" },
-        { name: "Mobile Development", time: "14:00-17:00", category: "Mobile" },
-      ];
-    }
-
     // Create timetable
     const timetable = new Timetable({
       user: req.user.id,
       name: name.trim(),
       description,
       defaultActivities: activities,
+      isActive: req.body.isActive !== undefined ? req.body.isActive : true,
     });
 
     // Initialize the current week
     await timetable.startNewWeek();
+
+    // Save the timetable explicitly
+    await timetable.save();
+
+    // If this timetable is set as active, deactivate others
+    if (timetable.isActive) {
+      await Timetable.updateMany(
+        { user: req.user.id, _id: { $ne: timetable._id } },
+        { isActive: false }
+      );
+    }
+
+    // Log the created timetable for debugging
+    console.log("Created new timetable:", {
+      id: timetable._id,
+      name: timetable.name,
+      isActive: timetable.isActive,
+    });
 
     res.status(201).json({
       success: true,
       data: timetable,
     });
   } catch (error) {
+    console.error("Error creating timetable:", error);
     handleError(res, error, "Error creating timetable");
   }
 };
@@ -258,54 +267,82 @@ exports.deleteTimetable = async (req, res) => {
 // @desc    Get current week for active timetable
 // @route   GET /api/timetables/current-week
 // @access  Private
+// @desc    Get current week for a specific timetable
+// @route   GET /api/timetables/:id/current-week
+// @access  Private
 exports.getCurrentWeek = async (req, res) => {
   try {
     setCacheHeaders(res);
 
-    // Find active timetable
-    let timetable = await Timetable.findOne({
-      user: req.user.id,
-      isActive: true,
-    });
+    // Find timetable by id (if provided) or get active timetable
+    let timetable;
 
-    // If no active timetable, use the first one
-    if (!timetable) {
-      timetable = await Timetable.findOne({ user: req.user.id });
+    if (req.params.id) {
+      // If an ID is provided in the URL, try to find that specific timetable
+      timetable = await Timetable.findOne({
+        _id: req.params.id,
+        user: req.user.id,
+      });
 
-      // If still no timetable, create a default one
+      // If timetable not found, return proper error
       if (!timetable) {
-        timetable = new Timetable({
-          user: req.user.id,
-          name: "Default Timetable",
-          defaultActivities: [
-            { name: "DS & Algo", time: "18:00-00:00", category: "Core" },
-            { name: "MERN Stack", time: "00:00-05:00", category: "Frontend" },
-            { name: "Go Backend", time: "10:00-12:00", category: "Backend" },
-            { name: "Java & Spring", time: "12:00-14:00", category: "Backend" },
-            {
-              name: "Mobile Development",
-              time: "14:00-17:00",
-              category: "Mobile",
-            },
-          ],
+        return res.status(404).json({
+          success: false,
+          message: "Timetable not found or not authorized",
         });
-        await timetable.startNewWeek();
       }
+    } else {
+      // Find active timetable
+      timetable = await Timetable.findOne({
+        user: req.user.id,
+        isActive: true,
+      });
 
-      // Set as active
-      timetable.isActive = true;
-      await timetable.save();
+      // If no active timetable, use the first one
+      if (!timetable) {
+        timetable = await Timetable.findOne({ user: req.user.id });
+
+        // If still no timetable, create a default one
+        if (!timetable) {
+          timetable = new Timetable({
+            user: req.user.id,
+            name: "Default Timetable",
+            defaultActivities: [
+              { name: "DS & Algo", time: "18:00-00:00", category: "Core" },
+              { name: "MERN Stack", time: "00:00-05:00", category: "Frontend" },
+              { name: "Go Backend", time: "10:00-12:00", category: "Backend" },
+              {
+                name: "Java & Spring",
+                time: "12:00-14:00",
+                category: "Backend",
+              },
+              {
+                name: "Mobile Development",
+                time: "14:00-17:00",
+                category: "Mobile",
+              },
+            ],
+          });
+        }
+
+        // Set as active
+        timetable.isActive = true;
+      }
     }
 
     const now = new Date();
 
-    // Check if week has ended
-    if (
-      timetable.currentWeek &&
-      now > new Date(timetable.currentWeek.weekEndDate)
-    ) {
-      console.log("Week has ended, starting new week");
+    // Check if week has ended or if there's no current week yet
+    const needsNewWeek =
+      !timetable.currentWeek ||
+      now > new Date(timetable.currentWeek.weekEndDate);
+
+    if (needsNewWeek) {
+      console.log("Week has ended or no current week, starting new week");
       await timetable.startNewWeek();
+
+      // Save the timetable
+      await timetable.save();
 
       // Reload timetable to get fresh data
       timetable = await Timetable.findById(timetable._id);
@@ -636,11 +673,18 @@ exports.startNewWeek = async (req, res) => {
   }
 };
 
+// This should be part of your timetable.js controller file
+
 // @desc    Get categories for timetables
 // @route   GET /api/timetables/categories
 // @access  Private
 exports.getCategories = async (req, res) => {
   try {
+    // Set cache headers
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+
     // Get all timetables for this user
     const timetables = await Timetable.find({ user: req.user.id });
 
@@ -648,21 +692,32 @@ exports.getCategories = async (req, res) => {
     const categoriesSet = new Set();
 
     timetables.forEach((timetable) => {
-      timetable.defaultActivities.forEach((activity) => {
-        categoriesSet.add(activity.category);
-      });
+      if (
+        timetable.defaultActivities &&
+        Array.isArray(timetable.defaultActivities)
+      ) {
+        timetable.defaultActivities.forEach((activity) => {
+          if (activity.category) {
+            categoriesSet.add(activity.category);
+          }
+        });
+      }
     });
 
     // Get user-defined categories
+    const Category = require("../models/Category");
     const userCategories = await Category.find({
       user: req.user.id,
       type: "timetable",
     });
 
     userCategories.forEach((category) => {
-      categoriesSet.add(category.name);
+      if (category.name) {
+        categoriesSet.add(category.name);
+      }
     });
 
+    // Convert to array
     const categories = Array.from(categoriesSet);
 
     res.json({
@@ -670,6 +725,10 @@ exports.getCategories = async (req, res) => {
       categories,
     });
   } catch (error) {
-    handleError(res, error, "Error getting categories");
+    console.error("Error getting categories:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to get categories",
+    });
   }
 };

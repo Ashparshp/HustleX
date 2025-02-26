@@ -70,6 +70,14 @@ const TimetablePage = () => {
   const [activities, setActivities] = useState([]);
   const [timetableCategories, setTimetableCategories] = useState([]);
   const [showTimetableSelector, setShowTimetableSelector] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // Added for forcing re-renders
+
+  // Log state for debugging
+  useEffect(() => {
+    console.log("Current timetables:", timetables);
+    console.log("Current timetable:", currentTimetable);
+    console.log("Current week:", currentWeek);
+  }, [timetables, currentTimetable, currentWeek]);
 
   // Fetch activities and categories when timetable changes
   useEffect(() => {
@@ -103,13 +111,59 @@ const TimetablePage = () => {
     setEditingActivity(null);
   };
 
-  const openAddActivityModal = () => {
-    setActiveModal("add");
-    setEditingActivity(null);
+  const openAddActivityModal = async () => {
+    try {
+      // Force a fresh fetch of categories right before opening the modal
+      const freshCategories = await getTimetableCategories();
+      console.log("Fresh categories before opening modal:", freshCategories);
+
+      // Make sure we're setting the state with the fresh data
+      setTimetableCategories(freshCategories || []);
+
+      // Wait a tiny bit to ensure state is updated before opening modal
+      setTimeout(() => {
+        setActiveModal("add");
+        setEditingActivity(null);
+      }, 50);
+    } catch (err) {
+      console.error("Failed to refresh categories:", err);
+      setActiveModal("add");
+      setEditingActivity(null);
+    }
   };
 
-  const openManageActivitiesModal = () => {
-    setActiveModal("manage");
+  const refreshTimetableCategories = async () => {
+    try {
+      const cats = await getTimetableCategories();
+      // Force clear and update the categories array with spread operator
+      // to ensure React recognizes the state change
+      setTimetableCategories([...(cats || [])]);
+    } catch (err) {
+      console.error("Failed to refresh timetable categories:", err);
+    }
+  };
+
+  const openManageActivitiesModal = async () => {
+    try {
+      // Force a fresh fetch of categories right before opening the modal
+      const freshCategories = await getTimetableCategories();
+      console.log(
+        "Fresh categories before opening manage modal:",
+        freshCategories
+      );
+
+      // Make sure we're setting the state with the fresh data
+      setTimetableCategories(freshCategories || []);
+
+      // Wait a tiny bit to ensure state is updated before opening modal
+      setTimeout(() => {
+        setActiveModal("manage");
+      }, 50);
+    } catch (err) {
+      console.error("Failed to refresh categories for manage modal:", err);
+      // Still open the modal even if category refresh fails
+      setActiveModal("manage");
+    }
   };
 
   const openHistoryModal = () => {
@@ -176,13 +230,33 @@ const TimetablePage = () => {
   // Timetable management
   const handleCreateTimetable = async (data) => {
     try {
-      await createTimetable(data);
-      await fetchTimetables();
+      console.log("Creating new timetable with data:", data);
+      const createdTimetable = await createTimetable(data);
+      console.log("Timetable created successfully:", createdTimetable);
+
+      // Force refresh to update the dropdown
+      const fetchedTimetables = await fetchTimetables();
+      console.log("Fetched timetables after creation:", fetchedTimetables);
+
       closeAllModals();
       toast.success("Timetable created successfully");
+
+      // Force re-render the component
+      setRefreshKey((prevKey) => prevKey + 1);
+
+      // If this timetable is set to active, fetch its data
+      if (data.isActive) {
+        const timetableId = createdTimetable?._id || createdTimetable?.id;
+        if (timetableId) {
+          await fetchCurrentWeek(timetableId);
+        }
+      }
+
+      return createdTimetable;
     } catch (error) {
       console.error("Error creating timetable:", error);
       toast.error("Failed to create timetable");
+      throw error;
     }
   };
 
@@ -215,8 +289,12 @@ const TimetablePage = () => {
 
   const handleTimetableChange = async (id) => {
     try {
+      console.log("Changing to timetable ID:", id);
+
       // Find the timetable in our list
       const selected = timetables.find((t) => t.id === id);
+      console.log("Selected timetable:", selected);
+
       if (selected) {
         // If not active, make it active
         if (!selected.isActive) {
@@ -378,7 +456,10 @@ const TimetablePage = () => {
   }
 
   return (
-    <section className={`py-6 relative ${isDark ? "bg-black" : "bg-white"}`}>
+    <section
+      className={`py-6 relative ${isDark ? "bg-black" : "bg-white"}`}
+      key={refreshKey}
+    >
       {/* Background gradients */}
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
@@ -401,7 +482,13 @@ const TimetablePage = () => {
           <div className="flex justify-between items-center">
             <div className="relative">
               <button
-                onClick={() => setShowTimetableSelector(!showTimetableSelector)}
+                onClick={() => {
+                  console.log(
+                    "Showing timetable selector, current timetables:",
+                    timetables
+                  );
+                  setShowTimetableSelector(!showTimetableSelector);
+                }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border
                   ${
                     isDark
@@ -423,30 +510,36 @@ const TimetablePage = () => {
                   }`}
                 >
                   <div className="max-h-60 overflow-y-auto">
-                    {timetables.map((timetable) => (
-                      <button
-                        key={timetable.id}
-                        onClick={() => handleTimetableChange(timetable.id)}
-                        className={`w-full px-4 py-2 text-left hover:${
-                          isDark ? "bg-gray-800" : "bg-gray-100"
-                        } flex justify-between items-center ${
-                          timetable.isActive
-                            ? isDark
-                              ? "bg-indigo-900/30"
-                              : "bg-indigo-50"
-                            : ""
-                        }`}
-                      >
-                        <span>{timetable.name}</span>
-                        {timetable.isActive && (
-                          <CheckCircle
-                            className={`w-4 h-4 ${
-                              isDark ? "text-indigo-400" : "text-indigo-600"
-                            }`}
-                          />
-                        )}
-                      </button>
-                    ))}
+                    {timetables && timetables.length > 0 ? (
+                      timetables.map((timetable) => (
+                        <button
+                          key={timetable.id}
+                          onClick={() => handleTimetableChange(timetable.id)}
+                          className={`w-full px-4 py-2 text-left hover:${
+                            isDark ? "bg-gray-800" : "bg-gray-100"
+                          } flex justify-between items-center ${
+                            timetable.isActive
+                              ? isDark
+                                ? "bg-indigo-900/30"
+                                : "bg-indigo-50"
+                              : ""
+                          }`}
+                        >
+                          <span>{timetable.name}</span>
+                          {timetable.isActive && (
+                            <CheckCircle
+                              className={`w-4 h-4 ${
+                                isDark ? "text-indigo-400" : "text-indigo-600"
+                              }`}
+                            />
+                          )}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-2 text-center text-gray-500">
+                        No timetables found
+                      </div>
+                    )}
                   </div>
 
                   <div
@@ -744,24 +837,48 @@ const TimetablePage = () => {
             defaultCategories={defaultCategories}
             loading={categoriesLoading}
             onAdd={async (data) => {
-              await addCategory(data);
-              const cats = await getTimetableCategories();
-              setTimetableCategories(cats || []);
+              try {
+                await addCategory(data);
+                // Wait for backend to process
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                // Force a fresh fetch
+                const freshCategories = await getTimetableCategories();
+                console.log("Categories after adding:", freshCategories);
+                setTimetableCategories(freshCategories || []);
+                // Force component to re-render
+                setActiveModal((prev) => null);
+                setTimeout(() => setActiveModal("categoryManagement"), 10);
+              } catch (err) {
+                console.error("Error adding category:", err);
+              }
             }}
             onUpdate={async (id, data) => {
-              await updateCategory(id, data);
-              const cats = await getTimetableCategories();
-              setTimetableCategories(cats || []);
+              try {
+                await updateCategory(id, data);
+                // Wait for backend to process
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                // Force a fresh fetch
+                const freshCategories = await getTimetableCategories();
+                setTimetableCategories(freshCategories || []);
+              } catch (err) {
+                console.error("Error updating category:", err);
+              }
             }}
             onDelete={async (id) => {
-              await deleteCategory(id);
-              const cats = await getTimetableCategories();
-              setTimetableCategories(cats || []);
+              try {
+                await deleteCategory(id);
+                // Wait for backend to process
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                // Force a fresh fetch
+                const freshCategories = await getTimetableCategories();
+                setTimetableCategories(freshCategories || []);
+              } catch (err) {
+                console.error("Error deleting category:", err);
+              }
             }}
             onRefresh={async () => {
               await fetchCategories();
-              const cats = await getTimetableCategories();
-              setTimetableCategories(cats || []);
+              await refreshTimetableCategories();
             }}
             type="timetable"
           />
