@@ -18,7 +18,7 @@ const SkillFilters = ({
   selectedCategory,
   selectedStatus,
   searchQuery,
-  skills, // Add skills prop
+  skills,
   onSelectCategory,
   onSelectStatus,
   onSearchChange,
@@ -83,14 +83,14 @@ const SkillFilters = ({
     visible: {
       opacity: 1,
       transition: {
-        delayChildren: 0.1,
-        staggerChildren: 0.1,
+        delayChildren: 0.05,
+        staggerChildren: 0.05,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0 },
   };
 
@@ -145,24 +145,26 @@ const SkillFilters = ({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-6"
+      className="space-y-3"
     >
       {/* Search Section */}
       <motion.div
         variants={itemVariants}
-        className={`p-6 rounded-lg border ${
+        className={`p-3 rounded-lg border ${
           isDark
             ? "bg-black/80 border-indigo-500/30 hover:border-indigo-500/60"
             : "bg-white border-indigo-300/30 hover:border-indigo-300/60"
         } transition-all duration-300`}
       >
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-1 mb-2">
           <Search
             className={isDark ? "text-indigo-400" : "text-indigo-600"}
-            size={20}
+            size={14}
           />
           <h3
-            className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}
+            className={`text-xs font-medium ${
+              isDark ? "text-white" : "text-gray-900"
+            }`}
           >
             Search Skills
           </h3>
@@ -171,33 +173,33 @@ const SkillFilters = ({
         <div className="relative">
           <input
             type="text"
-            placeholder="Search by skill name, description..."
+            placeholder="Search skills..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className={`w-full pl-10 pr-4 py-2 rounded-lg border ${
+            className={`w-full pl-7 pr-7 py-1.5 text-xs rounded-lg border ${
               isDark
                 ? "bg-gray-900 text-white border-gray-700 focus:border-indigo-500"
                 : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500"
-            } focus:outline-none focus:ring-2 ${
+            } focus:outline-none focus:ring-1 ${
               isDark ? "focus:ring-indigo-500/30" : "focus:ring-indigo-500/30"
             }`}
           />
           <Search
-            size={18}
-            className={`absolute left-3 top-3 ${
+            size={12}
+            className={`absolute left-2.5 top-2 ${
               isDark ? "text-gray-500" : "text-gray-400"
             }`}
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange("")}
-              className={`absolute right-3 top-3 ${
+              className={`absolute right-2 top-1.5 ${
                 isDark
                   ? "text-gray-400 hover:text-white"
                   : "text-gray-500 hover:text-gray-800"
               }`}
             >
-              <X size={18} />
+              <X size={12} />
             </button>
           )}
         </div>
@@ -206,23 +208,23 @@ const SkillFilters = ({
       {/* Categories Section */}
       <motion.div
         variants={itemVariants}
-        className={`p-6 rounded-lg border ${
+        className={`p-3 rounded-lg border ${
           isDark
             ? "bg-black/80 border-indigo-500/30 hover:border-indigo-500/60"
             : "bg-white border-indigo-300/30 hover:border-indigo-300/60"
         } transition-all duration-300`}
       >
         <div
-          className="flex items-center justify-between mb-4 cursor-pointer"
+          className="flex items-center justify-between mb-2 cursor-pointer"
           onClick={() => toggleSection("categories")}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Tag
               className={isDark ? "text-indigo-400" : "text-indigo-600"}
-              size={20}
+              size={14}
             />
             <h3
-              className={`font-medium ${
+              className={`text-xs font-medium ${
                 isDark ? "text-white" : "text-gray-900"
               }`}
             >
@@ -230,16 +232,20 @@ const SkillFilters = ({
             </h3>
           </div>
           {expandedSections.categories ? (
-            <ChevronUp className={isDark ? "text-gray-400" : "text-gray-600"} />
+            <ChevronUp
+              size={14}
+              className={isDark ? "text-gray-400" : "text-gray-600"}
+            />
           ) : (
             <ChevronDown
+              size={14}
               className={isDark ? "text-gray-400" : "text-gray-600"}
             />
           )}
         </div>
 
         {expandedSections.categories && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-2">
             {categories.length > 0 ? (
               categories.map((category, index) => {
                 const categoryName =
@@ -251,10 +257,10 @@ const SkillFilters = ({
                 return (
                   <motion.button
                     key={index}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                     onClick={() => onSelectCategory(categoryName)}
-                    className={`p-3 rounded-lg flex items-center justify-between transition-all duration-300 ${
+                    className={`py-1.5 px-2 rounded-md flex items-center justify-between text-xs transition-all duration-200 ${
                       isSelected
                         ? `${
                             isDark
@@ -275,11 +281,13 @@ const SkillFilters = ({
                           : `${isDark ? "text-gray-300" : "text-gray-700"}`
                       }`}
                     >
-                      {categoryName}
+                      {categoryName.length > 15
+                        ? categoryName.substring(0, 15) + "..."
+                        : categoryName}
                     </span>
                     <div className="flex items-center gap-1">
                       <span
-                        className={`text-xs rounded-full px-2 py-0.5 ${
+                        className={`text-xs rounded-full px-1.5 py-0.5 ${
                           isSelected
                             ? `${
                                 isDark
@@ -301,7 +309,7 @@ const SkillFilters = ({
               })
             ) : (
               <p
-                className={`text-sm ${
+                className={`text-xs ${
                   isDark ? "text-gray-400" : "text-gray-600"
                 }`}
               >
@@ -315,23 +323,23 @@ const SkillFilters = ({
       {/* Status Section */}
       <motion.div
         variants={itemVariants}
-        className={`p-6 rounded-lg border ${
+        className={`p-3 rounded-lg border ${
           isDark
             ? "bg-black/80 border-indigo-500/30 hover:border-indigo-500/60"
             : "bg-white border-indigo-300/30 hover:border-indigo-300/60"
         } transition-all duration-300`}
       >
         <div
-          className="flex items-center justify-between mb-4 cursor-pointer"
+          className="flex items-center justify-between mb-2 cursor-pointer"
           onClick={() => toggleSection("status")}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Filter
               className={isDark ? "text-indigo-400" : "text-indigo-600"}
-              size={20}
+              size={14}
             />
             <h3
-              className={`font-medium ${
+              className={`text-xs font-medium ${
                 isDark ? "text-white" : "text-gray-900"
               }`}
             >
@@ -339,16 +347,20 @@ const SkillFilters = ({
             </h3>
           </div>
           {expandedSections.status ? (
-            <ChevronUp className={isDark ? "text-gray-400" : "text-gray-600"} />
+            <ChevronUp
+              size={14}
+              className={isDark ? "text-gray-400" : "text-gray-600"}
+            />
           ) : (
             <ChevronDown
+              size={14}
               className={isDark ? "text-gray-400" : "text-gray-600"}
             />
           )}
         </div>
 
         {expandedSections.status && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5 mt-2">
             {statuses.map((status) => {
               const StatusIcon = status.icon;
               const isSelected = status.value === selectedStatus;
@@ -378,10 +390,10 @@ const SkillFilters = ({
               return (
                 <motion.button
                   key={status.value}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
                   onClick={() => onSelectStatus(status.value)}
-                  className={`p-3 rounded-lg flex items-center justify-between transition-all duration-300 ${
+                  className={`py-1.5 px-2 rounded-md flex items-center justify-between text-xs transition-all duration-200 ${
                     isSelected
                       ? `${
                           isDark
@@ -395,9 +407,9 @@ const SkillFilters = ({
                         } border`
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <StatusIcon
-                      size={18}
+                      size={12}
                       className={`${
                         isSelected
                           ? status.color
@@ -415,12 +427,14 @@ const SkillFilters = ({
                           : "text-gray-700"
                       }`}
                     >
-                      {status.label}
+                      {status.label.length > 10
+                        ? status.label.substring(0, 10) + "..."
+                        : status.label}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span
-                      className={`text-xs rounded-full px-2 py-0.5 ${
+                      className={`text-xs rounded-full px-1.5 py-0.5 ${
                         isSelected
                           ? `${
                               isDark
