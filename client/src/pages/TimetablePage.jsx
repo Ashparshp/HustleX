@@ -26,6 +26,7 @@ import CreateTimetableModal from "../components/Timetable/CreateTimetableModal";
 import CategoryManagement from "../components/Categories/CategoryManagement";
 import TimetableError from "../components/Timetable/TimetableError";
 import ManageActivitiesModal from "../components/Timetable/ManageActivitiesModal";
+import DeleteTimetableModal from "../components/Timetable/DeleteTimetableModal";
 
 const TimetablePage = () => {
   const { isDark } = useTheme();
@@ -66,6 +67,7 @@ const TimetablePage = () => {
   const [showTimetableSelector, setShowTimetableSelector] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); // Added for forcing re-renders
   const [localCurrentTimetable, setLocalCurrentTimetable] = useState(null); // Local state for immediate UI updates
+  const [timetableToDelete, setTimetableToDelete] = useState(null);
 
   // Log state for debugging
   useEffect(() => {
@@ -307,13 +309,21 @@ const TimetablePage = () => {
   };
 
   const handleDeleteTimetable = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this timetable?")) {
-      return;
+    // Find the timetable to delete
+    const timetableToDelete = timetables.find((t) => t.id === id);
+    if (timetableToDelete) {
+      setTimetableToDelete(timetableToDelete);
+      setActiveModal("deleteTimetable");
     }
+  };
 
+  const confirmDeleteTimetable = async () => {
     try {
-      await deleteTimetable(id);
+      if (!timetableToDelete) return;
+
+      await deleteTimetable(timetableToDelete.id);
       await fetchTimetables();
+      closeAllModals();
       toast.success("Timetable deleted successfully");
     } catch (error) {
       console.error("Error deleting timetable:", error);
@@ -914,6 +924,17 @@ const TimetablePage = () => {
           />
         </ModalWrapper>
       </div>
+      <ModalWrapper
+        isOpen={activeModal === "deleteTimetable"}
+        onClose={closeAllModals}
+      >
+        <DeleteTimetableModal
+          isOpen={activeModal === "deleteTimetable"}
+          onClose={closeAllModals}
+          onConfirm={confirmDeleteTimetable}
+          timetableName={timetableToDelete?.name || ""}
+        />
+      </ModalWrapper>
     </section>
   );
 };
