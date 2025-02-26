@@ -13,32 +13,38 @@ const handleError = (res, error, message = "Server error") => {
 // @access  Private
 const getContests = async (req, res) => {
   try {
-    const { platform, participated, startDate, endDate, sort = 'date' } = req.query;
+    const {
+      platform,
+      participated,
+      startDate,
+      endDate,
+      sort = "date",
+    } = req.query;
     let query = { user: req.user.id };
-    
+
     // Apply filters if provided
     if (platform) {
       query.platform = platform;
     }
-    
+
     if (participated !== undefined) {
-      query.participated = participated === 'true';
+      query.participated = participated === "true";
     }
-    
+
     // Date range filter
     if (startDate && endDate) {
       query.date = {
         $gte: new Date(startDate),
-        $lte: new Date(endDate)
+        $lte: new Date(endDate),
       };
     }
-    
+
     // Determine sort direction
     let sortDirection = -1; // Default to descending (newest first)
-    let sortField = 'date';
-    
+    let sortField = "date";
+
     if (sort) {
-      if (sort.startsWith('-')) {
+      if (sort.startsWith("-")) {
         sortField = sort.substring(1);
         sortDirection = -1;
       } else {
@@ -46,39 +52,39 @@ const getContests = async (req, res) => {
         sortDirection = 1;
       }
     }
-    
+
     const sortOptions = { [sortField]: sortDirection };
-    
+
     const contests = await Contest.find(query).sort(sortOptions);
-    
+
     // Calculate stats
     const stats = {
       total: contests.length,
-      participated: contests.filter(c => c.participated).length,
-      platforms: {}
+      participated: contests.filter((c) => c.participated).length,
+      platforms: {},
     };
-    
+
     // Group by platform
-    contests.forEach(contest => {
+    contests.forEach((contest) => {
       if (!stats.platforms[contest.platform]) {
         stats.platforms[contest.platform] = {
           total: 0,
-          participated: 0
+          participated: 0,
         };
       }
-      
+
       stats.platforms[contest.platform].total++;
-      
+
       if (contest.participated) {
         stats.platforms[contest.platform].participated++;
       }
     });
-    
+
     res.json({
       success: true,
       count: contests.length,
       stats,
-      data: contests
+      data: contests,
     });
   } catch (error) {
     handleError(res, error, "Error retrieving contests");
@@ -90,15 +96,25 @@ const getContests = async (req, res) => {
 // @access  Private
 const addContest = async (req, res) => {
   try {
-    const { platform, name, date, participated, rank, solved, totalProblems, duration, notes } = req.body;
-    
+    const {
+      platform,
+      name,
+      date,
+      participated,
+      rank,
+      solved,
+      totalProblems,
+      duration,
+      notes,
+    } = req.body;
+
     if (!platform || !name || !date) {
       return res.status(400).json({
         success: false,
-        message: "Platform, name, and date are required"
+        message: "Platform, name, and date are required",
       });
     }
-    
+
     const contest = new Contest({
       user: req.user.id,
       platform,
@@ -109,14 +125,14 @@ const addContest = async (req, res) => {
       solved: participated && solved ? parseInt(solved) : null,
       totalProblems: totalProblems ? parseInt(totalProblems) : null,
       duration: duration ? parseInt(duration) : null,
-      notes
+      notes,
     });
-    
+
     const savedContest = await contest.save();
-    
+
     res.status(201).json({
       success: true,
-      data: savedContest
+      data: savedContest,
     });
   } catch (error) {
     handleError(res, error, "Error adding contest");
@@ -129,61 +145,71 @@ const addContest = async (req, res) => {
 const updateContest = async (req, res) => {
   try {
     const { id } = req.params;
-    const { platform, name, date, participated, rank, solved, totalProblems, duration, notes } = req.body;
-    
+    const {
+      platform,
+      name,
+      date,
+      participated,
+      rank,
+      solved,
+      totalProblems,
+      duration,
+      notes,
+    } = req.body;
+
     // Find contest and verify ownership
     const contest = await Contest.findOne({
       _id: id,
-      user: req.user.id
+      user: req.user.id,
     });
-    
+
     if (!contest) {
       return res.status(404).json({
         success: false,
-        message: "Contest not found or not authorized"
+        message: "Contest not found or not authorized",
       });
     }
-    
+
     // Update fields
     if (platform) contest.platform = platform;
     if (name) contest.name = name.trim();
     if (date) contest.date = date;
-    
+
     if (participated !== undefined) {
       contest.participated = participated;
-      
+
       // Reset rank and solved if not participated
       if (!participated) {
         contest.rank = null;
         contest.solved = null;
       }
     }
-    
+
     if (participated && rank !== undefined) {
       contest.rank = rank ? parseInt(rank) : null;
     }
-    
+
     if (participated && solved !== undefined) {
       contest.solved = solved ? parseInt(solved) : null;
     }
-    
+
     if (totalProblems !== undefined) {
       contest.totalProblems = totalProblems ? parseInt(totalProblems) : null;
     }
-    
+
     if (duration !== undefined) {
       contest.duration = duration ? parseInt(duration) : null;
     }
-    
+
     if (notes !== undefined) {
       contest.notes = notes;
     }
-    
+
     await contest.save();
-    
+
     res.json({
       success: true,
-      data: contest
+      data: contest,
     });
   } catch (error) {
     handleError(res, error, "Error updating contest");
@@ -196,25 +222,25 @@ const updateContest = async (req, res) => {
 const deleteContest = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Find contest and verify ownership
     const contest = await Contest.findOne({
       _id: id,
-      user: req.user.id
+      user: req.user.id,
     });
-    
+
     if (!contest) {
       return res.status(404).json({
         success: false,
-        message: "Contest not found or not authorized"
+        message: "Contest not found or not authorized",
       });
     }
-    
-    await contest.remove();
-    
+
+    await contest.deleteOne();
+
     res.json({
       success: true,
-      message: "Contest deleted successfully"
+      message: "Contest deleted successfully",
     });
   } catch (error) {
     handleError(res, error, "Error deleting contest");
@@ -227,23 +253,24 @@ const deleteContest = async (req, res) => {
 const getPlatforms = async (req, res) => {
   try {
     // Get all unique platforms used in contests by this user
-    const usedPlatforms = await Contest.distinct('platform', { user: req.user.id });
-    
-    // Get all categories (platforms) created by the user
-    const userPlatforms = await Category.find({ 
+    const usedPlatforms = await Contest.distinct("platform", {
       user: req.user.id,
-      type: 'goals'
     });
-    
+
+    // Get all categories (platforms) created by the user
+    const userPlatforms = await Category.find({
+      user: req.user.id,
+      type: "goals",
+    });
+
     // Combine and deduplicate
-    const allPlatforms = [...new Set([
-      ...usedPlatforms,
-      ...userPlatforms.map(p => p.name)
-    ])];
-    
+    const allPlatforms = [
+      ...new Set([...usedPlatforms, ...userPlatforms.map((p) => p.name)]),
+    ];
+
     res.json({
       success: true,
-      platforms: allPlatforms
+      platforms: allPlatforms,
     });
   } catch (error) {
     handleError(res, error, "Error getting platforms");
@@ -257,17 +284,17 @@ const getContestStats = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
     let query = { user: req.user.id };
-    
+
     // Apply date range filter if provided
     if (startDate && endDate) {
       query.date = {
         $gte: new Date(startDate),
-        $lte: new Date(endDate)
+        $lte: new Date(endDate),
       };
     }
-    
+
     const contests = await Contest.find(query);
-    
+
     if (contests.length === 0) {
       return res.json({
         success: true,
@@ -279,14 +306,14 @@ const getContestStats = async (req, res) => {
           best_rank: null,
           average_rank: null,
           average_solve_rate: null,
-          recent_trend: []
-        }
+          recent_trend: [],
+        },
       });
     }
-    
+
     // Basic stats
-    const participated = contests.filter(c => c.participated);
-    
+    const participated = contests.filter((c) => c.participated);
+
     // Calculate platform breakdown
     const platforms = contests.reduce((acc, contest) => {
       if (!acc[contest.platform]) {
@@ -294,73 +321,87 @@ const getContestStats = async (req, res) => {
           total: 0,
           participated: 0,
           avg_rank: null,
-          best_rank: null
+          best_rank: null,
         };
       }
-      
+
       acc[contest.platform].total++;
-      
+
       if (contest.participated) {
         acc[contest.platform].participated++;
-        
+
         // Collect ranks for averaging
         if (contest.rank) {
           if (!acc[contest.platform].ranks) {
             acc[contest.platform].ranks = [];
           }
           acc[contest.platform].ranks.push(contest.rank);
-          
+
           // Track best rank
-          if (!acc[contest.platform].best_rank || contest.rank < acc[contest.platform].best_rank) {
+          if (
+            !acc[contest.platform].best_rank ||
+            contest.rank < acc[contest.platform].best_rank
+          ) {
             acc[contest.platform].best_rank = contest.rank;
           }
         }
       }
-      
+
       return acc;
     }, {});
-    
+
     // Calculate average ranks for each platform
-    Object.keys(platforms).forEach(platform => {
+    Object.keys(platforms).forEach((platform) => {
       if (platforms[platform].ranks && platforms[platform].ranks.length > 0) {
         platforms[platform].avg_rank = Math.round(
-          platforms[platform].ranks.reduce((sum, rank) => sum + rank, 0) / 
-          platforms[platform].ranks.length
+          platforms[platform].ranks.reduce((sum, rank) => sum + rank, 0) /
+            platforms[platform].ranks.length
         );
         delete platforms[platform].ranks; // Remove temporary ranks array
       }
     });
-    
+
     // Find best rank overall
-    const rankedContests = participated.filter(c => c.rank);
-    const bestRank = rankedContests.length > 0 
-      ? Math.min(...rankedContests.map(c => c.rank))
-      : null;
-    
+    const rankedContests = participated.filter((c) => c.rank);
+    const bestRank =
+      rankedContests.length > 0
+        ? Math.min(...rankedContests.map((c) => c.rank))
+        : null;
+
     // Calculate average rank overall
-    const averageRank = rankedContests.length > 0
-      ? Math.round(rankedContests.reduce((sum, c) => sum + c.rank, 0) / rankedContests.length)
-      : null;
-    
+    const averageRank =
+      rankedContests.length > 0
+        ? Math.round(
+            rankedContests.reduce((sum, c) => sum + c.rank, 0) /
+              rankedContests.length
+          )
+        : null;
+
     // Calculate average solve rate
-    const contestsWithSolveRate = participated.filter(c => c.solved !== null && c.totalProblems !== null);
-    const averageSolveRate = contestsWithSolveRate.length > 0
-      ? contestsWithSolveRate.reduce((sum, c) => sum + (c.solved / c.totalProblems), 0) / contestsWithSolveRate.length
-      : null;
-    
+    const contestsWithSolveRate = participated.filter(
+      (c) => c.solved !== null && c.totalProblems !== null
+    );
+    const averageSolveRate =
+      contestsWithSolveRate.length > 0
+        ? contestsWithSolveRate.reduce(
+            (sum, c) => sum + c.solved / c.totalProblems,
+            0
+          ) / contestsWithSolveRate.length
+        : null;
+
     // Calculate recent trend (last 10 contests)
     const recentContests = [...participated]
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, 10)
-      .map(c => ({
+      .map((c) => ({
         name: c.name,
         platform: c.platform,
         date: c.date,
         rank: c.rank,
         solved: c.solved,
-        totalProblems: c.totalProblems
+        totalProblems: c.totalProblems,
       }));
-    
+
     const stats = {
       total: contests.length,
       participated: participated.length,
@@ -369,12 +410,12 @@ const getContestStats = async (req, res) => {
       best_rank: bestRank,
       average_rank: averageRank,
       average_solve_rate: averageSolveRate,
-      recent_trend: recentContests
+      recent_trend: recentContests,
     };
-    
+
     res.json({
       success: true,
-      stats
+      stats,
     });
   } catch (error) {
     handleError(res, error, "Error getting contest statistics");
@@ -387,5 +428,5 @@ module.exports = {
   updateContest,
   deleteContest,
   getPlatforms,
-  getContestStats
+  getContestStats,
 };

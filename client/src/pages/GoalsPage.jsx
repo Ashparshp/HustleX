@@ -81,12 +81,10 @@ const GoalsPage = () => {
 
   // Handle delete button click
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this goal?")) {
-      try {
-        await deleteGoal(id);
-      } catch (error) {
-        console.error("Delete error:", error);
-      }
+    try {
+      await deleteGoal(id);
+    } catch (error) {
+      console.error("Delete error:", error);
     }
   };
 

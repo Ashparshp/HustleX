@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useTheme } from "../../context/ThemeContext";
 import { motion } from "framer-motion";
 import {
   Edit2,
@@ -8,23 +7,16 @@ import {
   Check,
   X,
   Award,
-  BarChart2,
   Clock,
   MessageSquare,
+  Medal,
 } from "lucide-react";
+import { useTheme } from "../../context/ThemeContext";
 
 const GoalList = ({ goals, onEdit, onDelete, platforms }) => {
   const { isDark } = useTheme();
   const [expandedGoal, setExpandedGoal] = useState(null);
-
-  // Toggle expanded view for a goal
-  const toggleExpand = (id) => {
-    if (expandedGoal === id) {
-      setExpandedGoal(null);
-    } else {
-      setExpandedGoal(id);
-    }
-  };
+  const [deletingGoal, setDeletingGoal] = useState(null);
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -53,23 +45,40 @@ const GoalList = ({ goals, onEdit, onDelete, platforms }) => {
     return `${hours} hr ${remainingMinutes} min`;
   };
 
-  // Get platform color class
-  const getPlatformColorClass = (platformName) => {
-    const colorMap = {
-      // Color assignments based on common platforms
-      LeetCode: "bg-yellow-500",
-      CodeForces: "bg-red-500",
-      HackerRank: "bg-green-500",
-      CodeChef: "bg-blue-500",
-      "Advent of Code": "bg-purple-500",
-      GitHub: "bg-gray-500",
-      Kaggle: "bg-blue-400",
-      HackerEarth: "bg-indigo-500",
-      "Google CodeJam": "bg-red-400",
-      Other: "bg-gray-400",
-    };
+  // Get platform color variants
+  const getPlatformVariants = {
+    leetcode: {
+      color: isDark ? "text-yellow-400" : "text-yellow-600",
+      bg: isDark ? "bg-yellow-500/10" : "bg-yellow-100",
+    },
+    codechef: {
+      color: isDark ? "text-green-400" : "text-green-600",
+      bg: isDark ? "bg-green-500/10" : "bg-green-100",
+    },
+    codeforces: {
+      color: isDark ? "text-red-400" : "text-red-600",
+      bg: isDark ? "bg-red-500/10" : "bg-red-100",
+    },
+    hackerrank: {
+      color: isDark ? "text-blue-400" : "text-blue-600",
+      bg: isDark ? "bg-blue-500/10" : "bg-blue-100",
+    },
+    default: {
+      color: isDark ? "text-indigo-400" : "text-indigo-600",
+      bg: isDark ? "bg-indigo-500/10" : "bg-indigo-100",
+    },
+  };
 
-    return colorMap[platformName] || "bg-gray-400";
+  // Get platform details
+  const getPlatformDetails = (platformName) => {
+    const normalizedPlatform = (
+      typeof platformName === "string" ? platformName : platformName.name
+    )
+      .toLowerCase()
+      .replace(/\s+/g, "");
+    return (
+      getPlatformVariants[normalizedPlatform] || getPlatformVariants.default
+    );
   };
 
   // Generate progress indicators
@@ -110,6 +119,16 @@ const GoalList = ({ goals, onEdit, onDelete, platforms }) => {
     return null;
   };
 
+  // Handle delete confirmation
+  const handleConfirmDelete = async (goalId) => {
+    try {
+      await onDelete(goalId);
+      setDeletingGoal(null);
+    } catch (error) {
+      console.error("Deletion error:", error);
+    }
+  };
+
   // If no goals, show empty state
   if (goals.length === 0) {
     return (
@@ -128,20 +147,15 @@ const GoalList = ({ goals, onEdit, onDelete, platforms }) => {
 
         <div className="flex justify-center space-x-4">
           {platforms.slice(0, 4).map((platform, index) => {
-            // Handle both string platforms and object platforms
             const platformName =
               typeof platform === "string" ? platform : platform.name;
+            const platformDetails = getPlatformDetails(platformName);
             return (
               <div
                 key={index}
-                className={`w-12 h-12 flex items-center justify-center rounded-full ${getPlatformColorClass(
-                  platformName
-                )} text-white text-lg font-bold`}
-                style={
-                  platform.color ? { backgroundColor: platform.color } : {}
-                }
+                className={`w-12 h-12 flex items-center justify-center rounded-full ${platformDetails.bg} ${platformDetails.color} text-lg font-bold`}
               >
-                {platformName.substring(0, 2)}
+                {platformName.substring(0, 2).toUpperCase()}
               </div>
             );
           })}
@@ -152,175 +166,201 @@ const GoalList = ({ goals, onEdit, onDelete, platforms }) => {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {goals.map((goal) => (
-        <motion.div
-          key={goal._id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          className={`rounded-lg shadow-md overflow-hidden ${
-            isDark ? "bg-gray-800" : "bg-white"
-          }`}
-        >
-          {/* Header */}
-          <div
-            className={`p-4 flex justify-between items-center border-b ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            }`}
+      {goals.map((goal) => {
+        const platformDetails = getPlatformDetails(goal.platform);
+        const isDeleting = deletingGoal === goal._id;
+
+        return (
+          <motion.div
+            key={goal._id}
+            whileHover={{ y: -2, scale: 1.02 }}
+            className="relative group"
           >
-            <div className="flex items-center">
-              <div
-                className={`w-10 h-10 flex items-center justify-center rounded-md text-white text-sm font-medium ${getPlatformColorClass(
-                  goal.platform
-                )}`}
-              >
-                {(typeof goal.platform === "string"
-                  ? goal.platform
-                  : goal.platform.name
-                )
-                  .substring(0, 2)
-                  .toUpperCase()}
-              </div>
-              <div className="ml-3">
-                <h3
-                  className={`font-medium ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {goal.platform}
-                </h3>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
-                  {goal.participated ? "Participated" : "Not participated"}
-                </p>
-              </div>
-            </div>
+            <div
+              className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-lg blur opacity-30 
+                         group-hover:opacity-50 transition duration-300"
+            />
 
-            <div className="flex space-x-1">
-              <button
-                onClick={() => onEdit(goal)}
-                className={`p-1 rounded-md ${
+            <div
+              className={`relative p-6 rounded-lg border backdrop-blur-sm transition-all duration-300
+                ${
                   isDark
-                    ? "text-gray-400 hover:text-white hover:bg-gray-700"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                    ? "bg-black border-indigo-500/30 group-hover:border-indigo-400"
+                    : "bg-white border-indigo-300/50 group-hover:border-indigo-500"
                 }`}
-                aria-label="Edit"
-              >
-                <Edit2 size={16} />
-              </button>
-              <button
-                onClick={() => onDelete(goal._id)}
-                className={`p-1 rounded-md ${
-                  isDark
-                    ? "text-gray-400 hover:text-red-400 hover:bg-gray-700"
-                    : "text-gray-500 hover:text-red-500 hover:bg-gray-100"
-                }`}
-                aria-label="Delete"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="p-4">
-            <h2
-              className={`text-lg font-semibold mb-2 ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
             >
-              {goal.name}
-            </h2>
-
-            <div className="space-y-2">
-              {/* Date */}
-              <div
-                className={`flex items-center text-sm ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
-                <Calendar size={16} className="mr-2" />
-                {formatDate(goal.date)}
-              </div>
-
-              {/* Participation */}
-              <div
-                className={`flex items-center text-sm ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
-                {goal.participated ? (
-                  <Check size={16} className="mr-2 text-green-500" />
-                ) : (
-                  <X size={16} className="mr-2 text-red-500" />
-                )}
-                {goal.participated ? "Participated" : "Did not participate"}
-              </div>
-
-              {/* Duration if specified */}
-              {goal.duration && (
-                <div
-                  className={`flex items-center text-sm ${
-                    isDark ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
-                  <Clock size={16} className="mr-2" />
-                  {formatDuration(goal.duration)}
+              {isDeleting ? (
+                <div className="text-center space-y-4">
+                  <p className={isDark ? "text-gray-300" : "text-gray-700"}>
+                    Confirm goal deletion?
+                  </p>
+                  <div className="flex justify-center gap-3">
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleConfirmDelete(goal._id)}
+                      className={`px-4 py-2 rounded-lg ${
+                        isDark
+                          ? "bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                          : "bg-red-100 text-red-600 hover:bg-red-200"
+                      }`}
+                    >
+                      Delete
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setDeletingGoal(null)}
+                      className={`px-4 py-2 rounded-lg ${
+                        isDark
+                          ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      Cancel
+                    </motion.button>
+                  </div>
                 </div>
-              )}
+              ) : (
+                <>
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="space-y-2 flex-grow">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-grow">
+                          <div className="flex justify-between items-center">
+                            <span
+                              className={`font-medium ${platformDetails.color}`}
+                            >
+                              {goal.platform}
+                            </span>
+                            <span
+                              className={`px-2 py-1 text-xs rounded-full ${platformDetails.bg} ${platformDetails.color}`}
+                            >
+                              {goal.name}
+                            </span>
+                          </div>
+                          <div
+                            className={`text-sm mt-1 flex items-center gap-2 ${
+                              isDark ? "text-gray-400" : "text-gray-600"
+                            }`}
+                          >
+                            <Calendar className="w-4 h-4" />
+                            {formatDate(goal.date)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-              {/* Progress indicator */}
-              {getProgressIndicator(goal)}
+                    <div className="flex gap-2">
+                      <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => onEdit(goal)}
+                        className={`p-2 rounded-lg transition-colors ${
+                          isDark
+                            ? "hover:bg-indigo-500/10 text-indigo-400"
+                            : "hover:bg-indigo-50 text-indigo-600"
+                        }`}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </motion.button>
+                      <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setDeletingGoal(goal._id)}
+                        className={`p-2 rounded-lg transition-colors ${
+                          isDark
+                            ? "hover:bg-red-500/10 text-red-400"
+                            : "hover:bg-red-50 text-red-600"
+                        }`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </motion.button>
+                    </div>
+                  </div>
 
-              {/* Rank if participated */}
-              {goal.participated && goal.rank && (
-                <div
-                  className={`flex items-center text-sm ${
-                    isDark ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
-                  <Award size={16} className="mr-2" />
-                  Rank: {goal.rank}
-                </div>
-              )}
+                  <div className="mt-2 space-y-2">
+                    <div
+                      className={`flex items-center text-sm ${
+                        isDark ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      {goal.participated ? (
+                        <Check size={16} className="mr-2 text-green-500" />
+                      ) : (
+                        <X size={16} className="mr-2 text-red-500" />
+                      )}
+                      {goal.participated
+                        ? "Participated"
+                        : "Did not participate"}
+                    </div>
 
-              {/* Notes indicator - only shows if there are notes */}
-              {goal.notes && (
-                <div
-                  className={`flex items-center text-sm cursor-pointer ${
-                    isDark ? "text-gray-300" : "text-gray-600"
-                  }`}
-                  onClick={() => toggleExpand(goal._id)}
-                >
-                  <MessageSquare size={16} className="mr-2" />
-                  <span className="underline">
-                    {expandedGoal === goal._id ? "Hide notes" : "View notes"}
-                  </span>
-                </div>
+                    {goal.duration && (
+                      <div
+                        className={`flex items-center text-sm ${
+                          isDark ? "text-gray-300" : "text-gray-700"
+                        }`}
+                      >
+                        <Clock size={16} className="mr-2" />
+                        {formatDuration(goal.duration)}
+                      </div>
+                    )}
+
+                    {/* Progress indicator */}
+                    {getProgressIndicator(goal)}
+
+                    {goal.participated && goal.rank && (
+                      <div
+                        className={`flex items-center text-sm ${
+                          isDark ? "text-gray-300" : "text-gray-700"
+                        }`}
+                      >
+                        <Medal
+                          size={16}
+                          className={`mr-2 ${platformDetails.color}`}
+                        />
+                        Rank: {goal.rank}
+                      </div>
+                    )}
+
+                    {goal.notes && (
+                      <div
+                        className={`flex items-center text-sm cursor-pointer ${
+                          isDark ? "text-gray-300" : "text-gray-700"
+                        }`}
+                        onClick={() =>
+                          setExpandedGoal(
+                            expandedGoal === goal._id ? null : goal._id
+                          )
+                        }
+                      >
+                        <MessageSquare size={16} className="mr-2" />
+                        <span className="underline">
+                          {expandedGoal === goal._id
+                            ? "Hide notes"
+                            : "View notes"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Expanded notes */}
+                  {expandedGoal === goal._id && goal.notes && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className={`mt-4 pt-4 border-t border-dashed text-sm ${
+                        isDark
+                          ? "border-gray-700 text-gray-300"
+                          : "border-gray-200 text-gray-700"
+                      }`}
+                    >
+                      <div className="whitespace-pre-line">{goal.notes}</div>
+                    </motion.div>
+                  )}
+                </>
               )}
             </div>
-
-            {/* Expanded notes */}
-            {expandedGoal === goal._id && goal.notes && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className={`mt-3 p-3 rounded-md text-sm ${
-                  isDark
-                    ? "bg-gray-700 text-gray-300"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                <div className="whitespace-pre-line">{goal.notes}</div>
-              </motion.div>
-            )}
-          </div>
-        </motion.div>
-      ))}
+          </motion.div>
+        );
+      })}
     </div>
   );
 };
