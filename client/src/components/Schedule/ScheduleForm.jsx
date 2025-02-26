@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Calendar, Clock, FileText, Target, Tag } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
-import { Calendar, Clock, FileText, Plus } from "lucide-react";
 
 const ScheduleForm = ({
   initialData,
@@ -12,15 +13,17 @@ const ScheduleForm = ({
   initialDate,
 }) => {
   const { isDark } = useTheme();
-  const [formData, setFormData] = useState({
-    date: initialDate
-      ? new Date(initialDate).toISOString().split("T")[0]
-      : new Date().toISOString().split("T")[0],
-    dayType: "Weekday", // Default to Weekday
-    status: "Planned", // Default to Planned
-    items: [], // Will be populated from template or empty
-    templateName: "",
-  });
+  const [formData, setFormData] = useState(
+    initialData || {
+      date: initialDate
+        ? new Date(initialDate).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
+      dayType: "Weekday", // Default to Weekday
+      status: "Planned", // Default to Planned
+      items: [], // Will be populated from template or empty
+      templateName: "",
+    }
+  );
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [useTemplate, setUseTemplate] = useState(false);
   const [errors, setErrors] = useState({});
@@ -130,109 +133,119 @@ const ScheduleForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="space-y-4">
-        {/* Date */}
-        <div>
-          <label
-            htmlFor="date"
-            className={`block text-sm font-medium ${
-              isDark ? "text-gray-200" : "text-gray-700"
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Date Input */}
+      <div>
+        <label
+          htmlFor="date"
+          className={`block text-sm font-medium mb-2 ${
+            isDark ? "text-gray-300" : "text-gray-700"
+          }`}
+        >
+          Date*
+        </label>
+        <div className="relative">
+          <Calendar
+            className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDark ? "text-indigo-400" : "text-indigo-600"
             }`}
-          >
-            Date*
-          </label>
-          <div className="relative mt-1">
-            <div
-              className={`absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none ${
-                isDark ? "text-gray-400" : "text-gray-500"
-              }`}
-            >
-              <Calendar size={16} />
-            </div>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
-              className={`block w-full rounded-md shadow-sm py-2 pl-10 pr-3 ${
+          />
+          <input
+            type="date"
+            id="date"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+            className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
+              ${
                 isDark
-                  ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                  : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
               } ${errors.date ? "border-red-500" : ""}`}
-            />
-            {errors.date && (
-              <p className="mt-1 text-sm text-red-500">{errors.date}</p>
-            )}
-          </div>
-          <p
-            className={`mt-1 text-sm ${
-              isDark ? "text-gray-400" : "text-gray-500"
-            }`}
-          >
-            Day Type: {formData.dayType}
-          </p>
+            required
+          />
+          {errors.date && (
+            <p className="mt-1 text-sm text-red-500">{errors.date}</p>
+          )}
         </div>
+        <p
+          className={`mt-1 text-sm ${
+            isDark ? "text-gray-400" : "text-gray-500"
+          }`}
+        >
+          Day Type: {formData.dayType}
+        </p>
+      </div>
 
-        {/* Use template option - only for new schedules */}
-        {!initialData && (
-          <div
-            className={`p-4 rounded-lg ${
-              isDark ? "bg-gray-700" : "bg-gray-100"
-            }`}
-          >
-            <div className="flex items-start">
-              <input
-                type="checkbox"
-                id="useTemplate"
-                checked={useTemplate}
-                onChange={() => setUseTemplate(!useTemplate)}
-                className={`mt-1 h-4 w-4 ${
-                  isDark
-                    ? "bg-gray-700 text-indigo-600 border-gray-600 focus:ring-indigo-500"
-                    : "bg-white text-indigo-600 border-gray-300 focus:ring-indigo-500"
+      {/* Use template option - only for new schedules */}
+      {!initialData && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          className={`p-4 rounded-lg border border-dashed transition-all duration-300 ${
+            isDark
+              ? "bg-indigo-500/10 border-indigo-500/30"
+              : "bg-indigo-100/50 border-indigo-300/50"
+          }`}
+        >
+          <div className="flex items-start">
+            <input
+              type="checkbox"
+              id="useTemplate"
+              checked={useTemplate}
+              onChange={() => setUseTemplate(!useTemplate)}
+              className={`mt-1 h-4 w-4 rounded ${
+                isDark
+                  ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/30"
+                  : "bg-indigo-100/50 text-indigo-600 border-indigo-300/50"
+              }`}
+            />
+            <div className="ml-3">
+              <label
+                htmlFor="useTemplate"
+                className={`font-medium ${
+                  isDark ? "text-gray-200" : "text-gray-700"
                 }`}
-              />
-              <div className="ml-3">
-                <label
-                  htmlFor="useTemplate"
-                  className={`font-medium ${
-                    isDark ? "text-gray-200" : "text-gray-700"
-                  }`}
-                >
-                  Use a schedule template
-                </label>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
-                  Create this schedule based on a saved template
-                </p>
-              </div>
+              >
+                Use a schedule template
+              </label>
+              <p
+                className={`text-sm ${
+                  isDark ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                Create this schedule based on a saved template
+              </p>
             </div>
+          </div>
 
-            {useTemplate && (
-              <div className="mt-3">
-                <label
-                  htmlFor="templateId"
-                  className={`block text-sm font-medium ${
-                    isDark ? "text-gray-200" : "text-gray-700"
+          {useTemplate && (
+            <div className="mt-3">
+              <label
+                htmlFor="templateId"
+                className={`block text-sm font-medium mb-2 ${
+                  isDark ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Select Template
+              </label>
+              <div className="relative">
+                <Target
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                    isDark ? "text-indigo-400" : "text-indigo-600"
                   }`}
-                >
-                  Select Template
-                </label>
+                />
                 <select
                   id="templateId"
                   value={selectedTemplate}
                   onChange={handleTemplateChange}
-                  className={`mt-1 block w-full rounded-md shadow-sm py-2 px-3 ${
-                    isDark
-                      ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                      : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                  }`}
+                  className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border appearance-none transition-all duration-300
+                    ${
+                      isDark
+                        ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                        : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                    }`}
                 >
                   <option value="">Select a template</option>
                   {templates.map((template) => (
@@ -252,111 +265,138 @@ const ScheduleForm = ({
                   ))}
                 </select>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </motion.div>
+      )}
 
-        {/* Status - only for existing schedules */}
-        {initialData && (
-          <div>
-            <label
-              htmlFor="status"
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-200" : "text-gray-700"
+      {/* Status - only for existing schedules */}
+      {initialData && (
+        <div>
+          <label
+            htmlFor="status"
+            className={`block text-sm font-medium mb-2 ${
+              isDark ? "text-gray-300" : "text-gray-700"
+            }`}
+          >
+            Status
+          </label>
+          <div className="relative">
+            <Tag
+              className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                isDark ? "text-indigo-400" : "text-indigo-600"
               }`}
-            >
-              Status
-            </label>
+            />
             <select
               id="status"
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md shadow-sm py-2 px-3 ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                  : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-              }`}
+              className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border appearance-none transition-all duration-300
+                ${
+                  isDark
+                    ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                    : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                }`}
             >
               <option value="Planned">Planned</option>
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
             </select>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Additional notes for template-based schedules */}
-        {formData.templateName && (
-          <div
-            className={`p-3 rounded-lg ${
-              isDark
-                ? "bg-blue-900/20 text-blue-300"
-                : "bg-blue-50 text-blue-800"
-            }`}
-          >
-            <div className="flex items-start">
-              <FileText size={18} className="mr-2 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium">
-                  Using template: {formData.templateName}
-                </p>
-                <p
-                  className={`mt-1 text-sm ${
-                    isDark ? "text-blue-300/80" : "text-blue-700"
-                  }`}
-                >
-                  This schedule will be created with all items from the
-                  template. You can modify items after creation.
-                </p>
-              </div>
+      {/* Additional notes for template-based schedules */}
+      {formData.templateName && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`p-3 rounded-lg border border-dashed ${
+            isDark
+              ? "bg-blue-500/10 border-blue-500/30 text-blue-300"
+              : "bg-blue-50 border-blue-300/50 text-blue-800"
+          }`}
+        >
+          <div className="flex items-start">
+            <FileText
+              size={18}
+              className={`mr-2 mt-0.5 flex-shrink-0 ${
+                isDark ? "text-blue-400" : "text-blue-600"
+              }`}
+            />
+            <div>
+              <p className="font-medium">
+                Using template: {formData.templateName}
+              </p>
+              <p
+                className={`mt-1 text-sm ${
+                  isDark ? "text-blue-300/80" : "text-blue-700"
+                }`}
+              >
+                This schedule will be created with all items from the template.
+                You can modify items after creation.
+              </p>
             </div>
           </div>
-        )}
+        </motion.div>
+      )}
 
-        {/* Items preview for existing schedules */}
-        {initialData && initialData.items && initialData.items.length > 0 && (
-          <div
-            className={`p-4 rounded-lg ${
-              isDark ? "bg-gray-700" : "bg-gray-100"
+      {/* Items preview for existing schedules */}
+      {initialData && initialData.items && initialData.items.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`p-4 rounded-lg border border-dashed ${
+            isDark
+              ? "bg-indigo-500/10 border-indigo-500/30"
+              : "bg-indigo-100/50 border-indigo-300/50"
+          }`}
+        >
+          <h3
+            className={`font-medium mb-2 ${
+              isDark ? "text-white" : "text-gray-900"
             }`}
           >
-            <h3
-              className={`font-medium mb-2 ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
-              Schedule Items ({initialData.items.length})
-            </h3>
-            <p
-              className={`text-sm ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              You can edit items after saving this schedule.
-            </p>
-          </div>
-        )}
+            Schedule Items ({initialData.items.length})
+          </h3>
+          <p
+            className={`text-sm ${isDark ? "text-gray-300" : "text-gray-700"}`}
+          >
+            You can edit items after saving this schedule.
+          </p>
+        </motion.div>
+      )}
 
-        {/* Form actions */}
-        <div className="flex justify-end space-x-3 pt-4">
-          <button
-            type="button"
-            onClick={onCancel}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
+      {/* Form actions */}
+      <div className="flex justify-end space-x-3 pt-4">
+        <motion.button
+          type="button"
+          onClick={onCancel}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className={`px-6 py-2.5 rounded-lg border transition-all duration-300
+            ${
               isDark
-                ? "bg-gray-600 text-gray-200 hover:bg-gray-500"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                ? "bg-transparent border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10"
+                : "bg-transparent border-indigo-300/50 text-indigo-600 hover:bg-indigo-50"
             }`}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700"
-          >
-            {initialData ? "Update Schedule" : "Create Schedule"}
-          </button>
-        </div>
+        >
+          Cancel
+        </motion.button>
+        <motion.button
+          type="submit"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className={`px-6 py-2.5 rounded-lg transition-all duration-300
+            ${
+              isDark
+                ? "bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                : "bg-indigo-100/50 border border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+            }`}
+        >
+          {initialData ? "Update Schedule" : "Create Schedule"}
+        </motion.button>
       </div>
     </form>
   );
