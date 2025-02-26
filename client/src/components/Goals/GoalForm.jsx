@@ -1,20 +1,34 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  X,
+  Calendar,
+  Clock,
+  Target,
+  Tag,
+  MessageSquare,
+  AlertTriangle,
+} from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
-import { Calendar } from "lucide-react";
 
-const GoalForm = ({ initialData, onSubmit, onCancel, platforms }) => {
+const GoalModal = ({ initialData, onSubmit, onCancel, platforms }) => {
   const { isDark } = useTheme();
-  const [formData, setFormData] = useState({
-    platform: "",
-    name: "",
-    date: "",
-    participated: false,
-    rank: "",
-    solved: "",
-    totalProblems: "",
-    duration: "",
-    notes: "",
-  });
+
+  const [formData, setFormData] = useState(
+    initialData || {
+      platform: "",
+      name: "",
+      date: new Date().toISOString().split("T")[0],
+      participated: false,
+      rank: "",
+      solved: "",
+      totalProblems: "",
+      duration: "",
+      notes: "",
+    }
+  );
+
+  const [validationErrors, setValidationErrors] = useState({});
 
   // Populate form with initial data if editing
   useEffect(() => {
@@ -29,6 +43,15 @@ const GoalForm = ({ initialData, onSubmit, onCancel, platforms }) => {
     }
   }, [initialData]);
 
+  // Validate form
+  const validateGoal = () => {
+    const errors = {};
+    if (!formData.platform) errors.platform = "Platform is required";
+    if (!formData.name) errors.name = "Goal name is required";
+    if (!formData.date) errors.date = "Date is required";
+    return errors;
+  };
+
   // Handle input changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -36,14 +59,28 @@ const GoalForm = ({ initialData, onSubmit, onCancel, platforms }) => {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
+
+    // Clear validation error when user starts typing/selecting
+    if (validationErrors[name]) {
+      const newErrors = { ...validationErrors };
+      delete newErrors[name];
+      setValidationErrors(newErrors);
+    }
   };
 
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Create a new object to avoid validation issues
-    const formattedData = {
+    // Validate form
+    const errors = validateGoal();
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    // Prepare data for submission
+    const submissionData = {
       ...formData,
       rank: formData.rank ? parseInt(formData.rank) : null,
       solved: formData.solved ? parseInt(formData.solved) : null,
@@ -53,33 +90,39 @@ const GoalForm = ({ initialData, onSubmit, onCancel, platforms }) => {
       duration: formData.duration ? parseInt(formData.duration) : null,
     };
 
-    onSubmit(formattedData);
+    onSubmit(submissionData);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="space-y-4">
-        {/* Platform */}
-        <div>
-          <label
-            htmlFor="platform"
-            className={`block text-sm font-medium ${
-              isDark ? "text-gray-200" : "text-gray-700"
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Platform Input */}
+      <div>
+        <label
+          htmlFor="platform"
+          className={`block text-sm font-medium mb-2 ${
+            isDark ? "text-gray-300" : "text-gray-700"
+          }`}
+        >
+          Platform*
+        </label>
+        <div className="relative">
+          <Target
+            className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDark ? "text-indigo-400" : "text-indigo-600"
             }`}
-          >
-            Platform*
-          </label>
+          />
           <select
             id="platform"
             name="platform"
             value={formData.platform}
             onChange={handleChange}
+            className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border appearance-none transition-all duration-300
+              ${
+                isDark
+                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+              }`}
             required
-            className={`mt-1 block w-full rounded-md shadow-sm py-2 px-3 ${
-              isDark
-                ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-            }`}
           >
             <option value="">Select Platform</option>
             {platforms.map((platform, index) => {
@@ -93,179 +136,241 @@ const GoalForm = ({ initialData, onSubmit, onCancel, platforms }) => {
             })}
           </select>
         </div>
+        {validationErrors.platform && (
+          <p className="mt-1 text-sm text-red-500">
+            {validationErrors.platform}
+          </p>
+        )}
+      </div>
 
-        {/* Goal Name */}
-        <div>
-          <label
-            htmlFor="name"
-            className={`block text-sm font-medium ${
-              isDark ? "text-gray-200" : "text-gray-700"
+      {/* Goal Name Input */}
+      <div>
+        <label
+          htmlFor="name"
+          className={`block text-sm font-medium mb-2 ${
+            isDark ? "text-gray-300" : "text-gray-700"
+          }`}
+        >
+          Goal Name*
+        </label>
+        <div className="relative">
+          <Tag
+            className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDark ? "text-indigo-400" : "text-indigo-600"
             }`}
-          >
-            Goal Name*
-          </label>
+          />
           <input
             type="text"
             id="name"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            required
-            className={`mt-1 block w-full rounded-md shadow-sm py-2 px-3 ${
-              isDark
-                ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-            }`}
-          />
-        </div>
-
-        {/* Date */}
-        <div>
-          <label
-            htmlFor="date"
-            className={`block text-sm font-medium ${
-              isDark ? "text-gray-200" : "text-gray-700"
-            }`}
-          >
-            Date*
-          </label>
-          <div className="relative mt-1">
-            <div
-              className={`absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none ${
-                isDark ? "text-gray-400" : "text-gray-500"
-              }`}
-            >
-              <Calendar size={16} />
-            </div>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
-              className={`block w-full rounded-md shadow-sm py-2 pl-10 pr-3 ${
+            placeholder="Enter goal name"
+            className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
+              ${
                 isDark
-                  ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                  : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
               }`}
-            />
-          </div>
+            required
+          />
         </div>
+        {validationErrors.name && (
+          <p className="mt-1 text-sm text-red-500">{validationErrors.name}</p>
+        )}
+      </div>
 
-        {/* Participated */}
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="participated"
-            name="participated"
-            checked={formData.participated}
-            onChange={handleChange}
-            className={`h-4 w-4 ${
-              isDark
-                ? "bg-gray-700 text-indigo-600 border-gray-600 focus:ring-indigo-500"
-                : "bg-white text-indigo-600 border-gray-300 focus:ring-indigo-500"
+      {/* Date Input */}
+      <div>
+        <label
+          htmlFor="date"
+          className={`block text-sm font-medium mb-2 ${
+            isDark ? "text-gray-300" : "text-gray-700"
+          }`}
+        >
+          Date*
+        </label>
+        <div className="relative">
+          <Calendar
+            className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDark ? "text-indigo-400" : "text-indigo-600"
             }`}
           />
-          <label
-            htmlFor="participated"
-            className={`ml-2 block text-sm font-medium ${
-              isDark ? "text-gray-200" : "text-gray-700"
-            }`}
-          >
-            Participated
-          </label>
+          <input
+            type="date"
+            id="date"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+            className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
+              ${
+                isDark
+                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+              }`}
+            required
+          />
         </div>
+        {validationErrors.date && (
+          <p className="mt-1 text-sm text-red-500">{validationErrors.date}</p>
+        )}
+      </div>
 
-        {/* Conditional fields - only show if participated is checked */}
+      {/* Participated Checkbox */}
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          id="participated"
+          name="participated"
+          checked={formData.participated}
+          onChange={handleChange}
+          className={`h-4 w-4 rounded ${
+            isDark
+              ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/30"
+              : "bg-indigo-100/50 text-indigo-600 border-indigo-300/50"
+          }`}
+        />
+        <label
+          htmlFor="participated"
+          className={`ml-2 block text-sm font-medium ${
+            isDark ? "text-gray-300" : "text-gray-700"
+          }`}
+        >
+          Participated
+        </label>
+      </div>
+
+      {/* Conditional Fields for Participation */}
+      <AnimatePresence>
         {formData.participated && (
-          <div className="space-y-4 pl-4 border-l-2 border-indigo-500 mt-2">
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="space-y-4 pl-4 border-l-2 border-indigo-500 mt-2"
+          >
+            {/* Rank Input */}
             <div>
               <label
                 htmlFor="rank"
-                className={`block text-sm font-medium ${
-                  isDark ? "text-gray-200" : "text-gray-700"
+                className={`block text-sm font-medium mb-2 ${
+                  isDark ? "text-gray-300" : "text-gray-700"
                 }`}
               >
                 Rank
               </label>
-              <input
-                type="number"
-                id="rank"
-                name="rank"
-                value={formData.rank || ""}
-                onChange={handleChange}
-                min="1"
-                className={`mt-1 block w-full rounded-md shadow-sm py-2 px-3 ${
-                  isDark
-                    ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                    : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                }`}
-              />
+              <div className="relative">
+                <AlertTriangle
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                    isDark ? "text-indigo-400" : "text-indigo-600"
+                  }`}
+                />
+                <input
+                  type="number"
+                  id="rank"
+                  name="rank"
+                  value={formData.rank || ""}
+                  onChange={handleChange}
+                  min="1"
+                  placeholder="Enter rank"
+                  className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
+                    ${
+                      isDark
+                        ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                        : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                    }`}
+                />
+              </div>
             </div>
 
+            {/* Problems Solved & Total Problems */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label
                   htmlFor="solved"
-                  className={`block text-sm font-medium ${
-                    isDark ? "text-gray-200" : "text-gray-700"
+                  className={`block text-sm font-medium mb-2 ${
+                    isDark ? "text-gray-300" : "text-gray-700"
                   }`}
                 >
                   Problems Solved
                 </label>
-                <input
-                  type="number"
-                  id="solved"
-                  name="solved"
-                  value={formData.solved || ""}
-                  onChange={handleChange}
-                  min="0"
-                  className={`mt-1 block w-full rounded-md shadow-sm py-2 px-3 ${
-                    isDark
-                      ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                      : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                  }`}
-                />
+                <div className="relative">
+                  <Target
+                    className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                      isDark ? "text-indigo-400" : "text-indigo-600"
+                    }`}
+                  />
+                  <input
+                    type="number"
+                    id="solved"
+                    name="solved"
+                    value={formData.solved || ""}
+                    onChange={handleChange}
+                    min="0"
+                    placeholder="Solved problems"
+                    className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
+                      ${
+                        isDark
+                          ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                          : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                      }`}
+                  />
+                </div>
               </div>
 
               <div>
                 <label
                   htmlFor="totalProblems"
-                  className={`block text-sm font-medium ${
-                    isDark ? "text-gray-200" : "text-gray-700"
+                  className={`block text-sm font-medium mb-2 ${
+                    isDark ? "text-gray-300" : "text-gray-700"
                   }`}
                 >
                   Total Problems
                 </label>
-                <input
-                  type="number"
-                  id="totalProblems"
-                  name="totalProblems"
-                  value={formData.totalProblems || ""}
-                  onChange={handleChange}
-                  min="0"
-                  className={`mt-1 block w-full rounded-md shadow-sm py-2 px-3 ${
-                    isDark
-                      ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                      : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                  }`}
-                />
+                <div className="relative">
+                  <Target
+                    className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                      isDark ? "text-indigo-400" : "text-indigo-600"
+                    }`}
+                  />
+                  <input
+                    type="number"
+                    id="totalProblems"
+                    name="totalProblems"
+                    value={formData.totalProblems || ""}
+                    onChange={handleChange}
+                    min="0"
+                    placeholder="Total problems"
+                    className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
+                      ${
+                        isDark
+                          ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                          : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                      }`}
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Duration */}
-        <div>
-          <label
-            htmlFor="duration"
-            className={`block text-sm font-medium ${
-              isDark ? "text-gray-200" : "text-gray-700"
+      {/* Duration Input */}
+      <div>
+        <label
+          htmlFor="duration"
+          className={`block text-sm font-medium mb-2 ${
+            isDark ? "text-gray-300" : "text-gray-700"
+          }`}
+        >
+          Duration (minutes)
+        </label>
+        <div className="relative">
+          <Clock
+            className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDark ? "text-indigo-400" : "text-indigo-600"
             }`}
-          >
-            Duration (minutes)
-          </label>
+          />
           <input
             type="number"
             id="duration"
@@ -273,62 +378,77 @@ const GoalForm = ({ initialData, onSubmit, onCancel, platforms }) => {
             value={formData.duration || ""}
             onChange={handleChange}
             min="0"
-            className={`mt-1 block w-full rounded-md shadow-sm py-2 px-3 ${
-              isDark
-                ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-            }`}
+            placeholder="Duration in minutes"
+            className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
+              ${
+                isDark
+                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+              }`}
           />
         </div>
-
-        {/* Notes */}
-        <div>
-          <label
-            htmlFor="notes"
-            className={`block text-sm font-medium ${
-              isDark ? "text-gray-200" : "text-gray-700"
+      </div>
+      {/* Notes Input */}
+      <div>
+        <label
+          htmlFor="notes"
+          className={`block text-sm font-medium mb-2 ${
+            isDark ? "text-gray-300" : "text-gray-700"
+          }`}
+        >
+          Notes
+        </label>
+        <div className="relative">
+          <MessageSquare
+            className={`absolute left-3 top-3 w-4 h-4 ${
+              isDark ? "text-indigo-400" : "text-indigo-600"
             }`}
-          >
-            Notes
-          </label>
+          />
           <textarea
             id="notes"
             name="notes"
-            rows="3"
             value={formData.notes || ""}
             onChange={handleChange}
-            className={`mt-1 block w-full rounded-md shadow-sm py-2 px-3 ${
-              isDark
-                ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-            }`}
+            rows="3"
             placeholder="Add any additional notes about this goal..."
+            className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
+              ${
+                isDark
+                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+              }`}
           />
         </div>
+      </div>
 
-        {/* Form actions */}
-        <div className="flex justify-end space-x-3 pt-4">
-          <button
-            type="button"
-            onClick={onCancel}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
+      {/* Action Buttons */}
+      <div className="flex justify-end space-x-3 mt-6">
+        <button
+          type="button"
+          onClick={onCancel}
+          className={`px-6 py-2.5 rounded-lg border transition-all duration-300
+            ${
               isDark
-                ? "bg-gray-600 text-gray-200 hover:bg-gray-500"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                ? "bg-transparent border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10"
+                : "bg-transparent border-indigo-300/50 text-indigo-600 hover:bg-indigo-50"
             }`}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700"
-          >
-            {initialData ? "Update Goal" : "Add Goal"}
-          </button>
-        </div>
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className={`px-6 py-2.5 rounded-lg transition-all duration-300
+            ${
+              isDark
+                ? "bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                : "bg-indigo-100/50 border border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+            }`}
+        >
+          {initialData ? "Update" : "Create"} Goal
+        </button>
       </div>
     </form>
   );
 };
 
-export default GoalForm;
+export default GoalModal;
