@@ -1,5 +1,4 @@
-// src/pages/SchedulePage.jsx
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,
@@ -9,58 +8,38 @@ import {
   Activity,
   ArrowUpDown,
   Filter,
-  Settings,
-  RefreshCcw,
 } from "lucide-react";
-import { useTheme } from "../context/ThemeContext";
-import useSchedules from "../hooks/useSchedules";
-import useCategories from "../hooks/useCategories";
-import ScheduleCard from "../components/Schedule/ScheduleCard";
-import ScheduleModal from "../components/Schedule/ScheduleModal";
-import ScheduleTimelineChart from "../components/Schedule/ScheduleTimelineChart";
-import CategoryDistributionChart from "../components/Schedule/CategoryDistributionChart";
-import CategoryManagement from "../components/Categories/CategoryManagement";
-import StatsCard from "../components/common/StatsCard";
-import LoadingScheduleSkeleton from "../components/Schedule/LoadingScheduleSkeleton.jsx";
-import FilterButton from "../components/common/FilterButton";
+import { useTheme } from "../../context/ThemeContext";
+import useSchedules from "../../hooks/useSchedules";
+import ScheduleCard from "./ScheduleCard";
+import ScheduleModal from "./ScheduleModal";
+import ScheduleTimelineChart from "./ScheduleTimelineChart";
+import CategoryDistributionChart from "./CategoryDistributionChart";
+import StatsCard from "../common/StatsCard";
+import LoadingScheduleSkeleton from "./LoadingScheduleSkeleton.jsx";
+import FilterButton from "../common/FilterButton";
 
-const SchedulePage = () => {
+const Schedule = () => {
   const { isDark } = useTheme();
   const addButtonRef = useRef(null);
 
-  // Use the updated hooks with authentication
   const {
     schedules,
     loading,
     error,
     stats,
-    categories: scheduleCategories,
-    fetchSchedules,
     createSchedule,
     updateSchedule,
     deleteSchedule,
     addScheduleItem,
     updateScheduleItem,
     deleteScheduleItem,
-    fetchCategories: refreshScheduleCategories,
   } = useSchedules();
-
-  // Category management
-  const {
-    categories,
-    defaultCategories,
-    loading: categoriesLoading,
-    addCategory,
-    updateCategory,
-    deleteCategory,
-    fetchCategories,
-  } = useCategories("schedule");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date-desc");
-  const [showCategoryManagement, setShowCategoryManagement] = useState(false);
 
   const filteredSchedules = useMemo(() => {
     let processed = schedules.filter((schedule) => {
@@ -103,20 +82,6 @@ const SchedulePage = () => {
       console.error("Error updating schedule:", error);
     }
   };
-
-  // When categories are updated, refresh the schedule categories list
-  const handleCategoryChange = async () => {
-    await refreshScheduleCategories();
-  };
-
-  useEffect(() => {
-    if (scheduleCategories.length === 0) {
-      refreshScheduleCategories();
-    }
-
-    // Debug log to check what categories are available
-    console.log("Schedule categories:", scheduleCategories);
-  }, [scheduleCategories, refreshScheduleCategories]);
 
   if (loading) return <LoadingScheduleSkeleton />;
 
@@ -175,10 +140,11 @@ const SchedulePage = () => {
                     : "bg-white text-gray-800 border-gray-300"
                 }`}
               >
-                <option value="all">All</option>
-                <option value="Planned">Planned</option>
-                <option value="Progress">In Progress</option>
-                <option value="Completed">Completed</option>
+                {["All", "Planned", "Progress", "Completed"].map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -208,30 +174,6 @@ const SchedulePage = () => {
               <Plus className="w-4 h-4" />
               Add Schedule
             </FilterButton>
-
-            <button
-              onClick={() => setShowCategoryManagement(true)}
-              className={`flex items-center px-4 py-2 rounded-lg ${
-                isDark
-                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                  : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-              }`}
-            >
-              <Settings size={18} className="mr-1" />
-              Categories
-            </button>
-
-            <button
-              onClick={() => fetchSchedules()}
-              className={`flex items-center px-4 py-2 rounded-lg ${
-                isDark
-                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                  : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-              }`}
-              aria-label="Refresh"
-            >
-              <RefreshCcw size={18} />
-            </button>
           </motion.div>
         </div>
 
@@ -387,57 +329,9 @@ const SchedulePage = () => {
         onSubmit={editingSchedule ? handleEditSchedule : handleAddSchedule}
         initialData={editingSchedule}
         triggerRef={addButtonRef}
-        categories={
-          scheduleCategories.length > 0 ? scheduleCategories : defaultCategories
-        } // Fall back to default categories if none returned from API
       />
-
-      {/* Category Management modal */}
-      {showCategoryManagement && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div
-            className={`w-full max-w-4xl p-6 rounded-lg shadow-lg ${
-              isDark ? "bg-gray-800" : "bg-white"
-            }`}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Manage Categories</h2>
-              <button
-                onClick={() => setShowCategoryManagement(false)}
-                className={`p-1 rounded-full ${
-                  isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"
-                }`}
-              >
-                ✕
-              </button>
-            </div>
-            <CategoryManagement
-              categories={categories}
-              defaultCategories={defaultCategories}
-              loading={categoriesLoading}
-              onAdd={async (data) => {
-                await addCategory(data);
-                handleCategoryChange();
-              }}
-              onUpdate={async (id, data) => {
-                await updateCategory(id, data);
-                handleCategoryChange();
-              }}
-              onDelete={async (id) => {
-                await deleteCategory(id);
-                handleCategoryChange();
-              }}
-              onRefresh={async () => {
-                await fetchCategories();
-                handleCategoryChange();
-              }}
-              type="schedule"
-            />
-          </div>
-        </div>
-      )}
     </section>
   );
 };
 
-export default SchedulePage;
+export default Schedule;

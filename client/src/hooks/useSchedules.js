@@ -1,95 +1,60 @@
+// src/hooks/useSchedules.js
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
-import mockDataService from "../utils/mockDataService";
 import { useAuth } from "../context/AuthContext";
 
-// Flag to use mock data instead of real API
-const USE_MOCK_DATA = true; // Set to false when API is working
+const defaultStats = {
+  todayItems: 0,
+  completionRate: 0,
+  totalHours: 0,
+  highPriorityTasks: 0,
+  weeklyTrend: 0,
+  completionTrend: 0,
+  hoursChange: 0,
+  priorityChange: 0,
+  totalTasks: 0,
+  currentStreak: 0,
+  topCategory: "",
+  categoryCount: 0,
+};
 
 const useSchedules = () => {
   const [schedules, setSchedules] = useState([]);
-  const [currentSchedule, setCurrentSchedule] = useState(null);
-  const [templates, setTemplates] = useState([]);
-  const [currentTemplate, setCurrentTemplate] = useState(null);
-  const [stats, setStats] = useState(null);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [stats, setStats] = useState(defaultStats);
+  const [categories, setCategories] = useState([]);
 
   const { isAuthenticated } = useAuth();
 
-  // Fetch schedules for a date range
+  // Fetch schedules with optional date range
   const fetchSchedules = useCallback(
-    async (startDate, endDate, status) => {
+    async (startDate = null, endDate = null, status = null) => {
       if (!isAuthenticated) return;
 
       try {
         setLoading(true);
+        setError(null);
 
-        if (USE_MOCK_DATA) {
-          // Use mock data service
-          const mockResponse = await mockDataService.getSchedules({
-            startDate,
-            endDate,
-            status,
-          });
-          const mockStats = await mockDataService.getStats();
+        const params = {};
+        if (startDate) params.startDate = startDate;
+        if (endDate) params.endDate = endDate;
+        if (status) params.status = status;
 
-          setSchedules(mockResponse);
-          setStats(mockStats);
-          setError(null);
-          return { data: mockResponse, stats: mockStats };
-        } else {
-          // Use real API
-          const params = {};
-          if (startDate) params.startDate = startDate;
-          if (endDate) params.endDate = endDate;
-          if (status) params.status = status;
+        const response = await apiClient.get("/schedules", { params });
+        const fetchedSchedules = response.data || [];
 
-          const response = await apiClient.get("/schedules", { params });
+        setSchedules(fetchedSchedules);
+        calculateStats(fetchedSchedules);
 
-          setSchedules(response.data || []);
-          setStats(response.stats || null);
-          setError(null);
-          return response;
-        }
+        return fetchedSchedules;
       } catch (err) {
         console.error("Error fetching schedules:", err);
-        setError(err.message);
+        setError(err.message || "Failed to fetch schedules");
+        setSchedules([]);
+        setStats(defaultStats);
         toast.error("Failed to fetch schedules");
-        return { data: [], stats: null };
-      } finally {
-        setLoading(false);
-      }
-    },
-    [isAuthenticated]
-  );
-
-  // Fetch a single schedule by ID
-  const fetchScheduleById = useCallback(
-    async (id) => {
-      if (!isAuthenticated) return;
-
-      try {
-        setLoading(true);
-
-        let scheduleData;
-        if (USE_MOCK_DATA) {
-          scheduleData = await mockDataService.getScheduleById(id);
-        } else {
-          const response = await apiClient.get(`/schedules/${id}`);
-          scheduleData = response.data;
-        }
-
-        setCurrentSchedule(scheduleData || null);
-        setError(null);
-        return scheduleData;
-      } catch (err) {
-        console.error("Error fetching schedule:", err);
-        setError(err.message);
-        toast.error("Failed to fetch schedule");
-        return null;
       } finally {
         setLoading(false);
       }
@@ -99,70 +64,82 @@ const useSchedules = () => {
 
   // Create a new schedule
   const createSchedule = useCallback(
-    async (data) => {
+    async (scheduleData) => {
       if (!isAuthenticated) return;
 
       try {
-        setLoading(true);
-
-        let response;
-        if (USE_MOCK_DATA) {
-          response = await mockDataService.createSchedule(data);
-        } else {
-          response = await apiClient.post("/schedules", data);
+        // Validate required fields
+        if (!scheduleData.date) {
+          throw new Error("Date is required");
         }
 
-        // Refresh schedules
-        await fetchSchedules();
+        if (!scheduleData.items || scheduleData.items.length === 0) {
+          throw new Error("At least one schedule item is required");
+        }
+
+        // Ensure date is in correct format
+        const formattedData = {
+          ...scheduleData,
+          date: new Date(scheduleData.date).toISOString(),
+        };
+
+        const response = await apiClient.post("/schedules", formattedData);
+        const newSchedule = response.data || {};
+
+        // Update local state
+        setSchedules((prev) => [...prev, newSchedule]);
+        calculateStats([...schedules, newSchedule]);
 
         toast.success("Schedule created successfully");
-        return response;
+        return newSchedule;
       } catch (err) {
-        console.error("Error creating schedule:", err);
+        console.error("Create Schedule Error:", err);
         toast.error(err.message || "Failed to create schedule");
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
-    [isAuthenticated, fetchSchedules]
+    [isAuthenticated, schedules]
   );
 
   // Update an existing schedule
   const updateSchedule = useCallback(
-    async (id, data) => {
+    async (id, updates) => {
       if (!isAuthenticated) return;
 
       try {
-        setLoading(true);
-
-        let updatedSchedule;
-        if (USE_MOCK_DATA) {
-          updatedSchedule = await mockDataService.updateSchedule(id, data);
-        } else {
-          const response = await apiClient.put(`/schedules/${id}`, data);
-          updatedSchedule = response.data;
+        if (!id) {
+          throw new Error("Schedule ID is required");
         }
 
-        // Refresh current schedule
-        if (currentSchedule && currentSchedule._id === id) {
-          setCurrentSchedule(updatedSchedule);
+        // Ensure date is in correct format if present
+        if (updates.date) {
+          updates.date = new Date(updates.date).toISOString();
         }
 
-        // Refresh schedules list
-        await fetchSchedules();
+        const response = await apiClient.put(`/schedules/${id}`, updates);
+        const updatedSchedule = response.data || {};
+
+        // Update local state
+        setSchedules((prev) =>
+          prev.map((schedule) =>
+            schedule._id === id ? updatedSchedule : schedule
+          )
+        );
+        calculateStats(
+          schedules.map((schedule) =>
+            schedule._id === id ? updatedSchedule : schedule
+          )
+        );
 
         toast.success("Schedule updated successfully");
         return updatedSchedule;
       } catch (err) {
-        console.error("Error updating schedule:", err);
+        console.error("Update Schedule Error:", err);
         toast.error(err.message || "Failed to update schedule");
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
-    [isAuthenticated, currentSchedule, fetchSchedules]
+    [isAuthenticated, schedules]
   );
 
   // Delete a schedule
@@ -171,467 +148,313 @@ const useSchedules = () => {
       if (!isAuthenticated) return;
 
       try {
-        setLoading(true);
-
-        if (USE_MOCK_DATA) {
-          await mockDataService.deleteSchedule(id);
-        } else {
-          await apiClient.delete(`/schedules/${id}`);
+        if (!id) {
+          throw new Error("Schedule ID is required");
         }
 
-        // Reset current schedule if it was deleted
-        if (currentSchedule && currentSchedule._id === id) {
-          setCurrentSchedule(null);
-        }
+        await apiClient.delete(`/schedules/${id}`);
 
-        // Refresh schedules list
-        await fetchSchedules();
+        // Update local state
+        const updatedSchedules = schedules.filter(
+          (schedule) => schedule._id !== id
+        );
+        setSchedules(updatedSchedules);
+        calculateStats(updatedSchedules);
 
         toast.success("Schedule deleted successfully");
       } catch (err) {
-        console.error("Error deleting schedule:", err);
+        console.error("Delete Schedule Error:", err);
         toast.error(err.message || "Failed to delete schedule");
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
-    [isAuthenticated, currentSchedule, fetchSchedules]
+    [isAuthenticated, schedules]
   );
 
-  // Add a schedule item
+  // Add a new item to a specific schedule
   const addScheduleItem = useCallback(
     async (scheduleId, itemData) => {
       if (!isAuthenticated) return;
 
       try {
-        setLoading(true);
-
-        let updatedSchedule;
-        if (USE_MOCK_DATA) {
-          updatedSchedule = await mockDataService.addScheduleItem(
-            scheduleId,
-            itemData
-          );
-        } else {
-          const response = await apiClient.post(
-            `/schedules/${scheduleId}/items`,
-            itemData
-          );
-          updatedSchedule = response.data;
+        if (!scheduleId) {
+          throw new Error("Schedule ID is required");
         }
 
-        // Update current schedule
-        if (currentSchedule && currentSchedule._id === scheduleId) {
-          setCurrentSchedule(updatedSchedule);
-        }
+        const response = await apiClient.post(
+          `/schedules/${scheduleId}/items`,
+          itemData
+        );
+        const updatedSchedule = response.data || {};
 
-        // Refresh schedules list
-        await fetchSchedules();
+        // Update local state
+        setSchedules((prev) =>
+          prev.map((schedule) =>
+            schedule._id === scheduleId ? updatedSchedule : schedule
+          )
+        );
+        calculateStats(
+          schedules.map((schedule) =>
+            schedule._id === scheduleId ? updatedSchedule : schedule
+          )
+        );
 
         toast.success("Schedule item added successfully");
         return updatedSchedule;
       } catch (err) {
-        console.error("Error adding schedule item:", err);
+        console.error("Add Schedule Item Error:", err);
         toast.error(err.message || "Failed to add schedule item");
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
-    [isAuthenticated, currentSchedule, fetchSchedules]
+    [isAuthenticated, schedules]
   );
 
-  // Update a schedule item
+  // Update a specific item in a schedule
   const updateScheduleItem = useCallback(
-    async (scheduleId, itemId, itemData) => {
+    async (scheduleId, itemId, updates) => {
       if (!isAuthenticated) return;
 
       try {
-        setLoading(true);
-
-        let updatedSchedule;
-        if (USE_MOCK_DATA) {
-          updatedSchedule = await mockDataService.updateScheduleItem(
-            scheduleId,
-            itemId,
-            itemData
-          );
-        } else {
-          const response = await apiClient.put(
-            `/schedules/${scheduleId}/items/${itemId}`,
-            itemData
-          );
-          updatedSchedule = response.data;
+        if (!scheduleId || !itemId) {
+          throw new Error("Schedule ID and Item ID are required");
         }
 
-        // Update current schedule
-        if (currentSchedule && currentSchedule._id === scheduleId) {
-          setCurrentSchedule(updatedSchedule);
-        }
+        const response = await apiClient.put(
+          `/schedules/${scheduleId}/items/${itemId}`,
+          updates
+        );
+        const updatedSchedule = response.data || {};
 
-        // Refresh schedules list
-        await fetchSchedules();
+        // Update local state
+        setSchedules((prev) =>
+          prev.map((schedule) =>
+            schedule._id === scheduleId ? updatedSchedule : schedule
+          )
+        );
+        calculateStats(
+          schedules.map((schedule) =>
+            schedule._id === scheduleId ? updatedSchedule : schedule
+          )
+        );
 
-        toast.success("Schedule item updated successfully");
         return updatedSchedule;
       } catch (err) {
-        console.error("Error updating schedule item:", err);
+        console.error("Update Schedule Item Error:", err);
         toast.error(err.message || "Failed to update schedule item");
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
-    [isAuthenticated, currentSchedule, fetchSchedules]
+    [isAuthenticated, schedules]
   );
 
-  // Delete a schedule item
+  // Delete a specific item from a schedule
   const deleteScheduleItem = useCallback(
     async (scheduleId, itemId) => {
       if (!isAuthenticated) return;
 
       try {
-        setLoading(true);
-
-        let updatedSchedule;
-        if (USE_MOCK_DATA) {
-          updatedSchedule = await mockDataService.deleteScheduleItem(
-            scheduleId,
-            itemId
-          );
-        } else {
-          const response = await apiClient.delete(
-            `/schedules/${scheduleId}/items/${itemId}`
-          );
-          updatedSchedule = response.data;
+        if (!scheduleId || !itemId) {
+          throw new Error("Schedule ID and Item ID are required");
         }
 
-        // Update current schedule
-        if (currentSchedule && currentSchedule._id === scheduleId) {
-          setCurrentSchedule(updatedSchedule);
-        }
+        const response = await apiClient.delete(
+          `/schedules/${scheduleId}/items/${itemId}`
+        );
+        const updatedSchedule = response.data || {};
 
-        // Refresh schedules list
-        await fetchSchedules();
+        // Update local state
+        setSchedules((prev) =>
+          prev.map((schedule) =>
+            schedule._id === scheduleId ? updatedSchedule : schedule
+          )
+        );
+        calculateStats(
+          schedules.map((schedule) =>
+            schedule._id === scheduleId ? updatedSchedule : schedule
+          )
+        );
 
-        toast.success("Schedule item deleted successfully");
         return updatedSchedule;
       } catch (err) {
-        console.error("Error deleting schedule item:", err);
+        console.error("Delete Schedule Item Error:", err);
         toast.error(err.message || "Failed to delete schedule item");
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
-    [isAuthenticated, currentSchedule, fetchSchedules]
+    [isAuthenticated, schedules]
   );
 
-  // Fetch available categories
+  // Fixed fetchCategories function in useSchedules.js
+
+  // Fetch schedule categories
+  // Corrected fetchCategories function in useSchedules.js
+
+  // Fetch schedule categories
   const fetchCategories = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) return [];
 
     try {
-      let categoriesData;
-      if (USE_MOCK_DATA) {
-        categoriesData = await mockDataService.getCategories("schedule");
+      // Use the general categories endpoint with type=schedule instead
+      const response = await apiClient.get("/categories?type=schedule");
+
+      let extractedCategories = [];
+
+      // Handle different response structures
+      if (response && Array.isArray(response)) {
+        extractedCategories = response.map((cat) => cat.name);
+      } else if (response && response.data && Array.isArray(response.data)) {
+        extractedCategories = response.data.map((cat) => cat.name);
+      } else if (
+        response &&
+        response.categories &&
+        Array.isArray(response.categories)
+      ) {
+        extractedCategories = response.categories;
       } else {
-        // Try the categories endpoint with type parameter
-        const response = await apiClient.get("/categories", {
-          params: {
-            type: "schedule",
-          },
-        });
-        categoriesData = response.data || [];
+        // Fallback to default categories
+        extractedCategories = [
+          "DSA",
+          "System Design",
+          "Development",
+          "Learning",
+          "Problem Solving",
+          "Other",
+        ];
       }
 
-      setCategories(categoriesData);
-      return categoriesData;
+      console.log("Extracted categories:", extractedCategories);
+      setCategories(extractedCategories);
+      return extractedCategories;
     } catch (err) {
-      console.error("Error fetching categories:", err);
-      if (USE_MOCK_DATA) {
-        const mockCategories = await mockDataService.getCategories("schedule");
-        setCategories(mockCategories);
-        return mockCategories;
-      }
-      setCategories([]);
-      return [];
+      console.error("Error fetching schedule categories:", err);
+
+      // Fallback to default categories if there's an error
+      const defaultCats = [
+        "DSA",
+        "System Design",
+        "Development",
+        "Learning",
+        "Problem Solving",
+        "Other",
+      ];
+
+      setCategories(defaultCats);
+      return defaultCats;
     }
   }, [isAuthenticated]);
 
-  // Fetch all templates with a more robust approach
-  const fetchTemplates = useCallback(async () => {
-    if (!isAuthenticated) return;
-
-    try {
-      setLoading(true);
-
-      // We're going to try a different endpoint structure since the current one is failing
-      // Let's check if the templates might be accessed directly
-      let response;
-      try {
-        // First try the direct schedule templates route
-        response = await apiClient.get("/schedule-templates");
-      } catch (directError) {
-        console.warn(
-          "Direct template route failed, trying alternative:",
-          directError
-        );
-        try {
-          // Next try the nested route under schedules
-          response = await apiClient.get("/schedules/templates");
-        } catch (nestedError) {
-          console.warn("Nested template route failed too:", nestedError);
-          // Provide a fallback empty result
-          return [];
-        }
-      }
-
-      // Process response data
-      const templatesData = response.data || [];
-      setTemplates(templatesData);
-      setError(null);
-      return templatesData;
-    } catch (err) {
-      console.error("Error fetching templates:", err);
-      setError(err.message);
-      toast.error("Failed to fetch templates");
-      // Return empty array on error
-      setTemplates([]);
-      return [];
-    } finally {
-      setLoading(false);
+  // Stats calculation function
+  const calculateStats = useCallback((scheduleData) => {
+    if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
+      setStats(defaultStats);
+      return;
     }
-  }, [isAuthenticated]);
 
-  // Fetch a single template
-  const fetchTemplateById = useCallback(
-    async (id) => {
-      if (!isAuthenticated) return;
+    // Calculate number of items due today
+    const today = new Date().toISOString().split("T")[0];
+    const todaySchedules = scheduleData.filter(
+      (s) => s.date && new Date(s.date).toISOString().split("T")[0] === today
+    );
+    const todayItems = todaySchedules.reduce(
+      (acc, s) => acc + (s.items ? s.items.length : 0),
+      0
+    );
 
-      try {
-        setLoading(true);
-        // Using the correct API endpoint as defined in routes
-        const response = await apiClient.get(`/schedules/templates/${id}`);
-        setCurrentTemplate(response.data || null);
-        setError(null);
-        return response.data;
-      } catch (err) {
-        console.error("Error fetching template:", err);
-        setError(err.message);
-        toast.error("Failed to fetch template");
-        return null;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [isAuthenticated]
-  );
+    // Calculate completion rate across all schedules
+    const totalItems = scheduleData.reduce(
+      (acc, s) => acc + (s.items ? s.items.length : 0),
+      0
+    );
+    const completedItems = scheduleData.reduce(
+      (acc, s) =>
+        acc + (s.items ? s.items.filter((item) => item.completed).length : 0),
+      0
+    );
+    const completionRate =
+      totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
-  // Helper function to determine the correct template endpoint
-  const getTemplateEndpoint = useCallback(async () => {
-    // Try both endpoints and return the one that works
-    try {
-      await apiClient.get("/schedule-templates");
-      return "/schedule-templates";
-    } catch (err) {
-      try {
-        await apiClient.get("/schedules/templates");
-        return "/schedules/templates";
-      } catch (err2) {
-        console.error("Both template endpoints failed:", err, err2);
-        return "/schedule-templates"; // Default fallback
-      }
-    }
+    // Calculate total hours for all schedules
+    const totalHours = scheduleData.reduce((acc, schedule) => {
+      if (!schedule.items) return acc;
+
+      return (
+        acc +
+        schedule.items.reduce((itemAcc, item) => {
+          if (!item.startTime || !item.endTime) return itemAcc;
+
+          const start = new Date(`2000-01-01T${item.startTime}`);
+          const end = new Date(`2000-01-01T${item.endTime}`);
+          return itemAcc + (end - start) / (1000 * 60 * 60);
+        }, 0)
+      );
+    }, 0);
+
+    // Count high priority tasks
+    const highPriorityTasks = scheduleData.reduce(
+      (acc, s) =>
+        acc +
+        (s.items
+          ? s.items.filter((item) => item.priority === "High").length
+          : 0),
+      0
+    );
+
+    // Create category distribution
+    const categories = {};
+    scheduleData.forEach((schedule) => {
+      if (!schedule.items) return;
+
+      schedule.items.forEach((item) => {
+        if (!item.category) return;
+
+        categories[item.category] = (categories[item.category] || 0) + 1;
+      });
+    });
+
+    // Find top category
+    const topCategory =
+      Object.entries(categories).sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+
+    // Set the calculated stats
+    setStats({
+      todayItems,
+      completionRate,
+      totalHours,
+      highPriorityTasks,
+      weeklyTrend: 0, // Calculate based on requirements
+      completionTrend: 0, // Calculate based on requirements
+      hoursChange: 0, // Calculate based on requirements
+      priorityChange: 0, // Calculate based on requirements
+      totalTasks: totalItems,
+      currentStreak: 0, // Calculate based on requirements
+      topCategory,
+      categoryCount: Object.keys(categories).length,
+    });
   }, []);
-
-  // Create a template
-  const createTemplate = useCallback(
-    async (data) => {
-      if (!isAuthenticated) return;
-
-      try {
-        setLoading(true);
-
-        // Try to determine the correct endpoint
-        const endpoint = await getTemplateEndpoint();
-        const response = await apiClient.post(endpoint, data);
-
-        // Refresh templates
-        await fetchTemplates();
-
-        toast.success("Template created successfully");
-        return response.data;
-      } catch (err) {
-        console.error("Error creating template:", err);
-        toast.error(err.message || "Failed to create template");
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [isAuthenticated, fetchTemplates, getTemplateEndpoint]
-  );
-
-  // Update a template
-  const updateTemplate = useCallback(
-    async (id, data) => {
-      if (!isAuthenticated) return;
-
-      try {
-        setLoading(true);
-        // Using the correct API endpoint as defined in routes
-        const response = await apiClient.put(
-          `/schedules/templates/${id}`,
-          data
-        );
-
-        // Refresh current template
-        if (currentTemplate && currentTemplate._id === id) {
-          setCurrentTemplate(response.data);
-        }
-
-        // Refresh templates list
-        await fetchTemplates();
-
-        toast.success("Template updated successfully");
-        return response.data;
-      } catch (err) {
-        console.error("Error updating template:", err);
-        toast.error(err.message || "Failed to update template");
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [isAuthenticated, currentTemplate, fetchTemplates]
-  );
-
-  // Delete a template
-  const deleteTemplate = useCallback(
-    async (id) => {
-      if (!isAuthenticated) return;
-
-      try {
-        setLoading(true);
-        // Using the correct API endpoint as defined in routes
-        await apiClient.delete(`/schedules/templates/${id}`);
-
-        // Reset current template if it was deleted
-        if (currentTemplate && currentTemplate._id === id) {
-          setCurrentTemplate(null);
-        }
-
-        // Refresh templates list
-        await fetchTemplates();
-
-        toast.success("Template deleted successfully");
-      } catch (err) {
-        console.error("Error deleting template:", err);
-        toast.error(err.message || "Failed to delete template");
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [isAuthenticated, currentTemplate, fetchTemplates]
-  );
-
-  // Initialize with a modified version of the `apiClient.get` function that can handle API errors gracefully
-  const safeApiGet = async (url, options) => {
-    try {
-      return await apiClient.get(url, options);
-    } catch (err) {
-      console.warn(`API call to ${url} failed:`, err);
-      return { data: [] }; // Return empty data instead of throwing
-    }
-  };
 
   // Load initial data
   useEffect(() => {
     if (isAuthenticated) {
-      // Create a function to load all initial data with error handling for each call
-      const loadInitialData = async () => {
-        if (USE_MOCK_DATA) {
-          try {
-            // Use mock data for everything
-            const mockSchedulesData = await mockDataService.getSchedules();
-            const mockCategoriesData = await mockDataService.getCategories(
-              "schedule"
-            );
-            const mockTemplatesData = await mockDataService.getTemplates();
-            const mockStatsData = await mockDataService.getStats();
-
-            setSchedules(mockSchedulesData);
-            setCategories(mockCategoriesData);
-            setTemplates(mockTemplatesData);
-            setStats(mockStatsData);
-            setError(null);
-          } catch (err) {
-            console.error("Failed to load mock data:", err);
-            setError("Error loading data. Using mock data as fallback.");
-          } finally {
-            setLoading(false);
-          }
-        } else {
-          // Try to use real API
-          try {
-            await fetchSchedules();
-          } catch (err) {
-            console.error("Failed to load schedules:", err);
-          }
-
-          try {
-            await fetchCategories();
-          } catch (err) {
-            console.error("Failed to load categories:", err);
-          }
-
-          try {
-            await fetchTemplates();
-          } catch (err) {
-            console.error("Failed to load templates:", err);
-          }
-        }
-      };
-
-      loadInitialData();
+      fetchSchedules();
+      fetchCategories();
     }
-  }, [isAuthenticated, fetchSchedules, fetchCategories, fetchTemplates]);
+  }, [isAuthenticated, fetchSchedules, fetchCategories]);
 
   return {
-    // Schedule data
     schedules,
-    currentSchedule,
-    stats,
     loading,
     error,
-
-    // Schedule operations
+    stats,
+    categories,
     fetchSchedules,
-    fetchScheduleById,
     createSchedule,
     updateSchedule,
     deleteSchedule,
-
-    // Schedule item operations
     addScheduleItem,
     updateScheduleItem,
     deleteScheduleItem,
-
-    // Categories
-    categories,
     fetchCategories,
-
-    // Templates
-    templates,
-    currentTemplate,
-    fetchTemplates,
-    fetchTemplateById,
-    createTemplate,
-    updateTemplate,
-    deleteTemplate,
   };
 };
 

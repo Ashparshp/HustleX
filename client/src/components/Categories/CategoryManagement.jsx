@@ -204,7 +204,7 @@ const CategoryManagement = ({
             disabled={isAdding || editingId !== null}
           >
             <Plus size={16} />
-            Add Platform
+            Add Category
           </button>
 
           <button
