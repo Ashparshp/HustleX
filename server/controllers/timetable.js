@@ -427,7 +427,10 @@ exports.toggleActivityStatus = async (req, res) => {
 // @access  Private
 exports.updateDefaultActivities = async (req, res) => {
   try {
-    setCacheHeaders(res);
+    // Set cache headers
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
 
     // Input validation
     if (!Array.isArray(req.body.activities)) {
@@ -466,20 +469,10 @@ exports.updateDefaultActivities = async (req, res) => {
     // If there's a current week, update its activities while preserving statuses
     if (timetable.currentWeek && timetable.currentWeek.activities) {
       const currentActivities = timetable.currentWeek.activities;
-      const newActivitiesMap = new Map(
-        req.body.activities.map((activity, index) => [
-          JSON.stringify({
-            name: activity.name,
-            time: activity.time,
-            category: activity.category,
-          }),
-          index,
-        ])
-      );
 
       // Preserve status for matching activities, even if their order changes
       timetable.currentWeek.activities = req.body.activities.map(
-        (newActivity, newIndex) => {
+        (newActivity) => {
           // Find if this activity existed in the previous week
           const matchingPreviousActivity = currentActivities.find(
             (prevActivity) =>
@@ -501,8 +494,10 @@ exports.updateDefaultActivities = async (req, res) => {
       );
     }
 
+    // Save changes
     await timetable.save();
 
+    // Return updated data
     res.json({
       success: true,
       data: {
@@ -511,7 +506,12 @@ exports.updateDefaultActivities = async (req, res) => {
       },
     });
   } catch (error) {
-    handleError(res, error, "Error updating activities");
+    console.error("Error updating activities:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to update activities",
+      error: error.toString(),
+    });
   }
 };
 
