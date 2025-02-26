@@ -97,58 +97,13 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
     },
   };
 
-  const getCategoryColor = (category) => {
-    // Generate a deterministic color based on the category name
-    const hashCode = (str) => {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      return hash;
-    };
+  // Consistent background style for all categories
+  const categoryBgClass = isDark
+    ? "from-indigo-800/10 to-indigo-900/10 border-indigo-500/40"
+    : "from-indigo-100 to-indigo-50 border-indigo-300/30";
 
-    const colorOptions = [
-      isDark
-        ? "from-blue-600/20 to-blue-500/5 border-blue-500/30"
-        : "from-blue-100 to-blue-50 border-blue-200",
-      isDark
-        ? "from-green-600/20 to-green-500/5 border-green-500/30"
-        : "from-green-100 to-green-50 border-green-200",
-      isDark
-        ? "from-purple-600/20 to-purple-500/5 border-purple-500/30"
-        : "from-purple-100 to-purple-50 border-purple-200",
-      isDark
-        ? "from-red-600/20 to-red-500/5 border-red-500/30"
-        : "from-red-100 to-red-50 border-red-200",
-      isDark
-        ? "from-yellow-600/20 to-yellow-500/5 border-yellow-500/30"
-        : "from-yellow-100 to-yellow-50 border-yellow-200",
-      isDark
-        ? "from-pink-600/20 to-pink-500/5 border-pink-500/30"
-        : "from-pink-100 to-pink-50 border-pink-200",
-      isDark
-        ? "from-indigo-600/20 to-indigo-500/5 border-indigo-500/30"
-        : "from-indigo-100 to-indigo-50 border-indigo-200",
-    ];
-
-    const index = Math.abs(hashCode(category)) % colorOptions.length;
-    return colorOptions[index];
-  };
-
-  const getHeaderTextColor = (category) => {
-    const colorMap = {
-      "MERN Stack": isDark ? "text-blue-400" : "text-blue-600",
-      "Java & Ecosystem": isDark ? "text-yellow-400" : "text-yellow-600",
-      DevOps: isDark ? "text-red-400" : "text-red-600",
-      "Data Science & ML": isDark ? "text-purple-400" : "text-purple-600",
-      "Mobile Development": isDark ? "text-green-400" : "text-green-600",
-      "Go Backend": isDark ? "text-cyan-400" : "text-cyan-600",
-    };
-
-    return (
-      colorMap[category] || (isDark ? "text-indigo-400" : "text-indigo-600")
-    );
-  };
+  // Consistent text color for all categories
+  const categoryTextClass = isDark ? "text-indigo-400" : "text-indigo-600";
 
   // Render skill cards by category
   return (
@@ -158,17 +113,13 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
           key={category}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`p-6 rounded-lg border bg-gradient-to-br ${getCategoryColor(
-            category
-          )}`}
+          className={`p-6 rounded-lg border bg-gradient-to-br ${categoryBgClass}`}
         >
           <div
             className="flex items-center mb-4 cursor-pointer"
             onClick={() => toggleCategory(category)}
           >
-            <h2
-              className={`text-2xl font-bold ${getHeaderTextColor(category)}`}
-            >
+            <h2 className={`text-2xl font-bold ${categoryTextClass}`}>
               {category}
             </h2>
             <div
@@ -223,7 +174,7 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
                 >
                   {categorySkills.map((skill) => (
                     <motion.div
-                      key={skill.id}
+                      key={skill.id || skill._id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                     >
