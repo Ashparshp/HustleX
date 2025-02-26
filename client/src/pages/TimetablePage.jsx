@@ -4,12 +4,7 @@ import { motion } from "framer-motion";
 import {
   CheckCircle,
   Calendar,
-  Clock,
-  History,
-  ChartBar,
   Plus,
-  Settings,
-  RefreshCcw,
   Edit,
   Trash2,
   PlusCircle,
@@ -50,7 +45,6 @@ const TimetablePage = () => {
     getStats,
     getCategories: getTimetableCategories,
     updateDefaultActivities,
-    startNewWeek,
   } = useTimetable();
 
   const {
@@ -353,16 +347,6 @@ const TimetablePage = () => {
     }
   };
 
-  const handleForceNewWeek = async () => {
-    try {
-      await startNewWeek();
-      toast.success("Started a new week successfully");
-    } catch (error) {
-      console.error("Error starting new week:", error);
-      toast.error("Failed to start new week");
-    }
-  };
-
   // Format date for display
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -642,18 +626,6 @@ const TimetablePage = () => {
                   </button>
                 </>
               )}
-
-              <button
-                onClick={handleForceNewWeek}
-                className={`p-2 rounded-lg ${
-                  isDark
-                    ? "hover:bg-gray-900 text-blue-400"
-                    : "hover:bg-gray-100 text-blue-600"
-                }`}
-                title="Force Start New Week"
-              >
-                <RefreshCcw className="w-4 h-4" />
-              </button>
             </div>
           </div>
         </div>

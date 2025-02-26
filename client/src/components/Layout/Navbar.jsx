@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
   X,
@@ -96,97 +95,6 @@ const Navbar = () => {
     },
   ];
 
-  // IMPROVED ANIMATION VARIANTS
-  // Mobile menu animations - smoother easing and transform
-  const menuVariants = {
-    closed: {
-      opacity: 0,
-      height: 0,
-      transition: {
-        opacity: { duration: 0.2, ease: "easeInOut" },
-        height: { duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] },
-        when: "afterChildren",
-        staggerChildren: 0.05,
-        staggerDirection: -1,
-      },
-    },
-    open: {
-      opacity: 1,
-      height: "auto",
-      transition: {
-        opacity: { duration: 0.25, ease: "easeInOut" },
-        height: { duration: 0.35, ease: [0.04, 0.62, 0.23, 0.98] },
-        when: "beforeChildren",
-        staggerChildren: 0.07,
-        delayChildren: 0.05,
-      },
-    },
-  };
-
-  // Link item animations - improved spring physics
-  const linkVariants = {
-    closed: { 
-      opacity: 0, 
-      y: 15,
-      transition: {
-        duration: 0.2,
-        ease: "easeIn"
-      }
-    },
-    open: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.3,
-        ease: [0.25, 0.1, 0.25, 1.0] // Cubic bezier for a natural motion
-      }
-    },
-  };
-
-  // User menu dropdown - enhanced with spring physics
-  const userMenuVariants = {
-    hidden: {
-      opacity: 0,
-      y: -5,
-      scale: 0.98,
-      transformOrigin: "top right",
-      transition: {
-        duration: 0.15,
-        ease: "easeIn"
-      },
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transformOrigin: "top right",
-      transition: {
-        type: "spring",
-        stiffness: 350,
-        damping: 25,
-        mass: 0.8
-      },
-    },
-  };
-  
-  // Button hover animation - smoother scale
-  const buttonHoverAnimation = {
-    whileHover: { 
-      scale: 1.05, 
-      transition: { 
-        duration: 0.2, 
-        ease: "easeOut" 
-      } 
-    },
-    whileTap: { 
-      scale: 0.97, 
-      transition: { 
-        duration: 0.1,
-        ease: "easeIn"
-      } 
-    }
-  };
-
   // Theme specific styling with added shadow on scroll
   const navbarClass = isDark
     ? `bg-gray-900/90 text-white border-gray-800 backdrop-blur-sm ${
@@ -221,9 +129,7 @@ const Navbar = () => {
               to={isAuthenticated ? "/dashboard" : "/login"}
               className="flex-shrink-0 flex items-center"
             >
-              <motion.span
-                initial={{ opacity: 0.9 }}
-                animate={{ opacity: 1 }}
+              <span
                 className={`text-xl font-bold ${
                   isDark ? "text-white" : "text-indigo-600"
                 } transition-colors duration-300`}
@@ -236,7 +142,7 @@ const Navbar = () => {
                 >
                   Pro
                 </span>
-              </motion.span>
+              </span>
             </Link>
           </div>
 
@@ -246,10 +152,7 @@ const Navbar = () => {
               navLinks
                 .filter((link) => link.authRequired === isAuthenticated)
                 .map((link) => (
-                  <motion.div 
-                    key={link.path}
-                    {...buttonHoverAnimation}
-                  >
+                  <div key={link.path}>
                     <Link
                       to={link.path}
                       className={`px-3 py-2 ${linkClass(isActive(link.path))}`}
@@ -257,15 +160,14 @@ const Navbar = () => {
                       {link.icon}
                       <span>{link.text}</span>
                     </Link>
-                  </motion.div>
+                  </div>
                 ))}
           </div>
 
           {/* Right side - theme toggle, notifications & user menu */}
           <div className="flex items-center space-x-1">
             {/* Theme toggle */}
-            <motion.button
-              {...buttonHoverAnimation}
+            <button
               onClick={toggleTheme}
               className={`p-2 rounded-full ${
                 isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"
@@ -273,28 +175,15 @@ const Navbar = () => {
               aria-label="Toggle theme"
             >
               {isDark ? (
-                <motion.div
-                  initial={{ rotate: -30, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Sun size={20} className="text-yellow-300" />
-                </motion.div>
+                <Sun size={20} className="text-yellow-300" />
               ) : (
-                <motion.div
-                  initial={{ rotate: 30, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Moon size={20} className="text-indigo-600" />
-                </motion.div>
+                <Moon size={20} className="text-indigo-600" />
               )}
-            </motion.button>
+            </button>
 
             {/* Notifications button - for authenticated users only */}
             {isAuthenticated && (
-              <motion.button
-                {...buttonHoverAnimation}
+              <button
                 className={`p-2 rounded-full relative ${
                   isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"
                 } transition duration-200`}
@@ -303,25 +192,14 @@ const Navbar = () => {
                   size={20}
                   className={isDark ? "text-gray-300" : "text-gray-600"}
                 />
-                <motion.span 
-                  className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"
-                  animate={{ 
-                    scale: [1, 1.15, 1], 
-                  }}
-                  transition={{ 
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatType: "loop"
-                  }}
-                ></motion.span>
-              </motion.button>
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              </button>
             )}
 
             {isAuthenticated ? (
               /* User menu (desktop) */
               <div className="hidden md:relative md:block">
-                <motion.button
-                  {...buttonHoverAnimation}
+                <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className={`flex items-center gap-2 p-1.5 rounded-full ${
                     isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"
@@ -355,124 +233,108 @@ const Navbar = () => {
                       Account
                     </p>
                   </div>
-                  <motion.div
-                    animate={{ rotate: showUserMenu ? 180 : 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
+                  <div>
                     <ChevronDown
                       size={16}
-                      className={`${isDark ? "text-gray-400" : "text-gray-500"}`}
-                    />
-                  </motion.div>
-                </motion.button>
-
-                <AnimatePresence>
-                  {showUserMenu && (
-                    <motion.div
-                      initial="hidden"
-                      animate="visible"
-                      exit="hidden"
-                      variants={userMenuVariants}
-                      className={`absolute right-0 mt-2 w-56 py-2 rounded-lg shadow-lg border ${
-                        isDark
-                          ? "bg-gray-900 border-gray-700"
-                          : "bg-white border-gray-200"
+                      className={`${
+                        isDark ? "text-gray-400" : "text-gray-500"
                       }`}
-                      onBlur={() => setShowUserMenu(false)}
+                    />
+                  </div>
+                </button>
+
+                {showUserMenu && (
+                  <div
+                    className={`absolute right-0 mt-2 w-56 py-2 rounded-lg shadow-lg border ${
+                      isDark
+                        ? "bg-gray-900 border-gray-700"
+                        : "bg-white border-gray-200"
+                    }`}
+                    onBlur={() => setShowUserMenu(false)}
+                  >
+                    <div
+                      className={`px-4 py-2 mb-1 border-b ${
+                        isDark ? "border-gray-800" : "border-gray-100"
+                      }`}
                     >
-                      <div
-                        className={`px-4 py-2 mb-1 border-b ${
-                          isDark ? "border-gray-800" : "border-gray-100"
+                      <p
+                        className={`text-sm font-medium ${
+                          isDark ? "text-white" : "text-gray-900"
                         }`}
                       >
-                        <p
-                          className={`text-sm font-medium ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
-                        >
-                          {currentUser?.name || "User"}
-                        </p>
-                        <p
-                          className={`text-xs truncate ${
-                            isDark ? "text-gray-400" : "text-gray-500"
-                          }`}
-                        >
-                          {currentUser?.email || "user@example.com"}
-                        </p>
-                      </div>
-
-                      <motion.div
-                        whileHover={{ x: 3 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Link
-                          to="/profile"
-                          className={`block px-4 py-2 text-sm ${
-                            isDark
-                              ? "hover:bg-gray-800 text-gray-300"
-                              : "hover:bg-gray-50 text-gray-700"
-                          } transition-colors duration-200`}
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          <div className="flex items-center gap-2">
-                            <User size={16} />
-                            <span>Your Profile</span>
-                          </div>
-                        </Link>
-                      </motion.div>
-                      
-                      <motion.div
-                        whileHover={{ x: 3 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Link
-                          to="/settings"
-                          className={`block px-4 py-2 text-sm ${
-                            isDark
-                              ? "hover:bg-gray-800 text-gray-300"
-                              : "hover:bg-gray-50 text-gray-700"
-                          } transition-colors duration-200`}
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          <div className="flex items-center gap-2">
-                            <Settings size={16} />
-                            <span>Settings</span>
-                          </div>
-                        </Link>
-                      </motion.div>
-
-                      <div
-                        className={`mt-1 pt-1 border-t ${
-                          isDark ? "border-gray-800" : "border-gray-100"
+                        {currentUser?.name || "User"}
+                      </p>
+                      <p
+                        className={`text-xs truncate ${
+                          isDark ? "text-gray-400" : "text-gray-500"
                         }`}
                       >
-                        <motion.div
-                          whileHover={{ x: 3 }}
-                          transition={{ duration: 0.2 }}
+                        {currentUser?.email || "user@example.com"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <Link
+                        to="/profile"
+                        className={`block px-4 py-2 text-sm ${
+                          isDark
+                            ? "hover:bg-gray-800 text-gray-300"
+                            : "hover:bg-gray-50 text-gray-700"
+                        } transition-colors duration-200`}
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <User size={16} />
+                          <span>Your Profile</span>
+                        </div>
+                      </Link>
+                    </div>
+
+                    <div>
+                      <Link
+                        to="/settings"
+                        className={`block px-4 py-2 text-sm ${
+                          isDark
+                            ? "hover:bg-gray-800 text-gray-300"
+                            : "hover:bg-gray-50 text-gray-700"
+                        } transition-colors duration-200`}
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Settings size={16} />
+                          <span>Settings</span>
+                        </div>
+                      </Link>
+                    </div>
+
+                    <div
+                      className={`mt-1 pt-1 border-t ${
+                        isDark ? "border-gray-800" : "border-gray-100"
+                      }`}
+                    >
+                      <div>
+                        <button
+                          onClick={handleLogout}
+                          className={`block w-full text-left px-4 py-2 text-sm ${
+                            isDark
+                              ? "hover:bg-red-900/20 text-red-400"
+                              : "hover:bg-red-50 text-red-600"
+                          } transition-colors duration-200`}
                         >
-                          <button
-                            onClick={handleLogout}
-                            className={`block w-full text-left px-4 py-2 text-sm ${
-                              isDark
-                                ? "hover:bg-red-900/20 text-red-400"
-                                : "hover:bg-red-50 text-red-600"
-                            } transition-colors duration-200`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <LogOut size={16} />
-                              <span>Sign out</span>
-                            </div>
-                          </button>
-                        </motion.div>
+                          <div className="flex items-center gap-2">
+                            <LogOut size={16} />
+                            <span>Sign out</span>
+                          </div>
+                        </button>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               /* Login / Register buttons (desktop) */
               <div className="hidden md:flex md:items-center md:space-x-2">
-                <motion.div {...buttonHoverAnimation}>
+                <div>
                   <Link
                     to="/login"
                     className={`px-4 py-2 rounded-md text-sm font-medium ${
@@ -483,8 +345,8 @@ const Navbar = () => {
                   >
                     Sign in
                   </Link>
-                </motion.div>
-                <motion.div {...buttonHoverAnimation}>
+                </div>
+                <div>
                   <Link
                     to="/register"
                     className={`px-4 py-2 rounded-md text-sm font-medium ${
@@ -495,14 +357,13 @@ const Navbar = () => {
                   >
                     Sign up
                   </Link>
-                </motion.div>
+                </div>
               </div>
             )}
 
             {/* Mobile menu button */}
             <div className="flex md:hidden">
-              <motion.button
-                {...buttonHoverAnimation}
+              <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`inline-flex items-center justify-center p-2 rounded-md ${
                   isDark
@@ -512,193 +373,164 @@ const Navbar = () => {
                 aria-expanded="false"
               >
                 <span className="sr-only">Open main menu</span>
-                <AnimatePresence mode="wait">
-                  {isOpen ? (
-                    <motion.div
-                      key="close"
-                      initial={{ rotate: -90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: 90, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <X className="block h-6 w-6" aria-hidden="true" />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="menu"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Menu className="block h-6 w-6" aria-hidden="true" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
+                {isOpen ? (
+                  <X className="block h-6 w-6" aria-hidden="true" />
+                ) : (
+                  <Menu className="block h-6 w-6" aria-hidden="true" />
+                )}
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Mobile menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={menuVariants}
-            className={`md:hidden overflow-hidden ${
-              isDark ? "bg-gray-900" : "bg-white"
-            }`}
-          >
-            {/* User info block for mobile (when authenticated) */}
-            {isAuthenticated && (
-              <motion.div
-                variants={linkVariants}
-                className={`px-4 py-4 border-b ${
-                  isDark ? "border-gray-800" : "border-gray-100"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`h-10 w-10 rounded-full grid place-items-center ${
-                      isDark
-                        ? "bg-indigo-500/20 border border-indigo-500/30"
-                        : "bg-indigo-100 border border-indigo-200"
+      {isOpen && (
+        <div className={`md:hidden ${isDark ? "bg-gray-900" : "bg-white"}`}>
+          {/* User info block for mobile (when authenticated) */}
+          {isAuthenticated && (
+            <div
+              className={`px-4 py-4 border-b ${
+                isDark ? "border-gray-800" : "border-gray-100"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`h-10 w-10 rounded-full grid place-items-center ${
+                    isDark
+                      ? "bg-indigo-500/20 border border-indigo-500/30"
+                      : "bg-indigo-100 border border-indigo-200"
+                  }`}
+                >
+                  <User
+                    size={18}
+                    className={isDark ? "text-indigo-400" : "text-indigo-600"}
+                  />
+                </div>
+                <div>
+                  <p
+                    className={`text-sm font-medium ${
+                      isDark ? "text-white" : "text-gray-900"
                     }`}
                   >
-                    <User
-                      size={18}
-                      className={isDark ? "text-indigo-400" : "text-indigo-600"}
-                    />
-                  </div>
-                  <div>
-                    <p
-                      className={`text-sm font-medium ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {currentUser?.name || "User"}
-                    </p>
-                    <p
-                      className={`text-xs truncate ${
-                        isDark ? "text-gray-400" : "text-gray-500"
-                      }`}
-                    >
-                      {currentUser?.email || "user@example.com"}
-                    </p>
-                  </div>
+                    {currentUser?.name || "User"}
+                  </p>
+                  <p
+                    className={`text-xs truncate ${
+                      isDark ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    {currentUser?.email || "user@example.com"}
+                  </p>
                 </div>
-              </motion.div>
-            )}
-
-            <div className="px-3 pt-2 pb-3 space-y-1 sm:px-4">
-              {isAuthenticated ? (
-                <>
-                  {navLinks
-                    .filter((link) => link.authRequired === isAuthenticated)
-                    .map((link) => (
-                      <motion.div key={link.path} variants={linkVariants}>
-                        <Link
-                          to={link.path}
-                          className={`block px-3 py-2.5 ${linkClass(
-                            isActive(link.path)
-                          )}`}
-                          onClick={closeMenu}
-                        >
-                          {link.icon}
-                          <span>{link.text}</span>
-                        </Link>
-                      </motion.div>
-                    ))}
-
-                  <div
-                    className={`my-2 border-t ${
-                      isDark ? "border-gray-800" : "border-gray-100"
-                    }`}
-                  ></div>
-
-                  <motion.div variants={linkVariants}>
-                    <Link
-                      to="/profile"
-                      className={`block px-3 py-2.5 ${linkClass(
-                        isActive("/profile")
-                      )}`}
-                      onClick={closeMenu}
-                    >
-                      <User size={16} />
-                      <span>Profile</span>
-                    </Link>
-                  </motion.div>
-                  <motion.div variants={linkVariants}>
-                    <Link
-                      to="/settings"
-                      className={`block px-3 py-2.5 ${linkClass(
-                        isActive("/settings")
-                      )}`}
-                      onClick={closeMenu}
-                    >
-                      <Settings size={16} />
-                      <span>Settings</span>
-                    </Link>
-                  </motion.div>
-
-                  <div
-                    className={`my-2 border-t ${
-                      isDark ? "border-gray-800" : "border-gray-100"
-                    }`}
-                  ></div>
-
-                  <motion.div variants={linkVariants}>
-                    <button
-                      onClick={handleLogout}
-                      className={`flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-md ${
-                        isDark
-                          ? "text-red-400 hover:bg-red-900/20"
-                          : "text-red-600 hover:bg-red-50"
-                      } transition-colors duration-200`}
-                    >
-                      <LogOut size={16} />
-                      <span>Sign out</span>
-                    </button>
-                  </motion.div>
-                </>
-              ) : (
-                <>
-                  <motion.div variants={linkVariants} className="py-2">
-                    <Link
-                      to="/login"
-                      className={`flex items-center justify-center py-2.5 px-4 rounded-md font-medium ${
-                        isDark
-                          ? "text-indigo-400 border border-indigo-500/30 hover:bg-indigo-900/20"
-                          : "text-indigo-600 border border-indigo-200 hover:bg-indigo-50"
-                      } transition-colors duration-200`}
-                      onClick={closeMenu}
-                    >
-                      Sign in
-                    </Link>
-                  </motion.div>
-                  <motion.div variants={linkVariants} className="py-2">
-                    <Link
-                      to="/register"
-                      className={`flex items-center justify-center py-2.5 px-4 rounded-md font-medium ${
-                        isDark
-                          ? "bg-indigo-600 hover:bg-indigo-500 text-white"
-                          : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                      } transition-colors duration-200`}
-                      onClick={closeMenu}
-                    >
-                      Create an account
-                    </Link>
-                  </motion.div>
-                </>
-              )}
+              </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+
+          <div className="px-3 pt-2 pb-3 space-y-1 sm:px-4">
+            {isAuthenticated ? (
+              <>
+                {navLinks
+                  .filter((link) => link.authRequired === isAuthenticated)
+                  .map((link) => (
+                    <div key={link.path}>
+                      <Link
+                        to={link.path}
+                        className={`block px-3 py-2.5 ${linkClass(
+                          isActive(link.path)
+                        )}`}
+                        onClick={closeMenu}
+                      >
+                        {link.icon}
+                        <span>{link.text}</span>
+                      </Link>
+                    </div>
+                  ))}
+
+                <div
+                  className={`my-2 border-t ${
+                    isDark ? "border-gray-800" : "border-gray-100"
+                  }`}
+                ></div>
+
+                <div>
+                  <Link
+                    to="/profile"
+                    className={`block px-3 py-2.5 ${linkClass(
+                      isActive("/profile")
+                    )}`}
+                    onClick={closeMenu}
+                  >
+                    <User size={16} />
+                    <span>Profile</span>
+                  </Link>
+                </div>
+                <div>
+                  <Link
+                    to="/settings"
+                    className={`block px-3 py-2.5 ${linkClass(
+                      isActive("/settings")
+                    )}`}
+                    onClick={closeMenu}
+                  >
+                    <Settings size={16} />
+                    <span>Settings</span>
+                  </Link>
+                </div>
+
+                <div
+                  className={`my-2 border-t ${
+                    isDark ? "border-gray-800" : "border-gray-100"
+                  }`}
+                ></div>
+
+                <div>
+                  <button
+                    onClick={handleLogout}
+                    className={`flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-md ${
+                      isDark
+                        ? "text-red-400 hover:bg-red-900/20"
+                        : "text-red-600 hover:bg-red-50"
+                    } transition-colors duration-200`}
+                  >
+                    <LogOut size={16} />
+                    <span>Sign out</span>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="py-2">
+                  <Link
+                    to="/login"
+                    className={`flex items-center justify-center py-2.5 px-4 rounded-md font-medium ${
+                      isDark
+                        ? "text-indigo-400 border border-indigo-500/30 hover:bg-indigo-900/20"
+                        : "text-indigo-600 border border-indigo-200 hover:bg-indigo-50"
+                    } transition-colors duration-200`}
+                    onClick={closeMenu}
+                  >
+                    Sign in
+                  </Link>
+                </div>
+                <div className="py-2">
+                  <Link
+                    to="/register"
+                    className={`flex items-center justify-center py-2.5 px-4 rounded-md font-medium ${
+                      isDark
+                        ? "bg-indigo-600 hover:bg-indigo-500 text-white"
+                        : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                    } transition-colors duration-200`}
+                    onClick={closeMenu}
+                  >
+                    Create an account
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

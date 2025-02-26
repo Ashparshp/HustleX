@@ -1,16 +1,51 @@
 import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import {
-  Plus,
-  Edit2,
-  Trash2,
-  Save,
-  X,
-  Tag,
-  Circle,
-  RefreshCw,
-} from "lucide-react";
+import { Plus, Edit2, Trash2, Save, X, RefreshCw } from "lucide-react";
 import LoadingSpinner from "../UI/LoadingSpinner";
+
+const ConfirmModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  isDark,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div
+        className={`w-full max-w-md p-6 rounded-lg shadow-xl ${
+          isDark ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+        }`}
+      >
+        <h2 className="text-xl font-semibold mb-4">{title}</h2>
+        <p className={`mb-6 ${isDark ? "text-gray-300" : "text-gray-600"}`}>
+          {message}
+        </p>
+        <div className="flex justify-end space-x-2">
+          <button
+            onClick={onClose}
+            className={`px-4 py-2 rounded-lg ${
+              isDark
+                ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+            }`}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white`}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const CategoryManagement = ({
   categories,
@@ -25,6 +60,7 @@ const CategoryManagement = ({
   const { isDark } = useTheme();
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     color: "#3498db",
@@ -107,13 +143,14 @@ const CategoryManagement = ({
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this platform?")) {
-      try {
-        await onDelete(id);
-      } catch (error) {
-        console.error("Error deleting category:", error);
-      }
+  const handleDelete = async () => {
+    if (!categoryToDelete) return;
+
+    try {
+      await onDelete(categoryToDelete);
+      setCategoryToDelete(null);
+    } catch (error) {
+      console.error("Error deleting category:", error);
     }
   };
 
@@ -137,6 +174,16 @@ const CategoryManagement = ({
 
   return (
     <div className="space-y-4">
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={categoryToDelete !== null}
+        onClose={() => setCategoryToDelete(null)}
+        onConfirm={handleDelete}
+        title="Delete Platform"
+        message="Are you sure you want to delete this platform? This action cannot be undone."
+        isDark={isDark}
+      />
+
       <div className="flex justify-between items-center">
         <h2
           className={`text-xl font-semibold ${
@@ -394,7 +441,7 @@ const CategoryManagement = ({
                 </button>
 
                 <button
-                  onClick={() => handleDelete(category._id)}
+                  onClick={() => setCategoryToDelete(category._id)}
                   className={`p-1.5 rounded-lg ${
                     isDark
                       ? "hover:bg-gray-700 text-red-400"
