@@ -143,7 +143,7 @@ exports.deleteLeetCodeStats = async (req, res) => {
       });
     }
     
-    await stats.remove();
+    await stats.deleteOne();
     
     res.json({
       success: true,

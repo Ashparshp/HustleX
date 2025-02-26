@@ -158,7 +158,7 @@ exports.deleteWorkingHours = async (req, res) => {
       });
     }
 
-    await workingHours.remove();
+    await workingHours.deleteOne();
     res.json({ 
       success: true, 
       message: "Working hours entry deleted successfully" 

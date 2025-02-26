@@ -183,7 +183,7 @@ exports.deleteSchedule = async (req, res) => {
       });
     }
 
-    await schedule.remove();
+    await schedule.deleteOne();
 
     res.json({
       success: true,
