@@ -5,11 +5,11 @@ const scheduleItemSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   description: {
     type: String,
-    trim: true
+    trim: true,
   },
   startTime: {
     type: String,
@@ -21,7 +21,7 @@ const scheduleItemSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    required: true
+    required: true,
   },
   priority: {
     type: String,
@@ -34,7 +34,7 @@ const scheduleItemSchema = new mongoose.Schema({
   },
   notes: {
     type: String,
-    trim: true
+    trim: true,
   },
 });
 
@@ -42,8 +42,8 @@ const scheduleSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
+      ref: "User",
+      required: true,
     },
     date: {
       type: Date,
@@ -64,54 +64,44 @@ const scheduleSchema = new mongoose.Schema(
       enum: ["Planned", "In Progress", "Completed"],
       default: "Planned",
     },
-    overallCompletion: {
-      type: Number,
-      default: 0
-    },
-    templateName: {
-      type: String, // If this schedule is based on a template
-      trim: true
-    }
   },
   { timestamps: true }
 );
 
-// Calculate total hours and completion rate before saving
+// Calculate total hours before saving
 scheduleSchema.pre("save", function (next) {
   let total = 0;
   let completedItems = 0;
-  
+
   this.items.forEach((item) => {
     // Calculate hours
     const start = new Date(`2000-01-01T${item.startTime}`);
     const end = new Date(`2000-01-01T${item.endTime}`);
     total += (end - start) / (1000 * 60 * 60); // Convert to hours
-    
+
     // Track completed items
     if (item.completed) {
       completedItems++;
     }
   });
-  
+
   this.totalHours = total;
-  
-  // Calculate completion percentage
+
+  // Update status based on completion
   if (this.items.length > 0) {
-    this.overallCompletion = (completedItems / this.items.length) * 100;
-    
-    // Update status based on completion
-    if (this.overallCompletion === 0) {
+    const completionPercentage = (completedItems / this.items.length) * 100;
+
+    if (completionPercentage === 0) {
       this.status = "Planned";
-    } else if (this.overallCompletion < 100) {
+    } else if (completionPercentage < 100) {
       this.status = "In Progress";
     } else {
       this.status = "Completed";
     }
   } else {
-    this.overallCompletion = 0;
     this.status = "Planned";
   }
-  
+
   next();
 });
 
