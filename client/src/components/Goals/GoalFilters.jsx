@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Calendar, Filter, Target, X, Clock } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
-import { Calendar, Filter } from "lucide-react";
 
 const GoalFilters = ({ initialFilters, onApply, onCancel, platforms }) => {
   const { isDark } = useTheme();
@@ -54,29 +55,95 @@ const GoalFilters = ({ initialFilters, onApply, onCancel, platforms }) => {
     onApply(formattedFilters);
   };
 
+  // Quick date selectors
+  const quickDateSelectors = [
+    {
+      label: "Last Month",
+      action: () => {
+        const today = new Date();
+        const lastMonth = new Date();
+        lastMonth.setMonth(today.getMonth() - 1);
+
+        setFilters((prev) => ({
+          ...prev,
+          startDate: lastMonth.toISOString().split("T")[0],
+          endDate: today.toISOString().split("T")[0],
+        }));
+      },
+    },
+    {
+      label: "Last 3 Months",
+      action: () => {
+        const today = new Date();
+        const lastThreeMonths = new Date();
+        lastThreeMonths.setMonth(today.getMonth() - 3);
+
+        setFilters((prev) => ({
+          ...prev,
+          startDate: lastThreeMonths.toISOString().split("T")[0],
+          endDate: today.toISOString().split("T")[0],
+        }));
+      },
+    },
+    {
+      label: "Last 6 Months",
+      action: () => {
+        const today = new Date();
+        const lastSixMonths = new Date();
+        lastSixMonths.setMonth(today.getMonth() - 6);
+
+        setFilters((prev) => ({
+          ...prev,
+          startDate: lastSixMonths.toISOString().split("T")[0],
+          endDate: today.toISOString().split("T")[0],
+        }));
+      },
+    },
+    {
+      label: "Last Year",
+      action: () => {
+        const today = new Date();
+        const lastYear = new Date();
+        lastYear.setFullYear(today.getFullYear() - 1);
+
+        setFilters((prev) => ({
+          ...prev,
+          startDate: lastYear.toISOString().split("T")[0],
+          endDate: today.toISOString().split("T")[0],
+        }));
+      },
+    },
+  ];
+
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="space-y-4">
-        {/* Platform filter */}
-        <div>
-          <label
-            htmlFor="platform"
-            className={`block text-sm font-medium ${
-              isDark ? "text-gray-200" : "text-gray-700"
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Platform filter */}
+      <div>
+        <label
+          htmlFor="platform"
+          className={`block text-sm font-medium mb-2 ${
+            isDark ? "text-gray-300" : "text-gray-700"
+          }`}
+        >
+          Platform
+        </label>
+        <div className="relative">
+          <Target
+            className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDark ? "text-indigo-400" : "text-indigo-600"
             }`}
-          >
-            Platform
-          </label>
+          />
           <select
             id="platform"
             name="platform"
             value={filters.platform}
             onChange={handleChange}
-            className={`mt-1 block w-full rounded-md shadow-sm py-2 px-3 ${
-              isDark
-                ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-            }`}
+            className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border appearance-none transition-all duration-300
+              ${
+                isDark
+                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+              }`}
           >
             <option value="">All Platforms</option>
             {platforms.map((platform, index) => {
@@ -90,241 +157,192 @@ const GoalFilters = ({ initialFilters, onApply, onCancel, platforms }) => {
             })}
           </select>
         </div>
+      </div>
 
-        {/* Participation status */}
-        <div>
-          <label
-            htmlFor="participated"
-            className={`block text-sm font-medium ${
-              isDark ? "text-gray-200" : "text-gray-700"
+      {/* Participation status */}
+      <div>
+        <label
+          htmlFor="participated"
+          className={`block text-sm font-medium mb-2 ${
+            isDark ? "text-gray-300" : "text-gray-700"
+          }`}
+        >
+          Participation Status
+        </label>
+        <div className="relative">
+          <Clock
+            className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDark ? "text-indigo-400" : "text-indigo-600"
             }`}
-          >
-            Participation Status
-          </label>
+          />
           <select
             id="participated"
             name="participated"
             value={filters.participated}
             onChange={handleChange}
-            className={`mt-1 block w-full rounded-md shadow-sm py-2 px-3 ${
-              isDark
-                ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-            }`}
+            className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border appearance-none transition-all duration-300
+              ${
+                isDark
+                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+              }`}
           >
             <option value="">All</option>
             <option value="true">Participated</option>
             <option value="false">Not Participated</option>
           </select>
         </div>
+      </div>
 
-        {/* Date range */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label
-              htmlFor="startDate"
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-200" : "text-gray-700"
-              }`}
-            >
-              Start Date
-            </label>
-            <div className="relative mt-1">
-              <div
-                className={`absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                <Calendar size={16} />
-              </div>
-              <input
-                type="date"
-                id="startDate"
-                name="startDate"
-                value={filters.startDate}
-                onChange={handleChange}
-                className={`block w-full rounded-md shadow-sm py-2 pl-10 pr-3 ${
-                  isDark
-                    ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                    : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                }`}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="endDate"
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-200" : "text-gray-700"
-              }`}
-            >
-              End Date
-            </label>
-            <div className="relative mt-1">
-              <div
-                className={`absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                <Calendar size={16} />
-              </div>
-              <input
-                type="date"
-                id="endDate"
-                name="endDate"
-                value={filters.endDate}
-                onChange={handleChange}
-                className={`block w-full rounded-md shadow-sm py-2 pl-10 pr-3 ${
-                  isDark
-                    ? "bg-gray-700 text-white border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-                    : "bg-white text-gray-900 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                }`}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Quick date selectors */}
+      {/* Date range */}
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <label
+            htmlFor="startDate"
             className={`block text-sm font-medium mb-2 ${
-              isDark ? "text-gray-200" : "text-gray-700"
+              isDark ? "text-gray-300" : "text-gray-700"
             }`}
           >
-            Quick Select
+            Start Date
           </label>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <button
-              type="button"
-              onClick={() => {
-                const today = new Date();
-                const lastMonth = new Date();
-                lastMonth.setMonth(today.getMonth() - 1);
-
-                setFilters({
-                  ...filters,
-                  startDate: lastMonth.toISOString().split("T")[0],
-                  endDate: today.toISOString().split("T")[0],
-                });
-              }}
-              className={`py-1 px-2 text-xs rounded-md ${
-                isDark
-                  ? "bg-gray-600 text-gray-200 hover:bg-gray-500"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+          <div className="relative">
+            <Calendar
+              className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                isDark ? "text-indigo-400" : "text-indigo-600"
               }`}
-            >
-              Last Month
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const today = new Date();
-                const lastThreeMonths = new Date();
-                lastThreeMonths.setMonth(today.getMonth() - 3);
-
-                setFilters({
-                  ...filters,
-                  startDate: lastThreeMonths.toISOString().split("T")[0],
-                  endDate: today.toISOString().split("T")[0],
-                });
-              }}
-              className={`py-1 px-2 text-xs rounded-md ${
-                isDark
-                  ? "bg-gray-600 text-gray-200 hover:bg-gray-500"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              Last 3 Months
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const today = new Date();
-                const lastSixMonths = new Date();
-                lastSixMonths.setMonth(today.getMonth() - 6);
-
-                setFilters({
-                  ...filters,
-                  startDate: lastSixMonths.toISOString().split("T")[0],
-                  endDate: today.toISOString().split("T")[0],
-                });
-              }}
-              className={`py-1 px-2 text-xs rounded-md ${
-                isDark
-                  ? "bg-gray-600 text-gray-200 hover:bg-gray-500"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              Last 6 Months
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const today = new Date();
-                const lastYear = new Date();
-                lastYear.setFullYear(today.getFullYear() - 1);
-
-                setFilters({
-                  ...filters,
-                  startDate: lastYear.toISOString().split("T")[0],
-                  endDate: today.toISOString().split("T")[0],
-                });
-              }}
-              className={`py-1 px-2 text-xs rounded-md ${
-                isDark
-                  ? "bg-gray-600 text-gray-200 hover:bg-gray-500"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              Last Year
-            </button>
+            />
+            <input
+              type="date"
+              id="startDate"
+              name="startDate"
+              value={filters.startDate}
+              onChange={handleChange}
+              className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
+                ${
+                  isDark
+                    ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                    : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                }`}
+            />
           </div>
         </div>
 
-        {/* Clear filters */}
-        <div className="text-right">
-          <button
-            type="button"
-            onClick={() => {
-              setFilters({
-                platform: "",
-                participated: "",
-                startDate: "",
-                endDate: "",
-              });
-            }}
-            className={`text-sm ${
-              isDark
-                ? "text-red-400 hover:text-red-300"
-                : "text-red-600 hover:text-red-700"
+        <div>
+          <label
+            htmlFor="endDate"
+            className={`block text-sm font-medium mb-2 ${
+              isDark ? "text-gray-300" : "text-gray-700"
             }`}
           >
-            Clear All Filters
-          </button>
+            End Date
+          </label>
+          <div className="relative">
+            <Calendar
+              className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                isDark ? "text-indigo-400" : "text-indigo-600"
+              }`}
+            />
+            <input
+              type="date"
+              id="endDate"
+              name="endDate"
+              value={filters.endDate}
+              onChange={handleChange}
+              className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
+                ${
+                  isDark
+                    ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                    : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                }`}
+            />
+          </div>
         </div>
+      </div>
 
-        {/* Form actions */}
-        <div className="flex justify-end space-x-3 pt-4">
-          <button
-            type="button"
-            onClick={onCancel}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
-              isDark
-                ? "bg-gray-600 text-gray-200 hover:bg-gray-500"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 flex items-center"
-          >
-            <Filter size={16} className="mr-1" />
-            Apply Filters
-          </button>
+      {/* Quick date selectors */}
+      <div>
+        <label
+          className={`block text-sm font-medium mb-2 ${
+            isDark ? "text-gray-300" : "text-gray-700"
+          }`}
+        >
+          Quick Select
+        </label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {quickDateSelectors.map((selector, index) => (
+            <motion.button
+              key={index}
+              type="button"
+              onClick={selector.action}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`py-2 px-3 text-xs rounded-lg transition-all duration-300 ${
+                isDark
+                  ? "bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                  : "bg-indigo-100/50 border border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+              }`}
+            >
+              {selector.label}
+            </motion.button>
+          ))}
         </div>
+      </div>
+
+      {/* Clear filters */}
+      <div className="text-right">
+        <motion.button
+          type="button"
+          onClick={() => {
+            setFilters({
+              platform: "",
+              participated: "",
+              startDate: "",
+              endDate: "",
+            });
+          }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className={`text-sm flex items-center ${
+            isDark
+              ? "text-red-400 hover:text-red-300"
+              : "text-red-600 hover:text-red-700"
+          }`}
+        >
+          <X className="mr-1 w-4 h-4" />
+          Clear All Filters
+        </motion.button>
+      </div>
+
+      {/* Form actions */}
+      <div className="flex justify-end space-x-3 pt-4">
+        <motion.button
+          type="button"
+          onClick={onCancel}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className={`px-6 py-2.5 rounded-lg border transition-all duration-300
+            ${
+              isDark
+                ? "bg-transparent border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10"
+                : "bg-transparent border-indigo-300/50 text-indigo-600 hover:bg-indigo-50"
+            }`}
+        >
+          Cancel
+        </motion.button>
+        <motion.button
+          type="submit"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className={`px-6 py-2.5 rounded-lg flex items-center transition-all duration-300
+            ${
+              isDark
+                ? "bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
+                : "bg-indigo-100/50 border border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+            }`}
+        >
+          <Filter size={16} className="mr-2" />
+          Apply Filters
+        </motion.button>
       </div>
     </form>
   );
