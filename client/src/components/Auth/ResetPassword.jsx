@@ -1,3 +1,4 @@
+// ResetPassword.jsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams, Link } from "react-router-dom";
@@ -21,7 +22,6 @@ const ResetPassword = () => {
   const { token } = useParams();
   const navigate = useNavigate();
 
-  // Check if token exists
   useEffect(() => {
     if (!token) {
       setIsTokenValid(false);
@@ -29,22 +29,16 @@ const ResetPassword = () => {
     }
   }, [token]);
 
-  // Fix for mobile viewport height (adjust for navbar)
   useEffect(() => {
     const setVh = () => {
-      // First get the viewport height and multiply it by 1% to get a value for a vh unit
       const vh = window.innerHeight * 0.01;
-      // Set the value in the --vh custom property to the root of the document
       document.documentElement.style.setProperty("--vh", `${vh}px`);
     };
 
-    // Set the height initially
     setVh();
 
-    // Add event listener to reset on window resize
     window.addEventListener("resize", setVh);
 
-    // Clean up
     return () => window.removeEventListener("resize", setVh);
   }, []);
 
@@ -52,7 +46,6 @@ const ResetPassword = () => {
     e.preventDefault();
     if (isSubmitting) return;
 
-    // Form validation
     if (password.length < 6) {
       setFormError("Password must be at least 6 characters long");
       return;
@@ -70,7 +63,6 @@ const ResetPassword = () => {
       await resetPassword(token, password);
       setIsSuccess(true);
 
-      // Redirect to login after 3 seconds
       setTimeout(() => {
         navigate("/login");
       }, 3000);
@@ -87,8 +79,7 @@ const ResetPassword = () => {
       className={`flex items-center justify-center px-4 pt-6 pb-6 sm:pb-8
       ${isDark ? "bg-black" : "bg-gray-50"}
       `}
-      // Use calculated height instead of min-h-screen
-      style={{ minHeight: "calc(100vh - 60px)" }} // Subtract approximate navbar height
+      style={{ minHeight: "calc(100vh - 60px)" }}
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -182,7 +173,6 @@ const ResetPassword = () => {
             </motion.div>
           ) : isTokenValid ? (
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* New Password Field */}
               <div className="group/input">
                 <label
                   className={`block mb-2 text-sm font-medium
@@ -247,7 +237,6 @@ const ResetPassword = () => {
                 </p>
               </div>
 
-              {/* Confirm Password Field */}
               <div className="group/input">
                 <label
                   className={`block mb-2 text-sm font-medium
@@ -304,7 +293,6 @@ const ResetPassword = () => {
                 </div>
               </div>
 
-              {/* Submit Button */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
