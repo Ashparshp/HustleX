@@ -29,7 +29,7 @@ app.use(hpp());
 // Configure CORS dynamically from environment variables
 const allowedOrigins = process.env.CLIENT_URLS
   ? process.env.CLIENT_URLS.split(",")
-  : [];
+  : ["http://localhost:5173"];
 
 app.use(
   cors({

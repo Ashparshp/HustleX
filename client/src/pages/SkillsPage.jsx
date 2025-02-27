@@ -216,10 +216,10 @@ const SkillsPage = () => {
             {/* Refresh Button */}
             <button
               onClick={() => fetchSkills()}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`p-2 rounded-lg transition-colors shadow-sm ${
                 isDark
-                  ? "bg-gray-800 hover:bg-gray-700 text-gray-400"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                  ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+                  : "bg-indigo-100/50 hover:bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
               }`}
               aria-label="Refresh"
             >

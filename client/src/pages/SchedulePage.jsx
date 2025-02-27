@@ -230,10 +230,10 @@ const SchedulePage = () => {
 
             <button
               onClick={() => fetchSchedules()}
-              className={`flex items-center px-4 py-2 rounded-lg ${
+              className={`p-2 rounded-lg transition-colors shadow-sm ${
                 isDark
-                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                  : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+                  ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+                  : "bg-indigo-100/50 hover:bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
               }`}
               aria-label="Refresh"
             >

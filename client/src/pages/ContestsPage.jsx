@@ -3,13 +3,11 @@ import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Trophy,
-  Calendar,
   Filter,
   Plus,
   RefreshCw,
   Search,
   BarChart2,
-  PieChart,
   ArrowUpDown,
   Settings,
   Award,
@@ -310,25 +308,6 @@ const ContestsPage = () => {
               <span className="text-xs md:text-sm">Stats</span>
             </FilterButton>
 
-            {/* Visualize Button */}
-            <FilterButton
-              active={showVisualization}
-              onClick={() => setShowVisualization(true)}
-              colorClass={
-                isDark
-                  ? "bg-purple-500/10 border-purple-500/30 text-purple-400"
-                  : "bg-purple-100/50 border-purple-300/50 text-purple-600"
-              }
-              hoverClass={
-                isDark
-                  ? "hover:bg-purple-500/20 hover:border-purple-400"
-                  : "hover:bg-purple-200/70 hover:border-purple-500"
-              }
-            >
-              <Eye className="w-3 h-3 md:w-4 md:h-4" />
-              <span className="text-xs md:text-sm">Visualize</span>
-            </FilterButton>
-
             {/* Platforms Button */}
             <FilterButton
               active={showCategoryManagement}
@@ -383,14 +362,14 @@ const ContestsPage = () => {
             {/* Refresh Button */}
             <button
               onClick={() => fetchContests()}
-              className={`p-1.5 md:p-2 rounded-lg transition-colors ${
+              className={`p-2 rounded-lg transition-colors shadow-sm ${
                 isDark
-                  ? "bg-gray-800 hover:bg-gray-700 text-gray-400"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                  ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+                  : "bg-indigo-100/50 hover:bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
               }`}
               aria-label="Refresh"
             >
-              <RefreshCw size={16} />
+              <RefreshCw size={14} />
             </button>
           </motion.div>
         </div>
