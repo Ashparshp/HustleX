@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { Check, X, ArrowLeft, ArrowRight, Loader } from "lucide-react";
+import { Check, X, ArrowLeft } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import LoadingSpinner from "../UI/LoadingSpinner";
 
 const EmailVerification = () => {
-  const [verificationStatus, setVerificationStatus] = useState("verifying"); // 'verifying', 'success', 'error'
+  const [verificationStatus, setVerificationStatus] = useState("verifying");
   const [errorMessage, setErrorMessage] = useState("");
 
   const { verifyEmail } = useAuth();
@@ -27,7 +26,6 @@ const EmailVerification = () => {
         await verifyEmail(token);
         setVerificationStatus("success");
 
-        // Redirect to login after successful verification
         setTimeout(() => {
           navigate("/login");
         }, 5000);
@@ -40,7 +38,6 @@ const EmailVerification = () => {
     verifyToken();
   }, [token, verifyEmail, navigate]);
 
-  // Content based on verification status
   const renderContent = () => {
     switch (verificationStatus) {
       case "verifying":
