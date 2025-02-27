@@ -1,6 +1,6 @@
 // src/components/Skills/SkillCard.jsx
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Edit2,
   Trash2,
@@ -32,7 +32,7 @@ const SkillCard = ({ skill, onEdit }) => {
     });
   };
 
-  // Status color mapping - Blackish indigo with yellow/green/gray
+  // Status color mapping - Original colors
   const getStatusColors = (status) => {
     const statusMap = {
       upcoming: isDark
@@ -48,7 +48,7 @@ const SkillCard = ({ skill, onEdit }) => {
     return statusMap[status] || statusMap.upcoming;
   };
 
-  // Priority color mapping
+  // Priority color mapping - Original colors
   const getPriorityColors = (priority) => {
     const priorityMap = {
       high: isDark
@@ -64,7 +64,7 @@ const SkillCard = ({ skill, onEdit }) => {
     return priorityMap[priority] || priorityMap.medium;
   };
 
-  // Progress bar color - Blackish indigo with yellow/green/gray
+  // Progress bar color - Original colors
   const getProgressColor = (progress, status) => {
     // Base color on both progress and status
     if (status === "completed") return "bg-green-500";
@@ -87,7 +87,7 @@ const SkillCard = ({ skill, onEdit }) => {
     return "bg-indigo-900";
   };
 
-  // Get gradient colors based on status
+  // Get gradient colors based on status - Original colors
   const getGradientColors = (status) => {
     const gradientMap = {
       upcoming: "from-indigo-900 to-gray-800",
@@ -97,7 +97,7 @@ const SkillCard = ({ skill, onEdit }) => {
     return gradientMap[status] || gradientMap.upcoming;
   };
 
-  // Handle edit button click - Ensure we pass the skill data correctly
+  // Handle edit button click
   const handleEditClick = () => {
     // Create a complete copy of the skill object to ensure all properties are passed correctly
     const skillData = {
@@ -113,8 +113,6 @@ const SkillCard = ({ skill, onEdit }) => {
       startDate: skill.startDate || "",
       completionDate: skill.completionDate || "",
     };
-    // Pass the complete skill object to the edit handler
-    console.log("Passing skill data to edit modal:", skillData);
     onEdit(skillData);
   };
 
@@ -144,7 +142,6 @@ const SkillCard = ({ skill, onEdit }) => {
   const isCompleted = skill.status === "completed";
   const statusColors = getStatusColors(skill.status);
   const priorityColors = getPriorityColors(skill.priority);
-  const gradientColors = getGradientColors(skill.status);
 
   return (
     <>
@@ -153,14 +150,16 @@ const SkillCard = ({ skill, onEdit }) => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         whileHover={{ y: -3, transition: { duration: 0.2 } }}
-        className="relative group"
+        className="h-full relative group"
       >
         <div
           className={`absolute -inset-0.5 bg-gradient-to-r rounded-lg blur opacity-40 
-                   group-hover:opacity-60 transition duration-300 ${gradientColors}`}
+                   group-hover:opacity-60 transition duration-300 ${getGradientColors(
+                     skill.status
+                   )}`}
         />
         <div
-          className={`relative p-6 rounded-lg border backdrop-blur-sm transition-all duration-300
+          className={`relative h-full p-5 rounded-lg border backdrop-blur-sm transition-all duration-300
           ${
             isDark
               ? "bg-black border-indigo-900/50 group-hover:border-indigo-700"
@@ -171,7 +170,7 @@ const SkillCard = ({ skill, onEdit }) => {
             {/* Header with status and actions */}
             <div className="flex justify-between items-start">
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {isCompleted && (
                     <Award
                       className={`w-5 h-5 ${
@@ -179,37 +178,37 @@ const SkillCard = ({ skill, onEdit }) => {
                       }`}
                     />
                   )}
-                  <span
+                  <h3
                     className={`font-medium text-lg ${
-                      isDark ? "text-indigo-300" : "text-indigo-800"
+                      isDark ? "text-white" : "text-gray-900"
                     }`}
                   >
                     {skill.name}
-                  </span>
+                  </h3>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
                   <span
-                    className={`px-3 py-1 text-xs font-medium rounded-full border ${statusColors}`}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md border ${statusColors}`}
                   >
                     {skill.status.replace("-", " ")}
                   </span>
-                </div>
-                <div className="flex items-center gap-2">
                   <span
-                    className={`px-2 py-0.5 text-xs font-medium rounded-full border flex items-center gap-1 ${priorityColors}`}
+                    className={`px-2 py-0.5 text-xs font-medium rounded-md border flex items-center gap-1 ${priorityColors}`}
                   >
                     <Flag className="w-3 h-3" />
                     {skill.priority}
                   </span>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleEditClick}
                   className={`p-2 rounded-lg transition-colors ${
                     isDark
-                      ? "hover:bg-indigo-900/20 text-indigo-300"
-                      : "hover:bg-indigo-50 text-indigo-700"
+                      ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+                      : "bg-indigo-100/50 hover:bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
                   }`}
                   title="Edit skill"
                 >
@@ -221,8 +220,8 @@ const SkillCard = ({ skill, onEdit }) => {
                   onClick={handleDeleteClick}
                   className={`p-2 rounded-lg transition-colors ${
                     isDark
-                      ? "hover:bg-red-900/20 text-red-400"
-                      : "hover:bg-red-50 text-red-600"
+                      ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30"
+                      : "bg-red-100/50 hover:bg-red-100/70 text-red-600 border border-red-300/50"
                   }`}
                   title="Delete skill"
                 >
@@ -232,7 +231,7 @@ const SkillCard = ({ skill, onEdit }) => {
             </div>
 
             {/* Progress bar */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2">
                   <Clock
@@ -257,7 +256,7 @@ const SkillCard = ({ skill, onEdit }) => {
                   initial={{ width: 0 }}
                   animate={{ width: `${skill.progress}%` }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
-                  className={`h-2.5 rounded-full transition-colors ${getProgressColor(
+                  className={`h-2 rounded-full ${getProgressColor(
                     skill.progress,
                     skill.status
                   )}`}
@@ -266,7 +265,7 @@ const SkillCard = ({ skill, onEdit }) => {
             </div>
 
             {/* Dates */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+            <div className="grid grid-cols-1 gap-1.5 text-sm">
               {skill.startDate && (
                 <div className="flex items-center gap-1.5">
                   <Calendar
@@ -339,7 +338,7 @@ const SkillCard = ({ skill, onEdit }) => {
                     Resources:
                   </span>
                 </div>
-                <div className="pl-6 space-y-1">
+                <div className="pl-5 space-y-1">
                   {skill.resources.map((resource, index) => (
                     <a
                       key={index}
@@ -347,7 +346,7 @@ const SkillCard = ({ skill, onEdit }) => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`text-xs block truncate transition hover:underline ${
-                        isDark ? "text-indigo-300" : "text-indigo-700"
+                        isDark ? "text-indigo-300" : "text-indigo-600"
                       }`}
                     >
                       {resource.title || resource.url}
@@ -360,16 +359,36 @@ const SkillCard = ({ skill, onEdit }) => {
         </div>
       </motion.div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <ConfirmDeleteModal
-          title="Delete Skill"
-          message={`Are you sure you want to delete "${skill.name}"? This action cannot be undone.`}
-          isDeleting={isDeleting}
-          onConfirm={handleConfirmDelete}
-          onCancel={handleCancelDelete}
-        />
-      )}
+      {/* Delete Confirmation Modal with improved backdrop */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+          >
+            <div
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={handleCancelDelete}
+            ></div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative z-10 w-full max-w-md"
+            >
+              <ConfirmDeleteModal
+                title="Delete Skill"
+                message={`Are you sure you want to delete "${skill.name}"? This action cannot be undone.`}
+                isDeleting={isDeleting}
+                onConfirm={handleConfirmDelete}
+                onCancel={handleCancelDelete}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

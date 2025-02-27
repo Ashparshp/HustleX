@@ -9,7 +9,6 @@ import {
   Brain,
   Tag,
   Award,
-  Zap,
   Calendar,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
@@ -37,18 +36,11 @@ const SkillStats = ({ stats }) => {
   };
 
   // Stat cards
-  const StatCard = ({
-    title,
-    value,
-    description,
-    icon: Icon,
-    color,
-    delay,
-  }) => {
+  const StatCard = ({ title, value, description, icon: Icon, color }) => {
     return (
       <motion.div
         variants={itemVariants}
-        className={`p-6 rounded-lg border ${
+        className={`p-5 rounded-lg border shadow-sm ${
           isDark
             ? "bg-black/80 border-indigo-500/30 hover:border-indigo-500/60"
             : "bg-white border-indigo-300/30 hover:border-indigo-300/60"
@@ -145,7 +137,7 @@ const SkillStats = ({ stats }) => {
     return (
       <motion.div
         variants={itemVariants}
-        className={`p-6 rounded-lg border ${
+        className={`p-5 rounded-lg border shadow-sm ${
           isDark
             ? "bg-black/80 border-indigo-500/30 hover:border-indigo-500/60"
             : "bg-white border-indigo-300/30 hover:border-indigo-300/60"
@@ -213,7 +205,7 @@ const SkillStats = ({ stats }) => {
           </motion.div>
         </div>
 
-        <div className="flex justify-between text-sm">
+        <div className="flex flex-wrap justify-between text-sm">
           <div className="flex items-center gap-1">
             <div
               className={`w-3 h-3 rounded-full ${
@@ -249,7 +241,7 @@ const SkillStats = ({ stats }) => {
     return (
       <motion.div
         variants={itemVariants}
-        className={`p-6 rounded-lg border ${
+        className={`p-5 rounded-lg border shadow-sm ${
           isDark
             ? "bg-black/80 border-indigo-500/30 hover:border-indigo-500/60"
             : "bg-white border-indigo-300/30 hover:border-indigo-300/60"
@@ -385,7 +377,7 @@ const SkillStats = ({ stats }) => {
       className="space-y-6"
     >
       {/* Summary stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Skills"
           value={stats.total || 0}
@@ -416,7 +408,7 @@ const SkillStats = ({ stats }) => {
       </div>
 
       {/* Charts & visualizations */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <StatusDistribution />
         <AverageProgress />
       </div>
@@ -425,7 +417,7 @@ const SkillStats = ({ stats }) => {
       {stats.categoryCounts && Object.keys(stats.categoryCounts).length > 0 && (
         <motion.div
           variants={itemVariants}
-          className={`p-6 rounded-lg border ${
+          className={`p-5 rounded-lg border shadow-sm ${
             isDark
               ? "bg-black/80 border-indigo-500/30 hover:border-indigo-500/60"
               : "bg-white border-indigo-300/30 hover:border-indigo-300/60"
@@ -463,7 +455,7 @@ const SkillStats = ({ stats }) => {
       {/* Overall stats */}
       <motion.div
         variants={itemVariants}
-        className={`p-6 rounded-lg border ${
+        className={`p-5 rounded-lg border shadow-sm ${
           isDark
             ? "bg-black/80 border-indigo-500/30 hover:border-indigo-500/60"
             : "bg-white border-indigo-300/30 hover:border-indigo-300/60"
