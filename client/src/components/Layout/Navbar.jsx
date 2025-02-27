@@ -58,12 +58,6 @@ const Navbar = () => {
   // Navigation links with icons
   const navLinks = [
     {
-      text: "Dashboard",
-      path: "/dashboard",
-      icon: <Home size={16} />,
-      authRequired: true,
-    },
-    {
       text: "Working Hours",
       path: "/working-hours",
       icon: <Clock size={16} />,
@@ -82,8 +76,14 @@ const Navbar = () => {
       authRequired: true,
     },
     {
-      text: "Goals",
-      path: "/goals",
+      text: "Contest",
+      path: "/contests",
+      icon: <Home size={16} />,
+      authRequired: true,
+    },
+    {
+      text: "LeetCode",
+      path: "/leetcode",
       icon: <Target size={16} />,
       authRequired: true,
     },

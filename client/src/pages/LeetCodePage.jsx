@@ -143,7 +143,7 @@ const LeetCodePage = () => {
         }`}
       />
 
-      <div className="mx-auto px-4 max-w-6xl relative z-10">
+      <div className="mx-auto px-4 relative z-10">
         {/* Header and Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <motion.div
@@ -164,13 +164,6 @@ const LeetCodePage = () => {
                   : "from-orange-600 to-orange-300"
               } mt-4 rounded-full`}
             />
-            <p
-              className={`mt-2 text-sm ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              Last updated: {formatLastUpdated()}
-            </p>
           </motion.div>
 
           <motion.div

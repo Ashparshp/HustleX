@@ -114,14 +114,6 @@ function AppContent() {
           />
 
           {/* Protected Routes */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
 
           {/* Working Hours Feature */}
           <Route
@@ -153,12 +145,12 @@ function AppContent() {
             }
           />
 
-          {/* Goals Feature */}
+          {/* leetcode Feature */}
           <Route
-            path="/goals"
+            path="/leetcode"
             element={
               <ProtectedRoute>
-                <ContestsPage />
+                <LeetCodePage />
               </ProtectedRoute>
             }
           />
@@ -192,12 +184,21 @@ function AppContent() {
             }
           />
 
+          <Route
+            path="/contests"
+            element={
+              <ProtectedRoute>
+                <ContestsPage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Redirect root to dashboard or login */}
           <Route
             path="/"
             element={
               isAuthenticated ? (
-                <Navigate to="/dashboard" />
+                <Navigate to="/working-hours" />
               ) : (
                 <Navigate to="/login" />
               )
