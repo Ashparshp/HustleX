@@ -199,9 +199,6 @@ const useTimetable = (timetableId = null) => {
   const fetchCurrentWeek = useCallback(
     async (id = null) => {
       if (updateInProgress.current || !token) {
-        console.log(
-          "Update already in progress or not authenticated, skipping fetch..."
-        );
         return;
       }
 
@@ -263,9 +260,6 @@ const useTimetable = (timetableId = null) => {
   const toggleActivityStatus = useCallback(
     async (activityId, dayIndex) => {
       if (updateInProgress.current || !token || !currentTimetable) {
-        console.log(
-          "Update already in progress or not authenticated, skipping toggle..."
-        );
         return;
       }
 
@@ -372,9 +366,6 @@ const useTimetable = (timetableId = null) => {
   const getStats = useCallback(
     async (id = null) => {
       if (updateInProgress.current || !token) {
-        console.log(
-          "Update in progress or not authenticated, skipping stats fetch..."
-        );
         return;
       }
 
@@ -543,7 +534,6 @@ const useTimetable = (timetableId = null) => {
   useEffect(() => {
     const checkAndUpdateWeek = async () => {
       if (checkWeekTransition() && currentTimetable) {
-        console.log("Week transition detected, refreshing data");
         try {
           await fetchCurrentWeek(currentTimetable.id);
           toast.success("New week started!");

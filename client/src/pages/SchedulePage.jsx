@@ -113,9 +113,6 @@ const SchedulePage = () => {
     if (scheduleCategories.length === 0) {
       refreshScheduleCategories();
     }
-
-    // Debug log to check what categories are available
-    console.log("Schedule categories:", scheduleCategories);
   }, [scheduleCategories, refreshScheduleCategories]);
 
   if (loading) return <LoadingScheduleSkeleton />;

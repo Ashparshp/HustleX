@@ -323,7 +323,6 @@ const useSchedules = () => {
         ];
       }
 
-      console.log("Extracted categories:", extractedCategories);
       setCategories(extractedCategories);
       return extractedCategories;
     } catch (err) {
