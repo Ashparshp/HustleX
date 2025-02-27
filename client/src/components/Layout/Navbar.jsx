@@ -14,6 +14,7 @@ import {
   Calendar,
   Target,
   Layout,
+  MoreHorizontal,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
@@ -21,6 +22,7 @@ import { useAuth } from "../../context/AuthContext";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { isDark, toggleTheme } = useTheme();
   const { isAuthenticated, currentUser, logout } = useAuth();
@@ -39,8 +41,29 @@ const Navbar = () => {
     };
   }, []);
 
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Close user menu when clicking outside
+      if (showUserMenu && !event.target.closest(".user-menu-container")) {
+        setShowUserMenu(false);
+      }
+
+      // Close more menu when clicking outside
+      if (showMoreMenu && !event.target.closest(".more-menu-container")) {
+        setShowMoreMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showUserMenu, showMoreMenu]);
+
   const closeMenu = () => {
     setIsOpen(false);
+    setShowMoreMenu(false);
   };
 
   const handleLogout = async () => {
@@ -53,8 +76,8 @@ const Navbar = () => {
     return location.pathname === path;
   };
 
-  // Navigation links with icons
-  const navLinks = [
+  // Navigation links with icons - split into primary and secondary for responsive design
+  const primaryNavLinks = [
     {
       text: "Working Hours",
       path: "/working-hours",
@@ -73,6 +96,9 @@ const Navbar = () => {
       icon: <Layout size={16} />,
       authRequired: true,
     },
+  ];
+
+  const secondaryNavLinks = [
     {
       text: "Schedule",
       path: "/schedule",
@@ -119,8 +145,8 @@ const Navbar = () => {
     <nav
       className={`sticky top-0 z-50 border-b transition-all duration-300 ${navbarClass}`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-14 md:h-16">
           {/* Logo and brand */}
           <div className="flex items-center">
             <Link
@@ -128,13 +154,13 @@ const Navbar = () => {
               className="flex-shrink-0 flex items-center"
             >
               <span
-                className={`text-xl font-bold ${
+                className={`text-lg md:text-xl font-bold ${
                   isDark ? "text-white" : "text-indigo-600"
                 } transition-colors duration-300`}
               >
                 HustleX
                 <span
-                  className={`ml-1 text-sm font-normal ${
+                  className={`ml-1 text-xs md:text-sm font-normal ${
                     isDark ? "text-indigo-400" : "text-indigo-500"
                   }`}
                 >
@@ -144,26 +170,98 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Desktop nav links */}
-          <div className="hidden md:flex md:items-center md:space-x-1">
+          {/* Desktop nav links - primary always visible on md+, secondary in dropdown on md, visible on lg+ */}
+          <div className="hidden md:flex md:items-center md:space-x-1 lg:space-x-2">
             {isAuthenticated &&
-              navLinks
+              primaryNavLinks
                 .filter((link) => link.authRequired === isAuthenticated)
                 .map((link) => (
                   <div key={link.path}>
                     <Link
                       to={link.path}
-                      className={`px-3 py-2 ${linkClass(isActive(link.path))}`}
+                      className={`px-2 lg:px-3 py-2 ${linkClass(
+                        isActive(link.path)
+                      )}`}
+                      title={link.text}
                     >
-                      {link.icon}
-                      <span>{link.text}</span>
+                      <span className="md:mr-1">{link.icon}</span>
+                      <span className="hidden md:inline-block">
+                        {link.text}
+                      </span>
                     </Link>
                   </div>
                 ))}
+
+            {/* More menu for medium screens */}
+            {isAuthenticated &&
+              secondaryNavLinks.some(
+                (link) => link.authRequired === isAuthenticated
+              ) && (
+                <div className="relative more-menu-container md:block lg:hidden">
+                  <button
+                    onClick={() => setShowMoreMenu(!showMoreMenu)}
+                    className={`px-2 py-2 rounded-md ${
+                      isDark
+                        ? "text-gray-300 hover:text-indigo-400 hover:bg-indigo-500/5"
+                        : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/50"
+                    } transition duration-200 flex items-center gap-1`}
+                    aria-label="More navigation options"
+                    title="More"
+                  >
+                    <MoreHorizontal size={18} />
+                  </button>
+
+                  {showMoreMenu && (
+                    <div
+                      className={`absolute right-0 mt-2 w-48 py-2 rounded-lg shadow-lg border ${
+                        isDark
+                          ? "bg-gray-900 border-gray-700"
+                          : "bg-white border-gray-200"
+                      } z-50`}
+                    >
+                      {secondaryNavLinks
+                        .filter((link) => link.authRequired === isAuthenticated)
+                        .map((link) => (
+                          <Link
+                            key={link.path}
+                            to={link.path}
+                            className={`block px-4 py-2 ${linkClass(
+                              isActive(link.path)
+                            )}`}
+                            onClick={closeMenu}
+                          >
+                            {link.icon}
+                            <span>{link.text}</span>
+                          </Link>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+            {/* Secondary links visible on large screens */}
+            <div className="hidden lg:flex lg:items-center lg:space-x-2">
+              {isAuthenticated &&
+                secondaryNavLinks
+                  .filter((link) => link.authRequired === isAuthenticated)
+                  .map((link) => (
+                    <div key={link.path}>
+                      <Link
+                        to={link.path}
+                        className={`px-3 py-2 ${linkClass(
+                          isActive(link.path)
+                        )}`}
+                      >
+                        {link.icon}
+                        <span>{link.text}</span>
+                      </Link>
+                    </div>
+                  ))}
+            </div>
           </div>
 
           {/* Right side - theme toggle, notifications & user menu */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 md:space-x-2">
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
@@ -181,12 +279,13 @@ const Navbar = () => {
 
             {isAuthenticated ? (
               /* User menu (desktop) */
-              <div className="hidden md:relative md:block">
+              <div className="hidden md:relative md:block user-menu-container">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className={`flex items-center gap-2 p-1.5 rounded-full ${
                     isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"
                   } transition duration-200`}
+                  aria-label="User menu"
                 >
                   <div
                     className={`h-8 w-8 rounded-full grid place-items-center ${
@@ -219,9 +318,9 @@ const Navbar = () => {
                   <div>
                     <ChevronDown
                       size={16}
-                      className={`${
-                        isDark ? "text-gray-400" : "text-gray-500"
-                      }`}
+                      className={`transition-transform duration-200 ${
+                        showUserMenu ? "rotate-180" : ""
+                      } ${isDark ? "text-gray-400" : "text-gray-500"}`}
                     />
                   </div>
                 </button>
@@ -232,8 +331,7 @@ const Navbar = () => {
                       isDark
                         ? "bg-gray-900 border-gray-700"
                         : "bg-white border-gray-200"
-                    }`}
-                    onBlur={() => setShowUserMenu(false)}
+                    } z-50`}
                   >
                     <div
                       className={`px-4 py-2 mb-1 border-b ${
@@ -303,7 +401,7 @@ const Navbar = () => {
                 <div>
                   <Link
                     to="/login"
-                    className={`px-4 py-2 rounded-md text-sm font-medium ${
+                    className={`px-3 py-1.5 md:py-2 rounded-md text-sm font-medium ${
                       isDark
                         ? "text-indigo-400 hover:bg-indigo-900/20 border border-indigo-500/30"
                         : "text-indigo-600 hover:bg-indigo-50 border border-indigo-200"
@@ -315,7 +413,7 @@ const Navbar = () => {
                 <div>
                   <Link
                     to="/register"
-                    className={`px-4 py-2 rounded-md text-sm font-medium ${
+                    className={`px-3 py-1.5 md:py-2 rounded-md text-sm font-medium ${
                       isDark
                         ? "bg-indigo-600 hover:bg-indigo-500 text-white"
                         : "bg-indigo-600 hover:bg-indigo-700 text-white"
@@ -336,7 +434,8 @@ const Navbar = () => {
                     ? "text-gray-400 hover:bg-gray-800"
                     : "text-gray-700 hover:bg-gray-100"
                 } focus:outline-none transition duration-200`}
-                aria-expanded="false"
+                aria-expanded={isOpen ? "true" : "false"}
+                aria-label="Toggle mobile menu"
               >
                 <span className="sr-only">Open main menu</span>
                 {isOpen ? (
@@ -396,13 +495,14 @@ const Navbar = () => {
           <div className="px-3 pt-2 pb-3 space-y-1 sm:px-4">
             {isAuthenticated ? (
               <>
-                {navLinks
+                {/* Combine primary and secondary nav links for mobile */}
+                {[...primaryNavLinks, ...secondaryNavLinks]
                   .filter((link) => link.authRequired === isAuthenticated)
                   .map((link) => (
                     <div key={link.path}>
                       <Link
                         to={link.path}
-                        className={`block px-3 py-2.5 ${linkClass(
+                        className={`block px-3 py-2 ${linkClass(
                           isActive(link.path)
                         )}`}
                         onClick={closeMenu}
@@ -422,7 +522,7 @@ const Navbar = () => {
                 <div>
                   <Link
                     to="/profile"
-                    className={`block px-3 py-2.5 ${linkClass(
+                    className={`block px-3 py-2 ${linkClass(
                       isActive("/profile")
                     )}`}
                     onClick={closeMenu}
@@ -441,7 +541,7 @@ const Navbar = () => {
                 <div>
                   <button
                     onClick={handleLogout}
-                    className={`flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-md ${
+                    className={`flex items-center gap-2 w-full text-left px-3 py-2 rounded-md ${
                       isDark
                         ? "text-red-400 hover:bg-red-900/20"
                         : "text-red-600 hover:bg-red-50"
@@ -457,7 +557,7 @@ const Navbar = () => {
                 <div className="py-2">
                   <Link
                     to="/login"
-                    className={`flex items-center justify-center py-2.5 px-4 rounded-md font-medium ${
+                    className={`flex items-center justify-center py-2 px-4 rounded-md font-medium ${
                       isDark
                         ? "text-indigo-400 border border-indigo-500/30 hover:bg-indigo-900/20"
                         : "text-indigo-600 border border-indigo-200 hover:bg-indigo-50"
@@ -470,7 +570,7 @@ const Navbar = () => {
                 <div className="py-2">
                   <Link
                     to="/register"
-                    className={`flex items-center justify-center py-2.5 px-4 rounded-md font-medium ${
+                    className={`flex items-center justify-center py-2 px-4 rounded-md font-medium ${
                       isDark
                         ? "bg-indigo-600 hover:bg-indigo-500 text-white"
                         : "bg-indigo-600 hover:bg-indigo-700 text-white"

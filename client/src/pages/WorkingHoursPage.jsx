@@ -220,12 +220,12 @@ const WorkingHoursPage = () => {
               isDark ? "text-white" : "text-gray-900"
             }`}
           >
-            Working Hours Tracker
+            Working Hours
             <div
               className={`w-24 h-1 bg-gradient-to-r ${
                 isDark
-                  ? "from-indigo-500 to-purple-500"
-                  : "from-indigo-600 to-purple-600"
+                  ? "from-white to-gray-500"
+                  : "from-indigo-600 to-indigo-300"
               } mt-4 rounded-full`}
             />
           </motion.h2>
