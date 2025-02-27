@@ -341,7 +341,7 @@ exports.forgotPassword = async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     // Create reset URL
-    const URL = process.env.CLIENT_URLS.split(",")[0];
+    const URL = "https://www.hustlex.in";
     const resetUrl = `${URL}/reset-password/${resetToken}`;
 
     try {
