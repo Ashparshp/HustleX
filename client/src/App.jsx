@@ -88,13 +88,13 @@ function AppContent() {
           <Route
             path="/login"
             element={
-              isAuthenticated ? <Navigate to="/dashboard" /> : <LoginForm />
+              isAuthenticated ? <Navigate to="/working-hours" /> : <LoginForm />
             }
           />
           <Route
             path="/register"
             element={
-              isAuthenticated ? <Navigate to="/dashboard" /> : <RegisterForm />
+              isAuthenticated ? <Navigate to="/working-hours" /> : <RegisterForm />
             }
           />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -191,7 +191,7 @@ function AppContent() {
             }
           />
 
-          {/* Redirect root to dashboard or login */}
+          {/* Redirect root to working-hours or login */}
           <Route
             path="/"
             element={
@@ -227,7 +227,7 @@ function AppContent() {
                   The page you're looking for doesn't exist.
                 </p>
                 <motion.a
-                  href={isAuthenticated ? "/dashboard" : "/login"}
+                  href={isAuthenticated ? "/working-hours" : "/login"}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className={`inline-block py-2 px-4 rounded-lg transition duration-300 ${
@@ -236,7 +236,7 @@ function AppContent() {
                       : "bg-indigo-100/50 border border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70"
                   }`}
                 >
-                  Go to {isAuthenticated ? "Dashboard" : "Login"}
+                  Go to {isAuthenticated ? "Working Hours" : "Login"}
                 </motion.a>
               </motion.div>
             }
