@@ -1,4 +1,3 @@
-// src/pages/WorkingHoursPage.jsx
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -70,6 +69,14 @@ const WorkingHoursPage = () => {
     endDate: null,
     category: "",
   });
+
+  // Check if any modal is open to apply blur effect
+  const isAnyModalOpen =
+    showForm ||
+    showStats ||
+    showFilters ||
+    showCategoryManagement ||
+    entryToDelete !== null;
 
   // Filter and sort working hours
   const filteredWorkingHours = useMemo(() => {
@@ -176,24 +183,34 @@ const WorkingHoursPage = () => {
   }
 
   return (
-    <section className={`py-20 relative ${isDark ? "bg-black" : "bg-white"}`}>
-      {/* Background gradients */}
+    <section
+      className={`py-20 min-h-screen relative ${
+        isDark ? "bg-black" : "bg-gray-50"
+      }`}
+    >
+      {/* Enhanced Background gradients */}
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
           isDark
-            ? "from-indigo-900/10 via-black to-black"
-            : "from-indigo-100/50 via-white to-white"
+            ? "from-indigo-950/20 via-black to-black"
+            : "from-indigo-200/70 via-gray-50 to-gray-50"
         }`}
       />
       <div
         className={`absolute inset-0 ${
           isDark
-            ? "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.1),transparent_50%)]"
-            : "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.15),transparent_50%)]"
+            ? "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.15),transparent_60%)]"
+            : "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.2),transparent_70%)]"
         }`}
       />
+      {/* Additional subtle patterns for visual depth */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
-      <div className="mx-auto px-6 relative z-10">
+      <div
+        className={`mx-auto px-6 relative z-10 transition-all duration-300 ${
+          isAnyModalOpen ? "blur-sm" : ""
+        }`}
+      >
         {/* Header and Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <motion.h2
@@ -207,8 +224,8 @@ const WorkingHoursPage = () => {
             <div
               className={`w-24 h-1 bg-gradient-to-r ${
                 isDark
-                  ? "from-white to-gray-500"
-                  : "from-indigo-600 to-indigo-300"
+                  ? "from-indigo-500 to-purple-500"
+                  : "from-indigo-600 to-purple-600"
               } mt-4 rounded-full`}
             />
           </motion.h2>
@@ -224,7 +241,7 @@ const WorkingHoursPage = () => {
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search
                   className={`w-5 h-5 ${
-                    isDark ? "text-gray-500" : "text-gray-400"
+                    isDark ? "text-indigo-400" : "text-indigo-500"
                   }`}
                 />
               </div>
@@ -233,10 +250,10 @@ const WorkingHoursPage = () => {
                 placeholder="Search entries"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full pl-10 pr-4 py-2 rounded-lg text-sm border ${
+                className={`w-full pl-10 pr-4 py-2.5 rounded-lg text-sm border transition-colors ${
                   isDark
-                    ? "bg-gray-800 text-gray-200 border-gray-700 focus:border-indigo-500"
-                    : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500"
+                    ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+                    : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
                 }`}
               />
             </div>
@@ -280,10 +297,10 @@ const WorkingHoursPage = () => {
             {/* Refresh Button */}
             <button
               onClick={() => fetchWorkingHours()}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`p-2 rounded-lg transition-colors shadow-sm ${
                 isDark
-                  ? "bg-gray-800 hover:bg-gray-700 text-gray-400"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                  ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+                  : "bg-indigo-100/50 hover:bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
               }`}
               aria-label="Refresh"
             >
@@ -294,10 +311,14 @@ const WorkingHoursPage = () => {
 
         {/* Show active filters if any */}
         {(filters.startDate || filters.endDate || filters.category) && (
-          <div
-            className={`mb-4 p-3 rounded-lg ${
-              isDark ? "bg-gray-800/80" : "bg-gray-100"
-            }`}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mb-6 p-3 rounded-lg border ${
+              isDark
+                ? "bg-gray-900/70 border-indigo-500/30"
+                : "bg-white/90 border-indigo-300/50"
+            } shadow-md`}
           >
             <div className="flex items-center justify-between">
               <div>
@@ -310,8 +331,10 @@ const WorkingHoursPage = () => {
                 </span>
                 {filters.startDate && (
                   <span
-                    className={`ml-2 ${
-                      isDark ? "text-gray-300" : "text-gray-700"
+                    className={`ml-2 px-2 py-1 rounded-md ${
+                      isDark
+                        ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
+                        : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
                     }`}
                   >
                     From: {formatDisplayDate(filters.startDate)}
@@ -319,8 +342,10 @@ const WorkingHoursPage = () => {
                 )}
                 {filters.endDate && (
                   <span
-                    className={`ml-2 ${
-                      isDark ? "text-gray-300" : "text-gray-700"
+                    className={`ml-2 px-2 py-1 rounded-md ${
+                      isDark
+                        ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
+                        : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
                     }`}
                   >
                     To: {formatDisplayDate(filters.endDate)}
@@ -328,33 +353,41 @@ const WorkingHoursPage = () => {
                 )}
                 {filters.category && (
                   <span
-                    className={`ml-2 ${
-                      isDark ? "text-gray-300" : "text-gray-700"
+                    className={`ml-2 px-2 py-1 rounded-md ${
+                      isDark
+                        ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
+                        : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
                     }`}
                   >
                     Category: {filters.category}
                   </span>
                 )}
               </div>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={clearFilters}
-                className={`text-sm ${
+                className={`text-sm px-3 py-1 rounded-lg ${
                   isDark
-                    ? "text-red-400 hover:text-red-300"
-                    : "text-red-600 hover:text-red-700"
+                    ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
+                    : "bg-red-100/50 text-red-600 hover:bg-red-200/70 border border-red-300/50"
                 }`}
               >
                 Clear Filters
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Error message */}
         {error && (
-          <div
-            className={`p-4 mb-6 rounded-lg ${
-              isDark ? "bg-red-900/30 text-red-300" : "bg-red-100 text-red-700"
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`p-4 mb-6 rounded-lg border ${
+              isDark
+                ? "bg-red-900/30 text-red-300 border-red-500/30"
+                : "bg-red-100/70 text-red-700 border-red-300/50"
             }`}
           >
             <p>Error: {error}</p>
@@ -368,7 +401,7 @@ const WorkingHoursPage = () => {
             >
               Try again
             </button>
-          </div>
+          </motion.div>
         )}
 
         {/* Stats Grid */}
@@ -400,14 +433,16 @@ const WorkingHoursPage = () => {
         </div>
 
         {/* Chart Section */}
-        <div
-          className={`p-6 rounded-lg border mb-8 ${
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`p-6 rounded-lg border shadow-md mb-8 ${
             isDark
-              ? "bg-black border-indigo-500/30"
+              ? "bg-gray-900/70 border-indigo-500/30"
               : "bg-white border-indigo-300/50"
           }`}
         >
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
             <h3
               className={`text-xl font-semibold ${
                 isDark ? "text-white" : "text-gray-800"
@@ -418,8 +453,8 @@ const WorkingHoursPage = () => {
             <div
               className={`inline-flex rounded-lg p-1 ${
                 isDark
-                  ? "bg-gray-800 border border-gray-700"
-                  : "bg-gray-100 border border-gray-200"
+                  ? "bg-gray-800/50 border border-gray-700/70"
+                  : "bg-gray-100/80 border border-gray-200/70"
               }`}
             >
               {[
@@ -434,22 +469,24 @@ const WorkingHoursPage = () => {
                   label: "Category Distribution",
                 },
               ].map((viz) => (
-                <button
+                <motion.button
                   key={viz.key}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => setActiveVisualization(viz.key)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
                     activeVisualization === viz.key
                       ? isDark
-                        ? "bg-indigo-500/20 text-white"
-                        : "bg-indigo-100 text-indigo-600"
+                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                        : "bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
                       : isDark
-                      ? "text-gray-400 hover:bg-gray-700"
-                      : "text-gray-600 hover:bg-gray-200"
+                      ? "text-gray-400 hover:bg-gray-700/50"
+                      : "text-gray-600 hover:bg-gray-200/70"
                   }`}
                 >
                   <viz.icon className="w-5 h-5" />
                   <span className="hidden md:inline">{viz.label}</span>
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
@@ -460,7 +497,7 @@ const WorkingHoursPage = () => {
               <CategoryChart data={stats.categoryBreakdown} />
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Working Hours Cards Section */}
         <div className="mt-8">
@@ -474,8 +511,8 @@ const WorkingHoursPage = () => {
               <div
                 className={`w-24 h-1 bg-gradient-to-r ${
                   isDark
-                    ? "from-white to-gray-500"
-                    : "from-indigo-600 to-indigo-300"
+                    ? "from-indigo-500 to-purple-500"
+                    : "from-indigo-600 to-purple-600"
                 } mt-4 rounded-full`}
               />
             </h2>
@@ -484,13 +521,13 @@ const WorkingHoursPage = () => {
             <div className="flex items-center gap-2">
               <ArrowUpDown
                 className={`w-4 h-4 ${
-                  isDark ? "text-gray-400" : "text-gray-600"
+                  isDark ? "text-indigo-400" : "text-indigo-600"
                 }`}
               />
               <select
-                className={`px-3 py-2 rounded-lg text-sm border ${
+                className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
                   isDark
-                    ? "bg-gray-800 text-gray-200 border-gray-700 focus:border-indigo-500"
+                    ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500"
                     : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500"
                 }`}
                 onChange={(e) => setSortOrder(e.target.value)}
@@ -513,20 +550,22 @@ const WorkingHoursPage = () => {
             >
               <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p className="text-base">No working hours entries found</p>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   setShowForm(true);
                   setSelectedEntry(null);
                 }}
                 className={`mt-4 inline-flex items-center px-4 py-2 rounded-lg ${
                   isDark
-                    ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                    : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                    ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+                    : "bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600 border border-indigo-300/50"
                 }`}
               >
                 <Plus size={18} className="mr-1" />
                 Add Your First Entry
-              </button>
+              </motion.button>
             </motion.div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -551,13 +590,46 @@ const WorkingHoursPage = () => {
             </div>
           )}
         </div>
+      </div>
 
-        {/* Form Modal */}
+      {/* Modal Styles with improved backdrop blur */}
+      <style jsx global>{`
+        .bg-grid-pattern {
+          background-image: linear-gradient(
+              to right,
+              rgba(99, 102, 241, 0.1) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              to bottom,
+              rgba(99, 102, 241, 0.1) 1px,
+              transparent 1px
+            );
+          background-size: 20px 20px;
+        }
+      `}</style>
+
+      {/* Form Modal with improved backdrop */}
+      <AnimatePresence>
         {showForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+          >
             <div
-              className={`w-full max-w-md p-6 rounded-lg shadow-lg ${
-                isDark ? "bg-gray-800" : "bg-white"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={handleFormCancel}
+            ></div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className={`relative w-full max-w-md p-6 rounded-lg shadow-xl border ${
+                isDark
+                  ? "bg-gray-900 border-indigo-500/30"
+                  : "bg-white border-indigo-300/50"
               }`}
             >
               <div className="flex justify-between items-center mb-4">
@@ -570,8 +642,10 @@ const WorkingHoursPage = () => {
                 </h2>
                 <button
                   onClick={handleFormCancel}
-                  className={`p-1 rounded-full ${
-                    isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"
+                  className={`p-2 rounded-full transition-colors ${
+                    isDark
+                      ? "hover:bg-gray-700 text-gray-400"
+                      : "hover:bg-gray-200 text-gray-500"
                   }`}
                 >
                   ✕
@@ -583,60 +657,126 @@ const WorkingHoursPage = () => {
                 onCancel={handleFormCancel}
                 categories={workingHoursCategories}
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Stats Modal */}
+      {/* Stats Modal with improved backdrop */}
+      <AnimatePresence>
         {showStats && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+          >
             <div
-              className={`w-full max-w-4xl p-6 rounded-lg shadow-lg ${
-                isDark ? "bg-gray-800" : "bg-white"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => setShowStats(false)}
+            ></div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className={`relative w-full max-w-4xl p-6 rounded-lg shadow-xl border ${
+                isDark
+                  ? "bg-gray-900 border-indigo-500/30"
+                  : "bg-white border-indigo-300/50"
               }`}
             >
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Working Hours Statistics</h2>
+                <h2
+                  className={`text-xl font-bold ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  Working Hours Statistics
+                </h2>
                 <button
                   onClick={() => setShowStats(false)}
-                  className={`p-1 rounded-full ${
-                    isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"
+                  className={`p-2 rounded-full transition-colors ${
+                    isDark
+                      ? "hover:bg-gray-700 text-gray-400"
+                      : "hover:bg-gray-200 text-gray-500"
                   }`}
                 >
                   ✕
                 </button>
               </div>
               <WorkingHoursStats stats={stats} />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Filters Modal */}
+      {/* Filters Modal with improved backdrop */}
+      <AnimatePresence>
         {showFilters && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <WorkingHoursFilters
-              initialFilters={filters}
-              onApply={handleFilterApply}
-              onCancel={() => setShowFilters(false)}
-              categories={workingHoursCategories}
-            />
-          </div>
-        )}
-
-        {/* Category Management Modal */}
-        {showCategoryManagement && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+          >
             <div
-              className={`w-full max-w-4xl p-6 rounded-lg shadow-lg ${
-                isDark ? "bg-gray-800" : "bg-white"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => setShowFilters(false)}
+            ></div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative z-10 max-w-lg w-full"
+            >
+              <WorkingHoursFilters
+                initialFilters={filters}
+                onApply={handleFilterApply}
+                onCancel={() => setShowFilters(false)}
+                categories={workingHoursCategories}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Category Management Modal with improved backdrop */}
+      <AnimatePresence>
+        {showCategoryManagement && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+          >
+            <div
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => setShowCategoryManagement(false)}
+            ></div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className={`relative w-full max-w-4xl p-6 rounded-lg shadow-xl border ${
+                isDark
+                  ? "bg-gray-900 border-indigo-500/30"
+                  : "bg-white border-indigo-300/50"
               }`}
             >
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Manage Categories</h2>
+                <h2
+                  className={`text-xl font-bold ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  Manage Categories
+                </h2>
                 <button
                   onClick={() => setShowCategoryManagement(false)}
-                  className={`p-1 rounded-full ${
-                    isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"
+                  className={`p-2 rounded-full transition-colors ${
+                    isDark
+                      ? "hover:bg-gray-700 text-gray-400"
+                      : "hover:bg-gray-200 text-gray-500"
                   }`}
                 >
                   ✕
@@ -664,21 +804,21 @@ const WorkingHoursPage = () => {
                 }}
                 type="working-hours"
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Confirm Delete Dialog */}
-        <ConfirmDialog
-          isOpen={entryToDelete !== null}
-          onClose={() => setEntryToDelete(null)}
-          onConfirm={confirmDelete}
-          title="Delete Entry"
-          message="Are you sure you want to delete this working hours entry? This action cannot be undone."
-          confirmText="Delete Entry"
-          type="danger"
-        />
-      </div>
+      {/* Confirm Delete Dialog with improved backdrop */}
+      <ConfirmDialog
+        isOpen={entryToDelete !== null}
+        onClose={() => setEntryToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Delete Entry"
+        message="Are you sure you want to delete this working hours entry? This action cannot be undone."
+        confirmText="Delete Entry"
+        type="danger"
+      />
     </section>
   );
 };
@@ -688,40 +828,51 @@ const LoadingWorkingHoursSkeleton = () => {
   const { isDark } = useTheme();
 
   return (
-    <section className={`py-20 relative ${isDark ? "bg-black" : "bg-white"}`}>
+    <section
+      className={`py-20 min-h-screen relative ${
+        isDark ? "bg-black" : "bg-gray-50"
+      }`}
+    >
       {/* Background Gradients */}
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
           isDark
-            ? "from-indigo-900/10 via-black to-black"
-            : "from-indigo-100/50 via-white to-white"
+            ? "from-indigo-950/20 via-black to-black"
+            : "from-indigo-200/70 via-gray-50 to-gray-50"
         }`}
       />
       <div
         className={`absolute inset-0 ${
           isDark
-            ? "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.1),transparent_50%)]"
-            : "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.15),transparent_50%)]"
+            ? "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.15),transparent_60%)]"
+            : "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.2),transparent_70%)]"
         }`}
       />
+      {/* Additional subtle patterns for visual depth */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
-      <div className="mx-auto px-4 max-w-6xl relative z-10">
+      <div className="mx-auto px-6 relative z-10">
         {/* Header Skeleton */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <div
-            className={`h-8 w-64 rounded-lg ${
-              isDark ? "bg-gray-800" : "bg-gray-200"
+            className={`h-10 w-64 rounded-lg ${
+              isDark ? "bg-gray-800/70" : "bg-gray-200/70"
             } animate-pulse`}
           ></div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <div
               className={`h-10 w-32 rounded-lg ${
-                isDark ? "bg-gray-800" : "bg-gray-200"
+                isDark ? "bg-gray-800/70" : "bg-gray-200/70"
               } animate-pulse`}
             ></div>
             <div
               className={`h-10 w-32 rounded-lg ${
-                isDark ? "bg-gray-800" : "bg-gray-200"
+                isDark ? "bg-gray-800/70" : "bg-gray-200/70"
+              } animate-pulse`}
+            ></div>
+            <div
+              className={`h-10 w-32 rounded-lg ${
+                isDark ? "bg-gray-800/70" : "bg-gray-200/70"
               } animate-pulse`}
             ></div>
           </div>
@@ -732,28 +883,28 @@ const LoadingWorkingHoursSkeleton = () => {
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className={`p-6 rounded-lg border animate-pulse ${
+              className={`p-6 rounded-lg border shadow-md animate-pulse ${
                 isDark
-                  ? "bg-gray-800 border-gray-700"
-                  : "bg-gray-100 border-gray-300"
+                  ? "bg-gray-900/70 border-indigo-500/30"
+                  : "bg-white/90 border-indigo-300/50"
               }`}
             >
               <div className="flex justify-between">
                 <div>
                   <div
                     className={`h-4 w-20 rounded ${
-                      isDark ? "bg-gray-700" : "bg-gray-200"
+                      isDark ? "bg-gray-800" : "bg-gray-200"
                     }`}
                   ></div>
                   <div
                     className={`h-8 w-16 rounded mt-2 ${
-                      isDark ? "bg-gray-700" : "bg-gray-200"
+                      isDark ? "bg-gray-800" : "bg-gray-200"
                     }`}
                   ></div>
                 </div>
                 <div
                   className={`h-10 w-10 rounded-lg ${
-                    isDark ? "bg-gray-700" : "bg-gray-200"
+                    isDark ? "bg-gray-800" : "bg-gray-200"
                   }`}
                 ></div>
               </div>
@@ -763,25 +914,27 @@ const LoadingWorkingHoursSkeleton = () => {
 
         {/* Chart Skeleton */}
         <div
-          className={`p-6 rounded-lg border mb-8 ${
-            isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+          className={`p-6 rounded-lg border shadow-md mb-8 ${
+            isDark
+              ? "bg-gray-900/70 border-indigo-500/30"
+              : "bg-white/90 border-indigo-300/50"
           }`}
         >
           <div className="flex justify-between items-center mb-4">
             <div
               className={`h-6 w-48 rounded ${
-                isDark ? "bg-gray-700" : "bg-gray-200"
+                isDark ? "bg-gray-800" : "bg-gray-200"
               } animate-pulse`}
             ></div>
             <div
               className={`h-10 w-48 rounded-lg ${
-                isDark ? "bg-gray-700" : "bg-gray-200"
+                isDark ? "bg-gray-800" : "bg-gray-200"
               } animate-pulse`}
             ></div>
           </div>
           <div
             className={`h-80 w-full rounded ${
-              isDark ? "bg-gray-700" : "bg-gray-200"
+              isDark ? "bg-gray-800" : "bg-gray-200"
             } animate-pulse`}
           ></div>
         </div>
@@ -789,7 +942,7 @@ const LoadingWorkingHoursSkeleton = () => {
         {/* Entries Section Skeleton */}
         <div className="mt-8">
           <div
-            className={`h-8 w-48 rounded mb-8 ${
+            className={`h-10 w-48 rounded mb-8 ${
               isDark ? "bg-gray-800" : "bg-gray-200"
             } animate-pulse`}
           ></div>
@@ -797,42 +950,42 @@ const LoadingWorkingHoursSkeleton = () => {
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className={`p-6 rounded-lg border h-64 animate-pulse ${
+                className={`p-6 rounded-lg border shadow-md h-64 animate-pulse ${
                   isDark
-                    ? "bg-gray-800 border-gray-700"
-                    : "bg-gray-100 border-gray-200"
+                    ? "bg-gray-900/70 border-indigo-500/30"
+                    : "bg-white/90 border-indigo-300/50"
                 }`}
               >
                 <div className="flex justify-between mb-4">
                   <div
                     className={`h-6 w-32 rounded ${
-                      isDark ? "bg-gray-700" : "bg-gray-200"
+                      isDark ? "bg-gray-800" : "bg-gray-200"
                     }`}
                   ></div>
                   <div
                     className={`h-6 w-20 rounded ${
-                      isDark ? "bg-gray-700" : "bg-gray-200"
+                      isDark ? "bg-gray-800" : "bg-gray-200"
                     }`}
                   ></div>
                 </div>
                 <div
                   className={`h-4 w-full rounded mb-4 ${
-                    isDark ? "bg-gray-700" : "bg-gray-200"
+                    isDark ? "bg-gray-800" : "bg-gray-200"
                   }`}
                 ></div>
                 <div
                   className={`h-4 w-3/4 rounded mb-4 ${
-                    isDark ? "bg-gray-700" : "bg-gray-200"
+                    isDark ? "bg-gray-800" : "bg-gray-200"
                   }`}
                 ></div>
                 <div
                   className={`h-2 w-full rounded-full mb-6 ${
-                    isDark ? "bg-gray-700" : "bg-gray-200"
+                    isDark ? "bg-gray-800" : "bg-gray-200"
                   }`}
                 ></div>
                 <div
                   className={`h-20 w-full rounded ${
-                    isDark ? "bg-gray-700" : "bg-gray-200"
+                    isDark ? "bg-gray-800" : "bg-gray-200"
                   }`}
                 ></div>
               </div>
