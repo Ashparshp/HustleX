@@ -80,15 +80,12 @@ const TimetablePage = () => {
   useEffect(() => {
     if (localCurrentTimetable) {
       console.log("Current timetable updated:", localCurrentTimetable.name);
-      // Force component re-render when current timetable changes
       setRefreshKey((prev) => prev + 1);
     }
   }, [localCurrentTimetable?.id, localCurrentTimetable?.name]);
 
-  // Fetch activities and categories when timetable changes
   useEffect(() => {
     if (currentWeek && currentWeek.activities) {
-      // Extract default activities from current week
       const extractedActivities = currentWeek.activities.map((item) => ({
         name: item.activity.name,
         time: item.activity.time,
@@ -98,7 +95,6 @@ const TimetablePage = () => {
       setActivities(extractedActivities);
     }
 
-    // Fetch timetable-specific categories
     const loadCategories = async () => {
       try {
         const cats = await getTimetableCategories();
@@ -111,7 +107,6 @@ const TimetablePage = () => {
     loadCategories();
   }, [currentWeek, getTimetableCategories]);
 
-  // Modal handlers
   const closeAllModals = () => {
     setActiveModal(null);
     setEditingActivity(null);
@@ -119,14 +114,9 @@ const TimetablePage = () => {
 
   const openAddActivityModal = async () => {
     try {
-      // Force a fresh fetch of categories right before opening the modal
       const freshCategories = await getTimetableCategories();
-      console.log("Fresh categories before opening modal:", freshCategories);
-
-      // Make sure we're setting the state with the fresh data
       setTimetableCategories(freshCategories || []);
 
-      // Wait a tiny bit to ensure state is updated before opening modal
       setTimeout(() => {
         setActiveModal("add");
         setEditingActivity(null);
