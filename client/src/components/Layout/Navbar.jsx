@@ -153,20 +153,88 @@ const Navbar = () => {
               to={isAuthenticated ? "/working-hours" : "/login"}
               className="flex-shrink-0 flex items-center"
             >
-              <span
-                className={`text-lg md:text-xl font-bold ${
-                  isDark ? "text-white" : "text-indigo-600"
-                } transition-colors duration-300`}
+              {/* SVG Logo */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 300 80"
+                className="h-10 w-auto"
               >
-                HustleX
-                <span
-                  className={`ml-1 text-xs md:text-sm font-normal ${
-                    isDark ? "text-indigo-400" : "text-indigo-500"
-                  }`}
+                {/* Background shapes */}
+                <g opacity="0.2">
+                  <path
+                    d="M20,40 L60,15 A30,30 0 0,1 90,40 L50,65 A30,30 0 0,1 20,40 Z"
+                    fill="#4f46e5"
+                    opacity="0.4"
+                  />
+                  <path
+                    d="M40,40 L80,15 A30,30 0 0,1 110,40 L70,65 A30,30 0 0,1 40,40 Z"
+                    fill="#4f46e5"
+                    opacity="0.2"
+                  />
+                  <path
+                    d="M60,40 L100,15 A30,30 0 0,1 130,40 L90,65 A30,30 0 0,1 60,40 Z"
+                    fill="#4f46e5"
+                    opacity="0.4"
+                  />
+                </g>
+
+                {/* Enhanced abstract productivity arrow */}
+                <g transform="translate(40, 40) scale(0.9)">
+                  <path
+                    d="M0,0 L20,0 L20,10 L30,5 L20,0 L20,0"
+                    fill="#4f46e5"
+                    transform="rotate(45)"
+                  />
+                  <circle cx="0" cy="0" r="3.5" fill="#818cf8" />
+                  {/* Added subtle pulse circle */}
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r="8"
+                    fill="none"
+                    stroke="#4f46e5"
+                    stroke-width="0.8"
+                    opacity="0.4"
+                  />
+                </g>
+
+                {/* "Hustle" text */}
+                <text
+                  x="80"
+                  y="52"
+                  font-family="Arial, sans-serif"
+                  font-weight="700"
+                  font-size="36"
+                  fill={isDark ? "#ffffff" : "#4f46e5"}
                 >
-                  Pro
-                </span>
-              </span>
+                  Hustle
+                </text>
+
+                {/* "X" with enhanced special styling */}
+                <g>
+                  <text
+                    x="190"
+                    y="52"
+                    font-family="Arial, sans-serif"
+                    font-weight="700"
+                    font-size="36"
+                    fill="#4338ca"
+                  >
+                    X
+                  </text>
+                </g>
+
+                {/* Additional decorative elements */}
+                <line
+                  x1="80"
+                  y1="58"
+                  x2="215"
+                  y2="58"
+                  stroke="#818cf8"
+                  stroke-width="1"
+                  opacity="0.3"
+                />
+              </svg>
             </Link>
           </div>
 
