@@ -341,7 +341,8 @@ exports.forgotPassword = async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     // Create reset URL
-    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+    const URL = process.env.CLIENT_URLS.split(",")[0];
+    const resetUrl = `${URL}/reset-password/${resetToken}`;
 
     try {
       await sendResetPasswordEmail(user, resetUrl);
