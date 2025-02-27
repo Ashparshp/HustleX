@@ -1,3 +1,4 @@
+// LoginForm.jsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, Link, useLocation } from "react-router-dom";
@@ -26,7 +27,6 @@ const LoginForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !loading) {
       const from = location.state?.from?.pathname || "/dashboard";
@@ -34,22 +34,16 @@ const LoginForm = () => {
     }
   }, [isAuthenticated, loading, navigate, location]);
 
-  // Fix for mobile viewport height (adjust for navbar)
   useEffect(() => {
     const setVh = () => {
-      // First get the viewport height and multiply it by 1% to get a value for a vh unit
       const vh = window.innerHeight * 0.01;
-      // Set the value in the --vh custom property to the root of the document
       document.documentElement.style.setProperty("--vh", `${vh}px`);
     };
 
-    // Set the height initially
     setVh();
 
-    // Add event listener to reset on window resize
     window.addEventListener("resize", setVh);
 
-    // Clean up
     return () => window.removeEventListener("resize", setVh);
   }, []);
 
@@ -58,7 +52,6 @@ const LoginForm = () => {
 
     if (isSubmitting) return;
 
-    // Form validation
     if (!email.trim() || !password) {
       setFormError("Email and password are required");
       return;
@@ -69,7 +62,6 @@ const LoginForm = () => {
 
     try {
       await login({ email, password });
-      // Navigation will happen in the useEffect
     } catch (error) {
       setFormError(error.message);
     } finally {
@@ -90,8 +82,7 @@ const LoginForm = () => {
       className={`flex items-center justify-center px-4 pt-6 pb-6 sm:pb-8
         ${isDark ? "bg-black" : "bg-gray-50"}
       `}
-      // Use the custom vh property for height calculation
-      style={{ minHeight: "calc(100vh - 60px)" }} // Subtract approximate navbar height
+      style={{ minHeight: "calc(100vh - 60px)" }}
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -133,7 +124,6 @@ const LoginForm = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Field */}
             <div className="group/input">
               <label
                 className={`block mb-2 text-sm font-medium
@@ -168,7 +158,6 @@ const LoginForm = () => {
               </div>
             </div>
 
-            {/* Password Field */}
             <div className="group/input">
               <div className="flex items-center justify-between mb-2">
                 <label
@@ -239,7 +228,6 @@ const LoginForm = () => {
               </div>
             </div>
 
-            {/* Submit Button */}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -266,7 +254,6 @@ const LoginForm = () => {
             </motion.button>
           </form>
 
-          {/* Register Link */}
           <div className="text-center mt-4">
             <span
               className={`text-sm

@@ -1,4 +1,4 @@
-// src/components/Auth/RegisterForm.jsx
+// RegisterForm.jsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
@@ -33,29 +33,22 @@ const RegisterForm = () => {
   const { isDark } = useTheme();
   const navigate = useNavigate();
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !loading) {
       navigate("/verify-email-notice", { replace: true });
     }
   }, [isAuthenticated, loading, navigate]);
 
-  // Fix for mobile viewport height (adjust for navbar)
   useEffect(() => {
     const setVh = () => {
-      // First get the viewport height and multiply it by 1% to get a value for a vh unit
       const vh = window.innerHeight * 0.01;
-      // Set the value in the --vh custom property to the root of the document
       document.documentElement.style.setProperty("--vh", `${vh}px`);
     };
 
-    // Set the height initially
     setVh();
 
-    // Add event listener to reset on window resize
     window.addEventListener("resize", setVh);
 
-    // Clean up
     return () => window.removeEventListener("resize", setVh);
   }, []);
 
@@ -68,20 +61,17 @@ const RegisterForm = () => {
   };
 
   const validateForm = () => {
-    // Name validation
     if (!formData.name.trim()) {
       setFormError("Name is required");
       return false;
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       setFormError("Please enter a valid email address");
       return false;
     }
 
-    // Phone number validation (optional)
     if (
       formData.phoneNumber &&
       !/^\d{10,15}$/.test(formData.phoneNumber.replace(/[^0-9]/g, ""))
@@ -90,13 +80,11 @@ const RegisterForm = () => {
       return false;
     }
 
-    // Password validation
     if (formData.password.length < 6) {
       setFormError("Password must be at least 6 characters long");
       return false;
     }
 
-    // Password match validation
     if (formData.password !== formData.confirmPassword) {
       setFormError("Passwords do not match");
       return false;
@@ -116,11 +104,9 @@ const RegisterForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Remove confirmPassword before sending to the API
       const { confirmPassword, ...registerData } = formData;
 
       await register(registerData);
-      // Navigation will happen in the useEffect
     } catch (error) {
       setFormError(error.message);
     } finally {
@@ -141,8 +127,7 @@ const RegisterForm = () => {
       className={`flex items-center justify-center px-4 pt-6 pb-6 sm:pb-8 
       ${isDark ? "bg-black" : "bg-gray-50"}
       `}
-      // Use calculated height instead of min-h-screen
-      style={{ minHeight: "calc(100vh - 60px)" }} // Subtract approximate navbar height
+      style={{ minHeight: "calc(100vh - 60px)" }}
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -184,7 +169,6 @@ const RegisterForm = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name Field */}
             <div className="group/input">
               <label
                 className={`block mb-2 text-sm font-medium
@@ -220,7 +204,6 @@ const RegisterForm = () => {
               </div>
             </div>
 
-            {/* Email Field */}
             <div className="group/input">
               <label
                 className={`block mb-2 text-sm font-medium
@@ -256,7 +239,6 @@ const RegisterForm = () => {
               </div>
             </div>
 
-            {/* Phone Number Field */}
             <div className="group/input">
               <label
                 className={`block mb-2 text-sm font-medium
@@ -291,7 +273,6 @@ const RegisterForm = () => {
               </div>
             </div>
 
-            {/* Password Field */}
             <div className="group/input">
               <label
                 className={`block mb-2 text-sm font-medium
@@ -353,7 +334,6 @@ const RegisterForm = () => {
               </p>
             </div>
 
-            {/* Confirm Password Field */}
             <div className="group/input">
               <label
                 className={`block mb-2 text-sm font-medium
@@ -407,7 +387,6 @@ const RegisterForm = () => {
               </div>
             </div>
 
-            {/* Submit Button */}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -434,7 +413,6 @@ const RegisterForm = () => {
             </motion.button>
           </form>
 
-          {/* Login Link */}
           <div className="text-center mt-4">
             <span
               className={`text-sm
