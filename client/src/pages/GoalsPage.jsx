@@ -123,7 +123,7 @@ const GoalsPage = () => {
           }`}
         >
           <Trophy className="inline-block mr-2" size={24} />
-          Coding Goals & Progress Tracker
+          Coding Contest
         </h1>
 
         <div className="flex space-x-2">

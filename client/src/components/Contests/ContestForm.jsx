@@ -1,17 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
+// src/components/Contests/ContestForm.jsx
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X,
   Calendar,
   Clock,
   Target,
   Tag,
   MessageSquare,
   AlertTriangle,
+  Trophy,
+  Code,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 
-const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
+const ContestForm = ({ initialData, onSubmit, onCancel, platforms = [] }) => {
   const { isDark } = useTheme();
 
   const [formData, setFormData] = useState(
@@ -44,10 +46,10 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
   }, [initialData]);
 
   // Validate form
-  const validateGoal = () => {
+  const validateContest = () => {
     const errors = {};
     if (!formData.platform) errors.platform = "Platform is required";
-    if (!formData.name) errors.name = "Goal name is required";
+    if (!formData.name) errors.name = "Contest name is required";
     if (!formData.date) errors.date = "Date is required";
     return errors;
   };
@@ -73,7 +75,7 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
     e.preventDefault();
 
     // Validate form
-    const errors = validateGoal();
+    const errors = validateContest();
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
@@ -108,7 +110,7 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
         <div className="relative">
           <Target
             className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
-              isDark ? "text-indigo-400" : "text-indigo-600"
+              isDark ? "text-purple-400" : "text-purple-600"
             }`}
           />
           <select
@@ -119,8 +121,8 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
             className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border appearance-none transition-all duration-300
               ${
                 isDark
-                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
-                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                  ? "bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+                  : "bg-purple-100/50 border-purple-300/50 text-purple-600 hover:bg-purple-200/70 hover:border-purple-500"
               }`}
             required
           >
@@ -143,7 +145,7 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
         )}
       </div>
 
-      {/* Goal Name Input */}
+      {/* Contest Name Input */}
       <div>
         <label
           htmlFor="name"
@@ -151,12 +153,12 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
             isDark ? "text-gray-300" : "text-gray-700"
           }`}
         >
-          Goal Name*
+          Contest Name*
         </label>
         <div className="relative">
           <Tag
             className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
-              isDark ? "text-indigo-400" : "text-indigo-600"
+              isDark ? "text-purple-400" : "text-purple-600"
             }`}
           />
           <input
@@ -165,12 +167,12 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            placeholder="Enter goal name"
+            placeholder="Enter contest name"
             className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
               ${
                 isDark
-                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
-                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                  ? "bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+                  : "bg-purple-100/50 border-purple-300/50 text-purple-600 hover:bg-purple-200/70 hover:border-purple-500"
               }`}
             required
           />
@@ -193,7 +195,7 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
         <div className="relative">
           <Calendar
             className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
-              isDark ? "text-indigo-400" : "text-indigo-600"
+              isDark ? "text-purple-400" : "text-purple-600"
             }`}
           />
           <input
@@ -205,8 +207,8 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
             className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
               ${
                 isDark
-                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
-                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                  ? "bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+                  : "bg-purple-100/50 border-purple-300/50 text-purple-600 hover:bg-purple-200/70 hover:border-purple-500"
               }`}
             required
           />
@@ -226,8 +228,8 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
           onChange={handleChange}
           className={`h-4 w-4 rounded ${
             isDark
-              ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/30"
-              : "bg-indigo-100/50 text-indigo-600 border-indigo-300/50"
+              ? "bg-purple-500/10 text-purple-400 border-purple-500/30"
+              : "bg-purple-100/50 text-purple-600 border-purple-300/50"
           }`}
         />
         <label
@@ -247,7 +249,7 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="space-y-4 pl-4 border-l-2 border-indigo-500 mt-2"
+            className="space-y-4 pl-4 border-l-2 border-purple-500 mt-2"
           >
             {/* Rank Input */}
             <div>
@@ -260,9 +262,9 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
                 Rank
               </label>
               <div className="relative">
-                <AlertTriangle
+                <Trophy
                   className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
-                    isDark ? "text-indigo-400" : "text-indigo-600"
+                    isDark ? "text-amber-400" : "text-amber-600"
                   }`}
                 />
                 <input
@@ -276,8 +278,8 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
                   className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
                     ${
                       isDark
-                        ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
-                        : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                        ? "bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+                        : "bg-purple-100/50 border-purple-300/50 text-purple-600 hover:bg-purple-200/70 hover:border-purple-500"
                     }`}
                 />
               </div>
@@ -295,9 +297,9 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
                   Problems Solved
                 </label>
                 <div className="relative">
-                  <Target
+                  <Code
                     className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
-                      isDark ? "text-indigo-400" : "text-indigo-600"
+                      isDark ? "text-blue-400" : "text-blue-600"
                     }`}
                   />
                   <input
@@ -311,8 +313,8 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
                     className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
                       ${
                         isDark
-                          ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
-                          : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                          ? "bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+                          : "bg-purple-100/50 border-purple-300/50 text-purple-600 hover:bg-purple-200/70 hover:border-purple-500"
                       }`}
                   />
                 </div>
@@ -344,8 +346,8 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
                     className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
                       ${
                         isDark
-                          ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
-                          : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                          ? "bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+                          : "bg-purple-100/50 border-purple-300/50 text-purple-600 hover:bg-purple-200/70 hover:border-purple-500"
                       }`}
                   />
                 </div>
@@ -368,7 +370,7 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
         <div className="relative">
           <Clock
             className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
-              isDark ? "text-indigo-400" : "text-indigo-600"
+              isDark ? "text-purple-400" : "text-purple-600"
             }`}
           />
           <input
@@ -382,12 +384,13 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
             className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
               ${
                 isDark
-                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
-                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                  ? "bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+                  : "bg-purple-100/50 border-purple-300/50 text-purple-600 hover:bg-purple-200/70 hover:border-purple-500"
               }`}
           />
         </div>
       </div>
+
       {/* Notes Input */}
       <div>
         <label
@@ -401,7 +404,7 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
         <div className="relative">
           <MessageSquare
             className={`absolute left-3 top-3 w-4 h-4 ${
-              isDark ? "text-indigo-400" : "text-indigo-600"
+              isDark ? "text-purple-400" : "text-purple-600"
             }`}
           />
           <textarea
@@ -410,12 +413,12 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
             value={formData.notes || ""}
             onChange={handleChange}
             rows="3"
-            placeholder="Add any additional notes about this goal..."
+            placeholder="Add any additional notes about this contest..."
             className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border transition-all duration-300
               ${
                 isDark
-                  ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
-                  : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                  ? "bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+                  : "bg-purple-100/50 border-purple-300/50 text-purple-600 hover:bg-purple-200/70 hover:border-purple-500"
               }`}
           />
         </div>
@@ -429,8 +432,8 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
           className={`px-6 py-2.5 rounded-lg border transition-all duration-300
             ${
               isDark
-                ? "bg-transparent border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10"
-                : "bg-transparent border-indigo-300/50 text-indigo-600 hover:bg-indigo-50"
+                ? "bg-transparent border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                : "bg-transparent border-purple-300/50 text-purple-600 hover:bg-purple-50"
             }`}
         >
           Cancel
@@ -440,15 +443,15 @@ const ContestModal = ({ initialData, onSubmit, onCancel, platforms }) => {
           className={`px-6 py-2.5 rounded-lg transition-all duration-300
             ${
               isDark
-                ? "bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-400"
-                : "bg-indigo-100/50 border border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70 hover:border-indigo-500"
+                ? "bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+                : "bg-purple-100/50 border border-purple-300/50 text-purple-600 hover:bg-purple-200/70 hover:border-purple-500"
             }`}
         >
-          {initialData ? "Update" : "Create"} Goal
+          {initialData ? "Update" : "Create"} Contest
         </button>
       </div>
     </form>
   );
 };
 
-export default ContestModal;
+export default ContestForm;

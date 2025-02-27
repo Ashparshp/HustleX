@@ -5,7 +5,7 @@ const leetCodeSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     totalSolved: {
@@ -26,26 +26,35 @@ const leetCodeSchema = new mongoose.Schema(
     },
     totalEasy: {
       type: Number,
-      default: 0
+      default: 0,
     },
     totalMedium: {
       type: Number,
-      default: 0
+      default: 0,
     },
     totalHard: {
       type: Number,
-      default: 0
+      default: 0,
     },
     ranking: {
       type: Number,
     },
     username: {
       type: String,
-      trim: true
+      trim: true,
     },
     lastUpdated: {
       type: Date,
       default: Date.now,
+    },
+    solvedCategories: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
+    completionStreak: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }

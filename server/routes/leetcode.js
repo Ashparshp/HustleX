@@ -5,19 +5,17 @@ const {
   getLeetCodeStats,
   updateLeetCodeStats,
   getLeetCodeHistory,
-  deleteLeetCodeStats
+  deleteLeetCodeStats,
 } = require("../controllers/leetcode");
-const { protect } = require('../middleware/auth');
+const { protect } = require("../middleware/auth");
 
 // Protect all routes
 router.use(protect);
 
 // Routes
-router.route('/stats')
-  .get(getLeetCodeStats)
-  .post(updateLeetCodeStats);
+router.route("/stats").get(getLeetCodeStats).post(updateLeetCodeStats);
 
-router.get('/history', getLeetCodeHistory);
-router.delete('/stats/:id', deleteLeetCodeStats);
+router.get("/history", getLeetCodeHistory);
+router.delete("/stats/:id", deleteLeetCodeStats);
 
 module.exports = router;

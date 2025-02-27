@@ -5,67 +5,67 @@ import apiClient from "../utils/apiClient";
 import { useAuth } from "../context/AuthContext";
 
 const useLeetCode = () => {
-  const [stats, setStats] = useState({
-    totalSolved: 0,
-    easySolved: 0,
-    mediumSolved: 0,
-    hardSolved: 0,
-    totalEasy: 0,
-    totalMedium: 0,
-    totalHard: 0,
-    ranking: null,
-    username: null,
-    lastUpdated: null,
-  });
+  const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const { isAuthenticated } = useAuth();
 
-  // Fetch current LeetCode stats
-  const fetchStats = useCallback(async () => {
+  // Get the latest LeetCode stats
+  const getLeetCodeStats = useCallback(async () => {
     if (!isAuthenticated) return;
 
     try {
       setLoading(true);
+      setError(null);
+
       const response = await apiClient.get("/leetcode/stats");
 
-      if (response && response.data) {
-        setStats(response.data);
+      if (response.success) {
+        setStats(response.data || null);
+        return response.data;
+      } else {
+        throw new Error(response.message || "Failed to fetch LeetCode stats");
       }
-
-      setError(null);
-      return response.data;
     } catch (err) {
       console.error("Error fetching LeetCode stats:", err);
-      setError(err.message);
-      toast.error("Failed to fetch LeetCode stats");
-      return null;
+      setError(
+        err.message || "An error occurred while fetching LeetCode stats"
+      );
+      toast.error("Failed to load LeetCode statistics");
     } finally {
       setLoading(false);
     }
   }, [isAuthenticated]);
 
-  // Update LeetCode stats
-  const updateStats = useCallback(
-    async (newStats) => {
+  // Get LeetCode stats history
+  const getLeetCodeHistory = useCallback(
+    async (limit = 10) => {
       if (!isAuthenticated) return;
 
       try {
         setLoading(true);
-        const response = await apiClient.post("/leetcode/stats", newStats);
+        setError(null);
 
-        if (response && response.data) {
-          setStats(response.data);
-          toast.success("LeetCode stats updated successfully");
+        const response = await apiClient.get("/leetcode/history", {
+          params: { limit },
+        });
+
+        if (response.success) {
+          setHistory(response.data || []);
+          return response.data;
+        } else {
+          throw new Error(
+            response.message || "Failed to fetch LeetCode history"
+          );
         }
-
-        return response.data;
       } catch (err) {
-        console.error("Error updating LeetCode stats:", err);
-        toast.error(err.message || "Failed to update LeetCode stats");
-        throw err;
+        console.error("Error fetching LeetCode history:", err);
+        setError(
+          err.message || "An error occurred while fetching LeetCode history"
+        );
+        toast.error("Failed to load LeetCode history");
       } finally {
         setLoading(false);
       }
@@ -73,106 +73,95 @@ const useLeetCode = () => {
     [isAuthenticated]
   );
 
-  // Fetch LeetCode history
-  const fetchHistory = useCallback(
-    async (limit = 10) => {
+  // Update LeetCode stats
+  const updateLeetCodeStats = useCallback(
+    async (data) => {
       if (!isAuthenticated) return;
 
       try {
-        const response = await apiClient.get("/leetcode/history", {
-          params: { limit },
-        });
+        setLoading(true);
+        setError(null);
 
-        if (response && response.data) {
-          setHistory(response.data);
+        const response = await apiClient.post("/leetcode/stats", data);
+
+        if (response.success) {
+          setStats(response.data || null);
+          // Also refresh history after updating stats
+          getLeetCodeHistory();
+          toast.success("LeetCode stats updated successfully");
+          return response.data;
+        } else {
+          throw new Error(
+            response.message || "Failed to update LeetCode stats"
+          );
         }
-
-        return response.data;
       } catch (err) {
-        console.error("Error fetching LeetCode history:", err);
-        toast.error("Failed to fetch LeetCode history");
-        return [];
+        console.error("Error updating LeetCode stats:", err);
+        setError(
+          err.message || "An error occurred while updating LeetCode stats"
+        );
+        toast.error("Failed to update LeetCode statistics");
+        throw err;
+      } finally {
+        setLoading(false);
       }
     },
-    [isAuthenticated]
+    [isAuthenticated, getLeetCodeHistory]
   );
 
-  // Delete a LeetCode stats entry
-  const deleteStatsEntry = useCallback(
+  // Delete a specific stats entry (from history)
+  const deleteLeetCodeStatsEntry = useCallback(
     async (id) => {
       if (!isAuthenticated) return;
 
       try {
-        await apiClient.delete(`/leetcode/stats/${id}`);
+        setLoading(true);
+        setError(null);
 
-        // Refresh history
-        await fetchHistory();
+        const response = await apiClient.delete(`/leetcode/stats/${id}`);
 
-        toast.success("Stats entry deleted successfully");
+        if (response.success) {
+          // Refresh history and current stats
+          getLeetCodeHistory();
+          getLeetCodeStats();
+          toast.success("LeetCode stats entry deleted successfully");
+          return true;
+        } else {
+          throw new Error(
+            response.message || "Failed to delete LeetCode stats entry"
+          );
+        }
       } catch (err) {
-        console.error("Error deleting stats entry:", err);
-        toast.error(err.message || "Failed to delete stats entry");
+        console.error("Error deleting LeetCode stats entry:", err);
+        setError(
+          err.message || "An error occurred while deleting LeetCode stats entry"
+        );
+        toast.error("Failed to delete LeetCode statistics entry");
         throw err;
+      } finally {
+        setLoading(false);
       }
     },
-    [isAuthenticated, fetchHistory]
+    [isAuthenticated, getLeetCodeHistory, getLeetCodeStats]
   );
 
-  // Calculate progress metrics from stats
-  const getProgressMetrics = useCallback(() => {
-    // Calculate solve percentages
-    const easyPercentage =
-      stats.totalEasy > 0 ? (stats.easySolved / stats.totalEasy) * 100 : 0;
-
-    const mediumPercentage =
-      stats.totalMedium > 0
-        ? (stats.mediumSolved / stats.totalMedium) * 100
-        : 0;
-
-    const hardPercentage =
-      stats.totalHard > 0 ? (stats.hardSolved / stats.totalHard) * 100 : 0;
-
-    const totalPercentage =
-      stats.totalEasy + stats.totalMedium + stats.totalHard > 0
-        ? (stats.totalSolved /
-            (stats.totalEasy + stats.totalMedium + stats.totalHard)) *
-          100
-        : 0;
-
-    // Calculate distribution
-    const distribution = {
-      easy: stats.easySolved,
-      medium: stats.mediumSolved,
-      hard: stats.hardSolved,
-    };
-
-    return {
-      easyPercentage,
-      mediumPercentage,
-      hardPercentage,
-      totalPercentage,
-      distribution,
-    };
-  }, [stats]);
-
-  // Initial data load
+  // Load initial data when authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      fetchStats();
-      fetchHistory();
+      getLeetCodeStats();
+      getLeetCodeHistory();
     }
-  }, [isAuthenticated, fetchStats, fetchHistory]);
+  }, [isAuthenticated, getLeetCodeStats, getLeetCodeHistory]);
 
   return {
     stats,
     history,
     loading,
     error,
-    fetchStats,
-    updateStats,
-    fetchHistory,
-    deleteStatsEntry,
-    getProgressMetrics,
+    getLeetCodeStats,
+    getLeetCodeHistory,
+    updateLeetCodeStats,
+    deleteLeetCodeStatsEntry,
   };
 };
 

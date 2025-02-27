@@ -12,7 +12,9 @@ const handleError = (res, error, message = "Server error") => {
 // @access  Private
 exports.getLeetCodeStats = async (req, res) => {
   try {
-    let stats = await LeetCode.findOne({ user: req.user.id }).sort({ createdAt: -1 });
+    let stats = await LeetCode.findOne({ user: req.user.id }).sort({
+      createdAt: -1,
+    });
 
     // If no stats exist, return default values
     if (!stats) {
@@ -28,14 +30,16 @@ exports.getLeetCodeStats = async (req, res) => {
           totalHard: 0,
           ranking: null,
           username: null,
+          solvedCategories: {},
+          completionStreak: 0,
           lastUpdated: new Date(),
-        }
+        },
       });
     }
 
     res.json({
       success: true,
-      data: stats
+      data: stats,
     });
   } catch (error) {
     handleError(res, error, "Error getting LeetCode stats");
@@ -47,16 +51,18 @@ exports.getLeetCodeStats = async (req, res) => {
 // @access  Private
 exports.updateLeetCodeStats = async (req, res) => {
   try {
-    const { 
-      totalSolved, 
-      easySolved, 
-      mediumSolved, 
-      hardSolved, 
-      totalEasy, 
-      totalMedium, 
+    const {
+      totalSolved,
+      easySolved,
+      mediumSolved,
+      hardSolved,
+      totalEasy,
+      totalMedium,
       totalHard,
       ranking,
-      username 
+      username,
+      solvedCategories,
+      completionStreak,
     } = req.body;
 
     // Create a new record
@@ -71,14 +77,16 @@ exports.updateLeetCodeStats = async (req, res) => {
       totalHard,
       ranking,
       username,
+      solvedCategories: solvedCategories || {},
+      completionStreak: completionStreak || 0,
       lastUpdated: new Date(),
     });
 
     await newStats.save();
-    
+
     res.json({
       success: true,
-      data: newStats
+      data: newStats,
     });
   } catch (error) {
     handleError(res, error, "Error updating LeetCode stats");
@@ -91,32 +99,34 @@ exports.updateLeetCodeStats = async (req, res) => {
 exports.getLeetCodeHistory = async (req, res) => {
   try {
     const { limit = 10 } = req.query;
-    
+
     const history = await LeetCode.find({ user: req.user.id })
       .sort({ createdAt: -1 })
       .limit(parseInt(limit));
-    
+
     if (history.length === 0) {
       return res.json({
         success: true,
-        data: []
+        data: [],
       });
     }
-    
+
     // Calculate progress over time
-    const progressHistory = history.map(entry => ({
+    const progressHistory = history.map((entry) => ({
       date: entry.createdAt,
       totalSolved: entry.totalSolved,
       easySolved: entry.easySolved,
       mediumSolved: entry.mediumSolved,
       hardSolved: entry.hardSolved,
-      ranking: entry.ranking
+      ranking: entry.ranking,
+      completionStreak: entry.completionStreak,
+      solvedCategories: entry.solvedCategories,
     }));
-    
+
     res.json({
       success: true,
       data: history,
-      progressHistory
+      progressHistory,
     });
   } catch (error) {
     handleError(res, error, "Error getting LeetCode history");
@@ -129,25 +139,25 @@ exports.getLeetCodeHistory = async (req, res) => {
 exports.deleteLeetCodeStats = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Find and verify ownership
     const stats = await LeetCode.findOne({
       _id: id,
-      user: req.user.id
+      user: req.user.id,
     });
-    
+
     if (!stats) {
       return res.status(404).json({
         success: false,
-        message: "Stats entry not found or not authorized"
+        message: "Stats entry not found or not authorized",
       });
     }
-    
+
     await stats.deleteOne();
-    
+
     res.json({
       success: true,
-      message: "Stats entry deleted successfully"
+      message: "Stats entry deleted successfully",
     });
   } catch (error) {
     handleError(res, error, "Error deleting LeetCode stats");

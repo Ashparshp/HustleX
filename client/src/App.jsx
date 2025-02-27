@@ -36,6 +36,8 @@ import SkillsPage from "./pages/SkillsPage";
 import GoalsPage from "./pages/GoalsPage";
 import SchedulePage from "./pages/SchedulePage";
 import TimetablePage from "./pages/TimetablePage";
+import LeetCodePage from "./pages/LeetCodePage";
+import ContestsPage from "./pages/ContestsPage";
 
 function AppContent() {
   const { isDark } = useTheme();
@@ -156,7 +158,7 @@ function AppContent() {
             path="/goals"
             element={
               <ProtectedRoute>
-                <GoalsPage />
+                <ContestsPage />
               </ProtectedRoute>
             }
           />
