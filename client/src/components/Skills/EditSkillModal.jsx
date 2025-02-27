@@ -31,11 +31,7 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [newCategory, setNewCategory] = useState("");
 
-  // Initialize form with skill data
-  // Using console.log to debug the skill props for troubleshooting
   useEffect(() => {
-    console.log("Skill prop received:", skill);
-
     if (skill) {
       setFormData({
         name: skill.name || "",
@@ -50,13 +46,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
         completionDate: skill.completionDate
           ? new Date(skill.completionDate).toISOString().split("T")[0]
           : "",
-      });
-      console.log("Form data set to:", {
-        name: skill.name || "",
-        category: skill.category || "",
-        status: skill.status || "upcoming",
-        progress: skill.progress || 0,
-        priority: skill.priority || "medium",
       });
     }
   }, [skill]);

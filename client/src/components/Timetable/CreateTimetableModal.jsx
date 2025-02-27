@@ -14,7 +14,6 @@ const CreateTimetableModal = ({ onClose, onSubmit, initialData = null }) => {
     isActive: true,
   });
 
-  // If editing, load initial data
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -38,7 +37,6 @@ const CreateTimetableModal = ({ onClose, onSubmit, initialData = null }) => {
     e.preventDefault();
     if (isSubmitting) return;
 
-    // Validate form
     if (!formData.name.trim()) {
       setError("Timetable name is required");
       return;
@@ -47,12 +45,7 @@ const CreateTimetableModal = ({ onClose, onSubmit, initialData = null }) => {
     try {
       setIsSubmitting(true);
       setError(null);
-
-      // Make a copy of the data to avoid reference issues
       const dataToSubmit = { ...formData };
-
-      // Debug log
-      console.log("Submitting timetable data:", dataToSubmit);
 
       await onSubmit(dataToSubmit);
       onClose();
