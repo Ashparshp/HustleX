@@ -102,7 +102,7 @@ const PlatformDistribution = ({ data = {} }) => {
   // Generate the summary table
   const renderSummaryTable = () => {
     return (
-      <div className="mt-6">
+      <div className="mt-4">
         <h3
           className={`text-lg font-medium mb-3 ${
             isDark ? "text-white" : "text-gray-900"
@@ -191,14 +191,10 @@ const PlatformDistribution = ({ data = {} }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative group"
+      className="h-full flex flex-col"
     >
       <div
-        className={`absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg blur opacity-30 
-                   group-hover:opacity-50 transition duration-300`}
-      />
-      <div
-        className={`relative p-6 rounded-lg border transition-all duration-300
+        className={`flex-1 flex flex-col relative p-4 rounded-lg border transition-all duration-300
         ${
           isDark
             ? "bg-black border-purple-500/30 group-hover:border-purple-400"
@@ -206,7 +202,7 @@ const PlatformDistribution = ({ data = {} }) => {
         }`}
       >
         <h3
-          className={`text-lg font-semibold flex items-center mb-6 ${
+          className={`text-lg font-semibold flex items-center mb-4 ${
             isDark ? "text-white" : "text-gray-800"
           }`}
         >
@@ -217,8 +213,8 @@ const PlatformDistribution = ({ data = {} }) => {
         </h3>
 
         {chartData.length > 0 ? (
-          <>
-            <div className="h-64">
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1 min-h-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -255,9 +251,9 @@ const PlatformDistribution = ({ data = {} }) => {
             </div>
 
             {renderSummaryTable()}
-          </>
+          </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-12">
+          <div className="flex-1 flex flex-col items-center justify-center">
             <AlertCircle
               className={`w-16 h-16 ${
                 isDark ? "text-gray-700" : "text-gray-300"

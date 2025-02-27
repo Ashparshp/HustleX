@@ -32,12 +32,16 @@ const VisualizeModal = ({ isOpen, onClose, contests, stats }) => {
               isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"
             }`}
           >
-            ✕
+            <span className={isDark ? "text-gray-300" : "text-gray-600"}>✕</span>
           </button>
         </div>
 
         {/* Visualization Toggle */}
-        <div className="inline-flex rounded-lg p-1 bg-gray-800 border border-gray-700 text-xs md:text-sm mb-4">
+        <div className={`inline-flex rounded-lg p-1 ${
+          isDark 
+            ? "bg-gray-800 border border-gray-700" 
+            : "bg-gray-100 border border-gray-200"
+        } text-xs md:text-sm mb-4`}>
           {[
             {
               key: "heatmap",
@@ -55,8 +59,12 @@ const VisualizeModal = ({ isOpen, onClose, contests, stats }) => {
               onClick={() => setActiveVisualization(viz.key)}
               className={`flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 rounded-lg transition-all duration-300 ${
                 activeVisualization === viz.key
-                  ? "bg-purple-500/20 text-white"
-                  : "text-gray-400 hover:bg-gray-700"
+                  ? isDark 
+                    ? "bg-purple-500/20 text-white"
+                    : "bg-purple-100 text-purple-800"
+                  : isDark
+                    ? "text-gray-400 hover:bg-gray-700"
+                    : "text-gray-600 hover:bg-gray-200"
               }`}
             >
               <viz.icon className="w-3 h-3 md:w-4 md:h-4" />
@@ -66,7 +74,11 @@ const VisualizeModal = ({ isOpen, onClose, contests, stats }) => {
         </div>
 
         {/* Visualization Content */}
-        <div className="bg-black p-4 rounded-lg border border-purple-500/30 h-[500px]">
+        <div className={`${
+          isDark ? "bg-black" : "bg-gray-50"
+        } p-4 rounded-lg border ${
+          isDark ? "border-purple-500/30" : "border-purple-200"
+        } h-[500px]`}>
           {activeVisualization === "heatmap" ? (
             <ContestsHeatmap data={contests} />
           ) : (
