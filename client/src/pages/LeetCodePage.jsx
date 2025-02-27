@@ -155,7 +155,7 @@ const LeetCodePage = () => {
                 isDark ? "text-white" : "text-gray-900"
               }`}
             >
-              LeetCode Progress Tracker
+              LeetCode Progress
             </h2>
             <div
               className={`w-24 h-1 bg-gradient-to-r ${

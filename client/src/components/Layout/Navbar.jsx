@@ -6,9 +6,7 @@ import {
   Sun,
   Moon,
   User,
-  Settings,
   LogOut,
-  Bell,
   ChevronDown,
   Home,
   Clock,
@@ -76,6 +74,12 @@ const Navbar = () => {
       authRequired: true,
     },
     {
+      text: "Schedule",
+      path: "/schedule",
+      icon: <Calendar size={16} />,
+      authRequired: true,
+    },
+    {
       text: "Contest",
       path: "/contests",
       icon: <Home size={16} />,
@@ -85,12 +89,6 @@ const Navbar = () => {
       text: "LeetCode",
       path: "/leetcode",
       icon: <Target size={16} />,
-      authRequired: true,
-    },
-    {
-      text: "Schedule",
-      path: "/schedule",
-      icon: <Calendar size={16} />,
       authRequired: true,
     },
   ];
@@ -126,7 +124,7 @@ const Navbar = () => {
           {/* Logo and brand */}
           <div className="flex items-center">
             <Link
-              to={isAuthenticated ? "/dashboard" : "/login"}
+              to={isAuthenticated ? "/working-hours" : "/login"}
               className="flex-shrink-0 flex items-center"
             >
               <span
@@ -134,7 +132,7 @@ const Navbar = () => {
                   isDark ? "text-white" : "text-indigo-600"
                 } transition-colors duration-300`}
               >
-                ServiceXchange
+                HustleX
                 <span
                   className={`ml-1 text-sm font-normal ${
                     isDark ? "text-indigo-400" : "text-indigo-500"
@@ -180,21 +178,6 @@ const Navbar = () => {
                 <Moon size={20} className="text-indigo-600" />
               )}
             </button>
-
-            {/* Notifications button - for authenticated users only */}
-            {isAuthenticated && (
-              <button
-                className={`p-2 rounded-full relative ${
-                  isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"
-                } transition duration-200`}
-              >
-                <Bell
-                  size={20}
-                  className={isDark ? "text-gray-300" : "text-gray-600"}
-                />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-            )}
 
             {isAuthenticated ? (
               /* User menu (desktop) */
@@ -286,23 +269,6 @@ const Navbar = () => {
                         <div className="flex items-center gap-2">
                           <User size={16} />
                           <span>Your Profile</span>
-                        </div>
-                      </Link>
-                    </div>
-
-                    <div>
-                      <Link
-                        to="/settings"
-                        className={`block px-4 py-2 text-sm ${
-                          isDark
-                            ? "hover:bg-gray-800 text-gray-300"
-                            : "hover:bg-gray-50 text-gray-700"
-                        } transition-colors duration-200`}
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Settings size={16} />
-                          <span>Settings</span>
                         </div>
                       </Link>
                     </div>
@@ -463,18 +429,6 @@ const Navbar = () => {
                   >
                     <User size={16} />
                     <span>Profile</span>
-                  </Link>
-                </div>
-                <div>
-                  <Link
-                    to="/settings"
-                    className={`block px-3 py-2.5 ${linkClass(
-                      isActive("/settings")
-                    )}`}
-                    onClick={closeMenu}
-                  >
-                    <Settings size={16} />
-                    <span>Settings</span>
                   </Link>
                 </div>
 
