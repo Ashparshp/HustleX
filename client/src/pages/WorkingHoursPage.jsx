@@ -212,24 +212,7 @@ const WorkingHoursPage = () => {
         }`}
       >
         {/* Header and Controls */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-          <motion.h2
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`text-3xl font-bold ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            Working Hours
-            <div
-              className={`w-24 h-1 bg-gradient-to-r ${
-                isDark
-                  ? "from-white to-gray-500"
-                  : "from-indigo-600 to-indigo-300"
-              } mt-4 rounded-full`}
-            />
-          </motion.h2>
-
+        <div className="flex flex-col md:flex-row justify-end items-start md:items-center gap-6 mb-8">
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -237,7 +220,7 @@ const WorkingHoursPage = () => {
             className="flex flex-wrap gap-3 items-center"
           >
             {/* Search Input */}
-            <div className="relative">
+            <div className="relative justify-start">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search
                   className={`w-5 h-5 ${
@@ -404,6 +387,98 @@ const WorkingHoursPage = () => {
           </motion.div>
         )}
 
+        {/* Working Hours Cards Section */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2
+              className={`text-3xl font-bold ${
+                isDark ? "text-white" : "text-gray-900"
+              }`}
+            >
+              Recent Entries
+              <div
+                className={`w-24 h-1 bg-gradient-to-r ${
+                  isDark
+                    ? "from-white to-gray-500"
+                    : "from-indigo-600 to-indigo-300"
+                } mt-4 rounded-full`}
+              />
+            </h2>
+
+            {/* Sort Controls */}
+            <div className="flex items-center gap-2">
+              <ArrowUpDown
+                className={`w-4 h-4 ${
+                  isDark ? "text-indigo-400" : "text-indigo-600"
+                }`}
+              />
+              <select
+                className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+                  isDark
+                    ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500"
+                    : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500"
+                }`}
+                onChange={(e) => setSortOrder(e.target.value)}
+                value={sortOrder}
+              >
+                <option value="desc">Newest First</option>
+                <option value="asc">Oldest First</option>
+              </select>
+            </div>
+          </div>
+
+          {filteredWorkingHours.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className={`text-center py-12 ${
+                isDark ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
+              <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p className="text-base">No working hours entries found</p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setShowForm(true);
+                  setSelectedEntry(null);
+                }}
+                className={`mt-4 inline-flex items-center px-4 py-2 rounded-lg ${
+                  isDark
+                    ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+                    : "bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600 border border-indigo-300/50"
+                }`}
+              >
+                <Plus size={18} className="mr-1" />
+                Add Your First Entry
+              </motion.button>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <AnimatePresence>
+                {filteredWorkingHours.map((entry) => (
+                  <motion.div
+                    key={entry._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <WorkingHoursCard
+                      key={entry._id}
+                      entry={entry}
+                      onEdit={() => handleEdit(entry)}
+                      onDelete={() => handleDelete(entry)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <StatsCard
@@ -498,98 +573,6 @@ const WorkingHoursPage = () => {
             )}
           </div>
         </motion.div>
-
-        {/* Working Hours Cards Section */}
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2
-              className={`text-3xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
-              Recent Entries
-              <div
-                className={`w-24 h-1 bg-gradient-to-r ${
-                  isDark
-                    ? "from-indigo-500 to-purple-500"
-                    : "from-indigo-600 to-purple-600"
-                } mt-4 rounded-full`}
-              />
-            </h2>
-
-            {/* Sort Controls */}
-            <div className="flex items-center gap-2">
-              <ArrowUpDown
-                className={`w-4 h-4 ${
-                  isDark ? "text-indigo-400" : "text-indigo-600"
-                }`}
-              />
-              <select
-                className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
-                  isDark
-                    ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500"
-                    : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500"
-                }`}
-                onChange={(e) => setSortOrder(e.target.value)}
-                value={sortOrder}
-              >
-                <option value="desc">Newest First</option>
-                <option value="asc">Oldest First</option>
-              </select>
-            </div>
-          </div>
-
-          {filteredWorkingHours.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className={`text-center py-12 ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="text-base">No working hours entries found</p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setShowForm(true);
-                  setSelectedEntry(null);
-                }}
-                className={`mt-4 inline-flex items-center px-4 py-2 rounded-lg ${
-                  isDark
-                    ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
-                    : "bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600 border border-indigo-300/50"
-                }`}
-              >
-                <Plus size={18} className="mr-1" />
-                Add Your First Entry
-              </motion.button>
-            </motion.div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AnimatePresence>
-                {filteredWorkingHours.map((entry) => (
-                  <motion.div
-                    key={entry._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <WorkingHoursCard
-                      key={entry._id}
-                      entry={entry}
-                      onEdit={() => handleEdit(entry)}
-                      onDelete={() => handleDelete(entry)}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Modal Styles with improved backdrop blur */}
