@@ -1,7 +1,14 @@
 // src/pages/SkillsPage.jsx
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Filter, BarChart2, Settings, RefreshCcw } from "lucide-react";
+import {
+  Plus,
+  Filter,
+  BarChart2,
+  Settings,
+  RefreshCcw,
+  Search,
+} from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import useSkills from "../hooks/useSkills";
 import useCategories from "../hooks/useCategories";
@@ -45,6 +52,9 @@ const SkillsPage = () => {
   const [showStats, setShowStats] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showCategoryManagement, setShowCategoryManagement] = useState(false);
+
+  // Check if any modal is open to apply blur effect
+  const isAnyModalOpen = showAddModal || showCategoryManagement;
 
   // Filter skills based on category, status, and search query
   const filteredSkills = useMemo(() => {
@@ -96,7 +106,7 @@ const SkillsPage = () => {
   // Fetch skills when filters change
   useEffect(() => {
     fetchSkills();
-  }, []);
+  }, [fetchSkills]);
 
   // Handlers for various actions
   const handleAddSkill = () => {
@@ -143,7 +153,7 @@ const SkillsPage = () => {
   }
 
   return (
-    <section className={`py-20 relative ${isDark ? "bg-black" : "bg-white"}`}>
+    <section className={`py-16 relative ${isDark ? "bg-black" : "bg-white"}`}>
       {/* Background gradients */}
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
@@ -160,60 +170,85 @@ const SkillsPage = () => {
         }`}
       />
 
-      <div className="mx-auto px-4 relative z-10">
-        {/* Header and Controls */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-          <motion.h2
+      <div
+        className={`w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 transition-all duration-300 ${
+          isAnyModalOpen ? "blur-sm" : ""
+        }`}
+      >
+        {/* Page Header */}
+        <div className="mb-8">
+          <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`text-3xl font-bold ${
+            className={`text-3xl font-bold mb-2 ${
               isDark ? "text-white" : "text-gray-900"
             }`}
           >
             Skills Management
-            <div
-              className={`w-24 h-1 bg-gradient-to-r ${
-                isDark
-                  ? "from-white to-gray-500"
-                  : "from-indigo-600 to-indigo-300"
-              } mt-4 rounded-full`}
-            />
-          </motion.h2>
+          </motion.h1>
+          <div
+            className={`w-32 h-1 bg-gradient-to-r ${
+              isDark
+                ? "from-indigo-500 to-indigo-300/70"
+                : "from-indigo-600 to-indigo-300"
+            } rounded-full`}
+          />
+        </div>
 
+        {/* Search and Controls */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          {/* Search Input */}
+          <div className="relative w-full sm:w-auto sm:min-w-72">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search
+                className={`w-5 h-5 ${
+                  isDark ? "text-indigo-400" : "text-indigo-500"
+                }`}
+              />
+            </div>
+            <input
+              type="text"
+              placeholder="Search skills..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`w-full pl-10 pr-4 py-2.5 rounded-lg text-sm border transition-colors ${
+                isDark
+                  ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+                  : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+              }`}
+            />
+          </div>
+
+          {/* Action Buttons */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex flex-wrap gap-3 items-center"
+            transition={{ duration: 0.3 }}
+            className="flex flex-wrap gap-2 justify-end"
           >
-            {/* Filters Button */}
             <FilterButton active={showFilters} onClick={handleToggleFilters}>
               <Filter className="w-4 h-4" />
-              Filter
+              <span className="hidden sm:inline">Filter</span>
             </FilterButton>
 
-            {/* Stats Button */}
             <FilterButton active={showStats} onClick={handleToggleStats}>
               <BarChart2 className="w-4 h-4" />
-              Stats
+              <span className="hidden sm:inline">Stats</span>
             </FilterButton>
 
-            {/* Categories Button */}
             <FilterButton
               active={showCategoryManagement}
               onClick={() => setShowCategoryManagement(true)}
             >
               <Settings className="w-4 h-4" />
-              Categories
+              <span className="hidden sm:inline">Categories</span>
             </FilterButton>
 
-            {/* Add Skill Button */}
             <FilterButton type="add" onClick={handleAddSkill}>
               <Plus className="w-4 h-4" />
-              Add Skill
+              <span className="hidden sm:inline">Add Skill</span>
             </FilterButton>
 
-            {/* Refresh Button */}
             <button
               onClick={() => fetchSkills()}
               className={`p-2 rounded-lg transition-colors shadow-sm ${
@@ -230,13 +265,17 @@ const SkillsPage = () => {
 
         {/* Active filters */}
         {(selectedCategory || selectedStatus || searchQuery) && (
-          <div
-            className={`mb-4 p-3 rounded-lg ${
-              isDark ? "bg-gray-800/80" : "bg-gray-100"
-            }`}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mb-6 p-4 rounded-lg border ${
+              isDark
+                ? "bg-gray-900/70 border-indigo-500/30"
+                : "bg-white/90 border-indigo-300/50"
+            } shadow-md`}
           >
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2 items-center">
                 <span
                   className={`font-medium ${
                     isDark ? "text-white" : "text-gray-900"
@@ -246,10 +285,10 @@ const SkillsPage = () => {
                 </span>
                 {selectedCategory && (
                   <span
-                    className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                    className={`px-2 py-1 rounded-md ${
                       isDark
-                        ? "bg-indigo-500/20 text-indigo-300"
-                        : "bg-indigo-100 text-indigo-800"
+                        ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
+                        : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
                     }`}
                   >
                     Category: {selectedCategory}
@@ -257,10 +296,10 @@ const SkillsPage = () => {
                 )}
                 {selectedStatus && (
                   <span
-                    className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                    className={`px-2 py-1 rounded-md ${
                       isDark
-                        ? "bg-green-500/20 text-green-300"
-                        : "bg-green-100 text-green-800"
+                        ? "bg-green-500/10 text-green-300 border border-green-500/30"
+                        : "bg-green-100/60 text-green-700 border border-green-300/50"
                     }`}
                   >
                     Status: {selectedStatus.replace("-", " ")}
@@ -268,35 +307,41 @@ const SkillsPage = () => {
                 )}
                 {searchQuery && (
                   <span
-                    className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                    className={`px-2 py-1 rounded-md ${
                       isDark
-                        ? "bg-purple-500/20 text-purple-300"
-                        : "bg-purple-100 text-purple-800"
+                        ? "bg-purple-500/10 text-purple-300 border border-purple-500/30"
+                        : "bg-purple-100/60 text-purple-700 border border-purple-300/50"
                     }`}
                   >
                     Search: {searchQuery}
                   </span>
                 )}
               </div>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleClearFilters}
-                className={`text-sm ${
+                className={`text-sm px-3 py-1 rounded-lg whitespace-nowrap ${
                   isDark
-                    ? "text-red-400 hover:text-red-300"
-                    : "text-red-600 hover:text-red-700"
+                    ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
+                    : "bg-red-100/50 text-red-600 hover:bg-red-200/70 border border-red-300/50"
                 }`}
               >
                 Clear Filters
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Error message */}
         {error && (
-          <div
-            className={`p-4 mb-6 rounded-lg ${
-              isDark ? "bg-red-900/30 text-red-300" : "bg-red-100 text-red-700"
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`p-4 mb-6 rounded-lg border ${
+              isDark
+                ? "bg-red-900/30 text-red-300 border-red-500/30"
+                : "bg-red-100/70 text-red-700 border-red-300/50"
             }`}
           >
             <p>Error: {error}</p>
@@ -310,7 +355,7 @@ const SkillsPage = () => {
             >
               Try again
             </button>
-          </div>
+          </motion.div>
         )}
 
         {/* Stats Panel */}
@@ -320,12 +365,12 @@ const SkillsPage = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-8"
+              className="mb-8 overflow-hidden"
             >
               <div
-                className={`p-6 rounded-lg border ${
+                className={`p-6 rounded-lg border shadow-md ${
                   isDark
-                    ? "bg-black border-indigo-500/30"
+                    ? "bg-gray-900/70 border-indigo-500/30"
                     : "bg-white border-indigo-300/50"
                 }`}
               >
@@ -349,12 +394,12 @@ const SkillsPage = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-8"
+              className="mb-8 overflow-hidden"
             >
               <div
-                className={`p-6 rounded-lg border ${
+                className={`p-6 rounded-lg border shadow-md ${
                   isDark
-                    ? "bg-black border-indigo-500/30"
+                    ? "bg-gray-900/70 border-indigo-500/30"
                     : "bg-white border-indigo-300/50"
                 }`}
               >
@@ -408,37 +453,81 @@ const SkillsPage = () => {
             }
           />
         </motion.div>
+      </div>
 
-        {/* Add Skill Modal */}
+      {/* Add Skill Modal with improved backdrop */}
+      <AnimatePresence>
         {showAddModal && (
-          <AddSkillModal
-            categories={
-              categories.length > 0
-                ? categories
-                : defaultCategories && defaultCategories.length > 0
-                ? defaultCategories.map((c) =>
-                    typeof c === "string" ? c : c.name
-                  )
-                : []
-            }
-            onClose={handleCloseAddModal}
-          />
-        )}
-
-        {/* Category Management Modal */}
-        {showCategoryManagement && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+          >
             <div
-              className={`w-full max-w-4xl p-6 rounded-lg shadow-lg ${
-                isDark ? "bg-gray-800" : "bg-white"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={handleCloseAddModal}
+            ></div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative z-10 w-full max-w-xl"
+            >
+              <AddSkillModal
+                categories={
+                  categories.length > 0
+                    ? categories
+                    : defaultCategories && defaultCategories.length > 0
+                    ? defaultCategories.map((c) =>
+                        typeof c === "string" ? c : c.name
+                      )
+                    : []
+                }
+                onClose={handleCloseAddModal}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Category Management Modal with improved backdrop */}
+      <AnimatePresence>
+        {showCategoryManagement && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+          >
+            <div
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => setShowCategoryManagement(false)}
+            ></div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className={`relative w-full max-w-4xl p-6 rounded-lg shadow-xl border ${
+                isDark
+                  ? "bg-gray-900 border-indigo-500/30"
+                  : "bg-white border-indigo-300/50"
               }`}
             >
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Manage Categories</h2>
+                <h2
+                  className={`text-xl font-bold ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  Manage Categories
+                </h2>
                 <button
                   onClick={() => setShowCategoryManagement(false)}
-                  className={`p-1 rounded-full ${
-                    isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"
+                  className={`p-2 rounded-full transition-colors ${
+                    isDark
+                      ? "hover:bg-gray-700 text-gray-400"
+                      : "hover:bg-gray-200 text-gray-500"
                   }`}
                 >
                   ✕
@@ -466,10 +555,10 @@ const SkillsPage = () => {
                 }}
                 type="skills"
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </section>
   );
 };
