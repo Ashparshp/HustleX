@@ -189,7 +189,7 @@ const SkillsPage = () => {
           <div
             className={`w-32 h-1 bg-gradient-to-r ${
               isDark
-                ? "from-indigo-500 to-indigo-300/70"
+                ? "from-white to-gray-500"
                 : "from-indigo-600 to-indigo-300"
             } rounded-full`}
           />

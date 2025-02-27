@@ -111,7 +111,6 @@ function AppContent() {
             }
           />
 
-          {/* Protected Routes */}
 
           {/* Working Hours Feature */}
           <Route
