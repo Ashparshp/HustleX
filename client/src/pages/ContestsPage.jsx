@@ -24,8 +24,6 @@ import ContestForm from "../components/Contests/ContestForm";
 import ContestStats from "../components/Contests/ContestStats";
 import ContestFilters from "../components/Contests/ContestFilters";
 import CategoryManagement from "../components/Categories/CategoryManagement";
-import ContestsHeatmap from "../components/Contests/ContestsHeatmap";
-import PlatformDistribution from "../components/Contests/PlatformDistribution";
 import VisualizeModal from "../components/Contests/VisualizeModal";
 import StatsCard from "../components/common/StatsCard";
 import FilterButton from "../components/common/FilterButton";
@@ -743,7 +741,7 @@ const ContestsPage = () => {
                   await fetchCategories();
                   handleCategoryChange();
                 }}
-                type="goals"
+                type="Contest Platforms"
               />
             </div>
           </div>

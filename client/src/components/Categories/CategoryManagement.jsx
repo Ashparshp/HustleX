@@ -19,7 +19,6 @@ import LoadingSpinner from "../UI/LoadingSpinner";
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }) => {
   const { isDark } = useTheme();
-
   return (
     <AnimatePresence>
       {isOpen && (
