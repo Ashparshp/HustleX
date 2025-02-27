@@ -13,7 +13,6 @@ import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // Layout Components
-import Dashboard from "./components/Dashboard/Dashboard";
 import Navbar from "./components/Layout/Navbar";
 import Footer from "./components/Layout/Footer";
 
@@ -33,7 +32,6 @@ import ChangePassword from "./components/Profile/ChangePassword";
 // App Feature Pages
 import WorkingHoursPage from "./pages/WorkingHoursPage";
 import SkillsPage from "./pages/SkillsPage";
-import GoalsPage from "./pages/GoalsPage";
 import SchedulePage from "./pages/SchedulePage";
 import TimetablePage from "./pages/TimetablePage";
 import LeetCodePage from "./pages/LeetCodePage";

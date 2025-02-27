@@ -1,6 +1,6 @@
 // src/pages/TimetablePage.jsx
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle,
   Calendar,
@@ -8,6 +8,8 @@ import {
   Edit,
   Trash2,
   PlusCircle,
+  Tag,
+  X,
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import useTimetable from "../hooks/useTimetable";
@@ -868,61 +870,118 @@ const TimetablePage = () => {
         </ModalWrapper>
 
         {/* Category Management Modal */}
-        <ModalWrapper
-          isOpen={activeModal === "categoryManagement"}
-          onClose={closeAllModals}
-        >
-          <CategoryManagement
-            categories={categories}
-            defaultCategories={defaultCategories}
-            loading={categoriesLoading}
-            onAdd={async (data) => {
-              try {
-                await addCategory(data);
-                // Wait for backend to process
-                await new Promise((resolve) => setTimeout(resolve, 100));
-                // Force a fresh fetch
-                const freshCategories = await getTimetableCategories();
-                console.log("Categories after adding:", freshCategories);
-                setTimetableCategories(freshCategories || []);
-                // Force component to re-render
-                setActiveModal((prev) => null);
-                setTimeout(() => setActiveModal("categoryManagement"), 10);
-              } catch (err) {
-                console.error("Error adding category:", err);
-              }
-            }}
-            onUpdate={async (id, data) => {
-              try {
-                await updateCategory(id, data);
-                // Wait for backend to process
-                await new Promise((resolve) => setTimeout(resolve, 100));
-                // Force a fresh fetch
-                const freshCategories = await getTimetableCategories();
-                setTimetableCategories(freshCategories || []);
-              } catch (err) {
-                console.error("Error updating category:", err);
-              }
-            }}
-            onDelete={async (id) => {
-              try {
-                await deleteCategory(id);
-                // Wait for backend to process
-                await new Promise((resolve) => setTimeout(resolve, 100));
-                // Force a fresh fetch
-                const freshCategories = await getTimetableCategories();
-                setTimetableCategories(freshCategories || []);
-              } catch (err) {
-                console.error("Error deleting category:", err);
-              }
-            }}
-            onRefresh={async () => {
-              await fetchCategories();
-              await refreshTimetableCategories();
-            }}
-            type="timetable"
-          />
-        </ModalWrapper>
+        <AnimatePresence>
+          {activeModal === "categoryManagement" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+            >
+              <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+                onClick={closeAllModals}
+              ></div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={`relative w-full max-w-4xl p-6 rounded-lg shadow-xl border ${
+                  isDark
+                    ? "bg-gray-900 border-indigo-500/30"
+                    : "bg-white border-indigo-300/50"
+                }`}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h2
+                    className={`text-xl font-bold flex items-center gap-2 ${
+                      isDark ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    <Tag
+                      size={20}
+                      className={isDark ? "text-indigo-400" : "text-indigo-600"}
+                    />
+                    Manage Categories
+                  </h2>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={closeAllModals}
+                    className={`p-2 rounded-full transition-colors ${
+                      isDark
+                        ? "hover:bg-gray-700 text-gray-400"
+                        : "hover:bg-gray-200 text-gray-500"
+                    }`}
+                  >
+                    <X size={20} />
+                  </motion.button>
+                </div>
+
+                <div className="max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
+                  <CategoryManagement
+                    categories={categories}
+                    defaultCategories={defaultCategories}
+                    loading={categoriesLoading}
+                    onAdd={async (data) => {
+                      try {
+                        await addCategory(data);
+                        // Wait for backend to process
+                        await new Promise((resolve) =>
+                          setTimeout(resolve, 100)
+                        );
+                        // Force a fresh fetch
+                        const freshCategories = await getTimetableCategories();
+                        setTimetableCategories(freshCategories || []);
+                        // Force component to re-render
+                        setActiveModal((prev) => null);
+                        setTimeout(
+                          () => setActiveModal("categoryManagement"),
+                          10
+                        );
+                      } catch (err) {
+                        console.error("Error adding category:", err);
+                      }
+                    }}
+                    onUpdate={async (id, data) => {
+                      try {
+                        await updateCategory(id, data);
+                        // Wait for backend to process
+                        await new Promise((resolve) =>
+                          setTimeout(resolve, 100)
+                        );
+                        // Force a fresh fetch
+                        const freshCategories = await getTimetableCategories();
+                        setTimetableCategories(freshCategories || []);
+                      } catch (err) {
+                        console.error("Error updating category:", err);
+                      }
+                    }}
+                    onDelete={async (id) => {
+                      try {
+                        await deleteCategory(id);
+                        // Wait for backend to process
+                        await new Promise((resolve) =>
+                          setTimeout(resolve, 100)
+                        );
+                        // Force a fresh fetch
+                        const freshCategories = await getTimetableCategories();
+                        setTimetableCategories(freshCategories || []);
+                      } catch (err) {
+                        console.error("Error deleting category:", err);
+                      }
+                    }}
+                    onRefresh={async () => {
+                      await fetchCategories();
+                      await refreshTimetableCategories();
+                    }}
+                    type="timetable"
+                  />
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <ModalWrapper
         isOpen={activeModal === "deleteTimetable"}
