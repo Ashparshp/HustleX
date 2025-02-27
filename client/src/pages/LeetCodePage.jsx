@@ -138,7 +138,7 @@ const LeetCodePage = () => {
       <div
         className={`absolute inset-0 ${
           isDark
-            ? "bg-[radial-gradient(ellipse_at_top,rgba(249,115,22,0.1),transparent_50%)]"
+            ? "bg-[radial-gradient(ellipse_at_top,rgba(75,0,90,0.2),rgba(0,0,0,0.7)_50%)]"
             : "bg-[radial-gradient(ellipse_at_top,rgba(249,115,22,0.15),transparent_50%)]"
         }`}
       />

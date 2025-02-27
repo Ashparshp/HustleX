@@ -188,19 +188,19 @@ const WorkingHoursPage = () => {
         isDark ? "bg-black" : "bg-gray-50"
       }`}
     >
-      {/* Enhanced Background gradients */}
+      {/* Background Gradients */}
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
           isDark
-            ? "from-indigo-950/20 via-black to-black"
-            : "from-indigo-200/70 via-gray-50 to-gray-50"
+            ? "from-indigo-900/10 via-black to-black"
+            : "from-indigo-100/50 via-white to-white"
         }`}
       />
       <div
         className={`absolute inset-0 ${
           isDark
-            ? "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.15),transparent_60%)]"
-            : "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.2),transparent_70%)]"
+            ? "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.1),transparent_50%)]"
+            : "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.15),transparent_50%)]"
         }`}
       />
       {/* Additional subtle patterns for visual depth */}

@@ -288,7 +288,7 @@ const CategoryManagement = ({
 
         <div className="flex gap-2">
           <motion.button
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleStartAdd}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${

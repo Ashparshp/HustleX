@@ -499,11 +499,11 @@ const TimetablePage = () => {
       className={`py-6 relative ${isDark ? "bg-black" : "bg-white"}`}
       key={refreshKey}
     >
-      {/* Background gradients */}
+      {/* Background Gradients */}
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
           isDark
-            ? "from-indigo-900/1 via-black to-black"
+            ? "from-indigo-900/10 via-black to-black"
             : "from-indigo-100/50 via-white to-white"
         }`}
       />
