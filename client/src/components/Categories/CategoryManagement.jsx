@@ -223,8 +223,6 @@ const CategoryManagement = ({
         return "Timetable Categories";
       case "schedule":
         return "Schedule Categories";
-      case "goals":
-        return "Goal Platforms";
       default:
         return `${type} Categories`;
     }
