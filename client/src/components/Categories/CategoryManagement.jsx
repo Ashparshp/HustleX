@@ -1,49 +1,107 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
-import { Plus, Edit2, Trash2, Save, X, RefreshCw } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Save,
+  X,
+  RefreshCw,
+  AlertTriangle,
+  Check,
+  Tag,
+  Palette,
+  FileText,
+  Type,
+} from "lucide-react";
 import LoadingSpinner from "../UI/LoadingSpinner";
 
-const ConfirmModal = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  title,
-  message,
-  isDark,
-}) => {
-  if (!isOpen) return null;
+const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }) => {
+  const { isDark } = useTheme();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div
-        className={`w-full max-w-md p-6 rounded-lg shadow-xl ${
-          isDark ? "bg-gray-800 text-white" : "bg-white text-gray-900"
-        }`}
-      >
-        <h2 className="text-xl font-semibold mb-4">{title}</h2>
-        <p className={`mb-6 ${isDark ? "text-gray-300" : "text-gray-600"}`}>
-          {message}
-        </p>
-        <div className="flex justify-end space-x-2">
-          <button
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+        >
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
             onClick={onClose}
-            className={`px-4 py-2 rounded-lg transition-colors ${
+          ></div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: "spring", duration: 0.5 }}
+            className={`relative w-full max-w-md p-6 rounded-lg shadow-xl border ${
               isDark
-                ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+                ? "bg-gray-900 border-red-500/30"
+                : "bg-white border-red-300/50"
             }`}
           >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
+            <div className="flex items-start gap-3 mb-4">
+              <AlertTriangle
+                className={`flex-shrink-0 ${
+                  isDark ? "text-red-400" : "text-red-600"
+                }`}
+                size={24}
+              />
+              <div>
+                <h2
+                  className={`text-xl font-semibold ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  {title}
+                </h2>
+                <p
+                  className={`mt-1 ${
+                    isDark ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  {message}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onClose}
+                className={`px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 ${
+                  isDark
+                    ? "bg-gray-500/10 text-gray-400 hover:bg-gray-500/20 border border-gray-500/30"
+                    : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/70 border border-gray-300/50"
+                }`}
+              >
+                <X size={16} />
+                Cancel
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onConfirm}
+                className={`px-4 py-2.5 rounded-lg flex items-center gap-2 ${
+                  isDark
+                    ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
+                    : "bg-red-100/50 text-red-600 hover:bg-red-200/70 border border-red-300/50"
+                }`}
+              >
+                <Trash2 size={16} />
+                Delete
+              </motion.button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
@@ -172,8 +230,46 @@ const CategoryManagement = ({
     }
   };
 
+  // Base styling for form inputs
+  const inputClass = `w-full px-3 py-2.5 rounded-lg border text-sm transition-all duration-200 ${
+    isDark
+      ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 placeholder-indigo-500/70"
+      : "bg-indigo-100/50 border-indigo-300/50 text-indigo-600 placeholder-indigo-600/50"
+  } focus:outline-none focus:ring-2 focus:ring-indigo-500/50`;
+
+  const labelClass = `block mb-2 text-sm font-medium ${
+    isDark ? "text-gray-300" : "text-gray-700"
+  }`;
+
+  // Get icon for category type
+  const getIconForCategoryType = () => {
+    switch (type) {
+      case "working-hours":
+        return (
+          <Tag
+            className={`mr-2 ${isDark ? "text-indigo-400" : "text-indigo-600"}`}
+            size={18}
+          />
+        );
+      case "skills":
+        return (
+          <Check
+            className={`mr-2 ${isDark ? "text-indigo-400" : "text-indigo-600"}`}
+            size={18}
+          />
+        );
+      default:
+        return (
+          <Tag
+            className={`mr-2 ${isDark ? "text-indigo-400" : "text-indigo-600"}`}
+            size={18}
+          />
+        );
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-1 custom-scrollbar">
       {/* Confirmation Modal */}
       <ConfirmModal
         isOpen={categoryToDelete !== null}
@@ -181,203 +277,244 @@ const CategoryManagement = ({
         onConfirm={handleDelete}
         title="Delete Category"
         message="Are you sure you want to delete this category? This action cannot be undone."
-        isDark={isDark}
       />
 
       <div className="flex justify-between items-center">
         <h2
-          className={`text-xl font-semibold ${
+          className={`text-xl font-semibold flex items-center ${
             isDark ? "text-white" : "text-gray-900"
           }`}
         >
+          {getIconForCategoryType()}
           {getCategoryTypeText()}
         </h2>
 
-        <div className="flex space-x-2">
-          <button
+        <div className="flex gap-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleStartAdd}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
               isDark
-                ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                ? "bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/30"
+                : "bg-indigo-100/50 text-indigo-600 hover:bg-indigo-200/70 border border-indigo-300/50"
             }`}
             disabled={isAdding || editingId !== null}
           >
             <Plus size={16} />
             Add Category
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={onRefresh}
-            className={`flex items-center gap-1 p-1.5 rounded-lg transition-colors ${
+            className={`flex items-center gap-1 p-2 rounded-lg transition-all duration-200 ${
               isDark
-                ? "hover:bg-gray-700 text-gray-300"
-                : "hover:bg-gray-200 text-gray-700"
+                ? "bg-gray-500/10 text-gray-400 hover:bg-gray-500/20 border border-gray-500/30"
+                : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/70 border border-gray-300/50"
             }`}
             title="Refresh categories"
           >
             <RefreshCw size={16} />
-          </button>
+          </motion.button>
         </div>
       </div>
 
       {/* Form for adding/editing categories */}
-      {(isAdding || editingId !== null) && (
-        <form
-          onSubmit={handleSubmit}
-          className={`p-4 rounded-lg ${
-            isDark
-              ? "bg-gray-800/80 border border-indigo-500/30"
-              : "bg-gray-100 border border-indigo-300/30"
-          }`}
-        >
-          <div className="space-y-4">
-            <div>
-              <label
-                className={`block mb-1 text-sm font-medium ${
-                  isDark ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Category Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 rounded-lg border ${
-                  isDark
-                    ? "bg-gray-700 border-gray-600 text-white"
-                    : "bg-white border-gray-300 text-gray-900"
-                }`}
-                placeholder="Enter category name"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label
-                  className={`block mb-1 text-sm font-medium ${
-                    isDark ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
-                  Color
-                </label>
-                <div className="flex items-center">
-                  <input
-                    type="color"
-                    name="color"
-                    value={formData.color}
-                    onChange={handleChange}
-                    className="w-10 h-10 rounded border-0 p-0"
-                  />
+      <AnimatePresence>
+        {(isAdding || editingId !== null) && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{ overflow: "hidden" }}
+          >
+            <motion.form
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              onSubmit={handleSubmit}
+              className={`p-5 rounded-lg border shadow-sm ${
+                isDark
+                  ? "bg-gray-900/70 border-indigo-500/30"
+                  : "bg-white/90 border-indigo-300/50"
+              }`}
+            >
+              <div className="space-y-4">
+                <div className="group/input">
+                  <label htmlFor="name" className={labelClass}>
+                    <div className="flex items-center">
+                      <Type
+                        size={16}
+                        className={`mr-2 ${
+                          isDark ? "text-indigo-400" : "text-indigo-600"
+                        }`}
+                      />
+                      Category Name
+                    </div>
+                  </label>
                   <input
                     type="text"
-                    name="color"
-                    value={formData.color}
+                    id="name"
+                    name="name"
+                    value={formData.name}
                     onChange={handleChange}
-                    className={`ml-2 w-full px-3 py-2 rounded-lg border ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white border-gray-300 text-gray-900"
-                    }`}
-                    placeholder="#3498db"
+                    className={inputClass}
+                    placeholder="Enter category name"
+                    required
                   />
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="group/input">
+                    <label htmlFor="color" className={labelClass}>
+                      <div className="flex items-center">
+                        <Palette
+                          size={16}
+                          className={`mr-2 ${
+                            isDark ? "text-indigo-400" : "text-indigo-600"
+                          }`}
+                        />
+                        Color
+                      </div>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        id="color-picker"
+                        name="color"
+                        value={formData.color}
+                        onChange={handleChange}
+                        className="w-10 h-10 rounded cursor-pointer border-0 bg-transparent p-0"
+                      />
+                      <input
+                        type="text"
+                        id="color"
+                        name="color"
+                        value={formData.color}
+                        onChange={handleChange}
+                        className={inputClass}
+                        placeholder="#3498db"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="group/input">
+                    <label htmlFor="icon" className={labelClass}>
+                      <div className="flex items-center">
+                        <Tag
+                          size={16}
+                          className={`mr-2 ${
+                            isDark ? "text-indigo-400" : "text-indigo-600"
+                          }`}
+                        />
+                        Icon
+                      </div>
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="icon"
+                        name="icon"
+                        value={formData.icon}
+                        onChange={handleChange}
+                        className={inputClass}
+                      >
+                        <option value="circle">Circle</option>
+                        <option value="square">Square</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="star">Star</option>
+                        <option value="heart">Heart</option>
+                        <option value="code">Code</option>
+                        <option value="book">Book</option>
+                        <option value="briefcase">Briefcase</option>
+                        <option value="calendar">Calendar</option>
+                        <option value="clock">Clock</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <svg
+                          className="fill-current h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="group/input">
+                  <label htmlFor="description" className={labelClass}>
+                    <div className="flex items-center">
+                      <FileText
+                        size={16}
+                        className={`mr-2 ${
+                          isDark ? "text-indigo-400" : "text-indigo-600"
+                        }`}
+                      />
+                      Description (Optional)
+                    </div>
+                  </label>
+                  <input
+                    type="text"
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    className={inputClass}
+                    placeholder="Enter description"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={handleCancel}
+                    className={`flex-1 py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 ${
+                      isDark
+                        ? "bg-gray-500/10 text-gray-400 hover:bg-gray-500/20 border border-gray-500/30"
+                        : "bg-gray-100/50 text-gray-600 hover:bg-gray-200/70 border border-gray-300/50"
+                    } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                    disabled={isSubmitting}
+                  >
+                    <X size={16} />
+                    Cancel
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    className={`flex-1 py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 group
+                      ${
+                        isDark
+                          ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30"
+                          : "bg-emerald-100/50 text-emerald-600 hover:bg-emerald-200/70 border border-emerald-300/50"
+                      } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <LoadingSpinner size="sm" />
+                    ) : (
+                      <>
+                        <Save
+                          size={16}
+                          className="transition-transform duration-300 group-hover:scale-110"
+                        />
+                        {isAdding ? "Add" : "Update"} Category
+                      </>
+                    )}
+                  </motion.button>
+                </div>
               </div>
-
-              <div>
-                <label
-                  className={`block mb-1 text-sm font-medium ${
-                    isDark ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
-                  Icon
-                </label>
-                <select
-                  name="icon"
-                  value={formData.icon}
-                  onChange={handleChange}
-                  className={`w-full px-3 py-2 rounded-lg border ${
-                    isDark
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-gray-300 text-gray-900"
-                  }`}
-                >
-                  <option value="circle">Circle</option>
-                  <option value="square">Square</option>
-                  <option value="triangle">Triangle</option>
-                  <option value="star">Star</option>
-                  <option value="heart">Heart</option>
-                  <option value="code">Code</option>
-                  <option value="book">Book</option>
-                  <option value="briefcase">Briefcase</option>
-                  <option value="calendar">Calendar</option>
-                  <option value="clock">Clock</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label
-                className={`block mb-1 text-sm font-medium ${
-                  isDark ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Description (Optional)
-              </label>
-              <input
-                type="text"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 rounded-lg border ${
-                  isDark
-                    ? "bg-gray-700 border-gray-600 text-white"
-                    : "bg-white border-gray-300 text-gray-900"
-                }`}
-                placeholder="Enter description"
-              />
-            </div>
-
-            <div className="flex space-x-3 pt-2">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className={`px-4 py-2 rounded-lg transition-colors flex-1 ${
-                  isDark
-                    ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                    : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-                }`}
-                disabled={isSubmitting}
-              >
-                <X size={16} className="inline mr-1" />
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                className={`px-4 py-2 rounded-lg transition-colors flex-1 ${
-                  isDark
-                    ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                    : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                }`}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <LoadingSpinner size="sm" />
-                ) : (
-                  <>
-                    <Save size={16} className="inline mr-1" />
-                    {isAdding ? "Add" : "Update"} Category
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </form>
-      )}
+            </motion.form>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Categories list */}
       {loading ? (
@@ -385,47 +522,78 @@ const CategoryManagement = ({
           <LoadingSpinner size="md" text="Loading categories..." />
         </div>
       ) : categories.length === 0 ? (
-        <div
-          className={`p-6 text-center rounded-lg ${
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`p-6 text-center rounded-lg border ${
             isDark
-              ? "bg-gray-800 border border-gray-700"
-              : "bg-white border border-gray-200"
+              ? "bg-gray-900/70 border-indigo-500/30"
+              : "bg-white/90 border-indigo-300/50"
           }`}
         >
-          <p className="mb-2">No custom categories found.</p>
-          <button
-            onClick={handleStartAdd}
-            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm ${
-              isDark
-                ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                : "bg-indigo-600 hover:bg-indigo-700 text-white"
-            }`}
-          >
-            <Plus size={16} />
-            Add Your First Category
-          </button>
-        </div>
+          <div className="flex flex-col items-center gap-3">
+            <div
+              className={`p-3 rounded-full ${
+                isDark ? "bg-indigo-500/10" : "bg-indigo-100/50"
+              }`}
+            >
+              <Tag
+                className={isDark ? "text-indigo-400" : "text-indigo-600"}
+                size={24}
+              />
+            </div>
+            <p
+              className={`text-base ${
+                isDark ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              No custom categories found.
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleStartAdd}
+              className={`mt-2 inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm ${
+                isDark
+                  ? "bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/30"
+                  : "bg-indigo-100/50 text-indigo-600 hover:bg-indigo-200/70 border border-indigo-300/50"
+              }`}
+            >
+              <Plus size={16} />
+              Add Your First Category
+            </motion.button>
+          </div>
+        </motion.div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {categories.map((category) => (
-            <div
+            <motion.div
               key={category._id}
-              className={`p-3 rounded-lg flex justify-between items-center transition-colors ${
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+              className={`p-4 rounded-lg flex justify-between items-center border shadow-sm ${
                 isDark
-                  ? "bg-gray-800 border border-gray-700 hover:border-indigo-500/30"
-                  : "bg-white border border-gray-200 hover:border-indigo-300/50"
-              }`}
+                  ? "bg-gray-900/70 border-indigo-500/30 hover:bg-indigo-500/5"
+                  : "bg-white/90 border-indigo-300/50 hover:bg-indigo-50/50"
+              } transition-all duration-200`}
             >
               <div className="flex items-center">
                 <div
-                  className="w-6 h-6 rounded-full mr-2"
+                  className="w-8 h-8 rounded-full mr-3 shadow-sm flex-shrink-0"
                   style={{ backgroundColor: category.color || "#3498db" }}
                 ></div>
                 <div>
-                  <p className="font-medium">{category.name}</p>
+                  <p
+                    className={`font-medium ${
+                      isDark ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    {category.name}
+                  </p>
                   {category.description && (
                     <p
-                      className={`text-xs ${
+                      className={`text-xs mt-0.5 ${
                         isDark ? "text-gray-400" : "text-gray-600"
                       }`}
                     >
@@ -436,31 +604,35 @@ const CategoryManagement = ({
               </div>
 
               <div className="flex space-x-2">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => handleStartEdit(category)}
-                  className={`p-1.5 rounded-lg transition-colors ${
+                  className={`p-2 rounded-lg transition-colors ${
                     isDark
-                      ? "hover:bg-gray-700 text-indigo-400"
-                      : "hover:bg-gray-100 text-indigo-600"
+                      ? "hover:bg-indigo-500/10 text-indigo-400"
+                      : "hover:bg-indigo-100/50 text-indigo-600"
                   }`}
                   disabled={isAdding || editingId !== null}
                 >
                   <Edit2 size={16} />
-                </button>
+                </motion.button>
 
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => setCategoryToDelete(category._id)}
-                  className={`p-1.5 rounded-lg transition-colors ${
+                  className={`p-2 rounded-lg transition-colors ${
                     isDark
-                      ? "hover:bg-gray-700 text-red-400"
-                      : "hover:bg-gray-100 text-red-600"
+                      ? "hover:bg-red-500/10 text-red-400"
+                      : "hover:bg-red-100/50 text-red-600"
                   }`}
                   disabled={isAdding || editingId !== null}
                 >
                   <Trash2 size={16} />
-                </button>
+                </motion.button>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}
