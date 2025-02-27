@@ -1,4 +1,3 @@
-// server/server.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -27,13 +26,25 @@ app.use("/api/auth", limiter); // Apply rate limiting to auth routes
 // Prevent HTTP param pollution
 app.use(hpp());
 
-// Regular middleware
+// Configure CORS dynamically from environment variables
+const allowedOrigins = process.env.CLIENT_URLS
+  ? process.env.CLIENT_URLS.split(",")
+  : [];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "*",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
+
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
@@ -45,9 +56,9 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log("MongoDB Connected Successfully");
+    console.log("✅ MongoDB Connected Successfully");
   } catch (error) {
-    console.error("MongoDB Connection Error:", error);
+    console.error("❌ MongoDB Connection Error:", error);
     process.exit(1);
   }
 };
