@@ -184,7 +184,7 @@ const WorkingHoursPage = () => {
 
   return (
     <section
-      className={`py-20 min-h-screen relative ${
+      className={`py-16 min-h-screen relative ${
         isDark ? "bg-black" : "bg-gray-50"
       }`}
     >
@@ -207,65 +207,108 @@ const WorkingHoursPage = () => {
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
       <div
-        className={`mx-auto px-6 relative z-10 transition-all duration-300 ${
+        className={`container mx-auto px-4 sm:px-6 relative z-10 transition-all duration-300 ${
           isAnyModalOpen ? "blur-sm" : ""
         }`}
       >
-        {/* Header and Controls */}
-        <div className="flex flex-col md:flex-row justify-end items-start md:items-center gap-6 mb-8">
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex flex-wrap gap-3 items-center"
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1
+            className={`text-3xl font-bold mb-2 ${
+              isDark ? "text-white" : "text-gray-900"
+            }`}
           >
-            {/* Search Input */}
-            <div className="relative justify-start">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search
-                  className={`w-5 h-5 ${
-                    isDark ? "text-indigo-400" : "text-indigo-500"
-                  }`}
-                />
-              </div>
-              <input
-                type="text"
-                placeholder="Search entries"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full pl-10 pr-4 py-2.5 rounded-lg text-sm border transition-colors ${
-                  isDark
-                    ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
-                    : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+            Working Hours
+          </h1>
+          <div
+              className={`w-24 h-1 bg-gradient-to-r ${
+                isDark
+                  ? "from-white to-gray-500"
+                  : "from-indigo-600 to-indigo-300"
+              } mt-4 rounded-full`}
+            />
+        </div>
+
+        {/* Stats Grid - Moved to top for better information hierarchy */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <StatsCard
+            title="Total Days"
+            value={stats.totalDays}
+            icon={Calendar}
+            color={isDark ? "text-indigo-400" : "text-indigo-600"}
+          />
+          <StatsCard
+            title="Target Hours"
+            value={stats.totalTargetHours?.toFixed(1)}
+            icon={Target}
+            color={isDark ? "text-emerald-400" : "text-emerald-600"}
+          />
+          <StatsCard
+            title="Achieved Hours"
+            value={stats.totalAchievedHours?.toFixed(1)}
+            icon={Clock}
+            color={isDark ? "text-blue-400" : "text-blue-600"}
+          />
+          <StatsCard
+            title="Completion Rate"
+            value={`${stats.averageCompletion?.toFixed(1)}%`}
+            icon={Activity}
+            color={isDark ? "text-purple-400" : "text-purple-600"}
+          />
+        </div>
+
+        {/* Controls Row - Improved alignment with consistent spacing */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          {/* Search Input */}
+          <div className="relative w-full sm:w-auto sm:min-w-72">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search
+                className={`w-5 h-5 ${
+                  isDark ? "text-indigo-400" : "text-indigo-500"
                 }`}
               />
             </div>
+            <input
+              type="text"
+              placeholder="Search entries"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`w-full pl-10 pr-4 py-2.5 rounded-lg text-sm border transition-colors ${
+                isDark
+                  ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+                  : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+              }`}
+            />
+          </div>
 
-            {/* Filters Button */}
+          {/* Action Buttons - Better organized */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-wrap gap-2 justify-end"
+          >
             <FilterButton
               active={showFilters}
               onClick={() => setShowFilters(!showFilters)}
             >
               <Filter className="w-4 h-4" />
-              Filters
+              <span className="hidden sm:inline">Filters</span>
             </FilterButton>
 
-            {/* Stats Button */}
             <FilterButton active={showStats} onClick={() => setShowStats(true)}>
               <BarChart2 className="w-4 h-4" />
-              Stats
+              <span className="hidden sm:inline">Stats</span>
             </FilterButton>
 
-            {/* Categories Button */}
             <FilterButton
               active={showCategoryManagement}
               onClick={() => setShowCategoryManagement(true)}
             >
               <Settings className="w-4 h-4" />
-              Categories
+              <span className="hidden sm:inline">Categories</span>
             </FilterButton>
 
-            {/* Add Hours Button */}
             <FilterButton
               type="add"
               onClick={() => {
@@ -274,10 +317,9 @@ const WorkingHoursPage = () => {
               }}
             >
               <Plus className="w-4 h-4" />
-              Add Hours
+              <span className="hidden sm:inline">Add Hours</span>
             </FilterButton>
 
-            {/* Refresh Button */}
             <button
               onClick={() => fetchWorkingHours()}
               className={`p-2 rounded-lg transition-colors shadow-sm ${
@@ -297,14 +339,14 @@ const WorkingHoursPage = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`mb-6 p-3 rounded-lg border ${
+            className={`mb-6 p-4 rounded-lg border ${
               isDark
                 ? "bg-gray-900/70 border-indigo-500/30"
                 : "bg-white/90 border-indigo-300/50"
             } shadow-md`}
           >
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2 items-center">
                 <span
                   className={`font-medium ${
                     isDark ? "text-white" : "text-gray-900"
@@ -314,7 +356,7 @@ const WorkingHoursPage = () => {
                 </span>
                 {filters.startDate && (
                   <span
-                    className={`ml-2 px-2 py-1 rounded-md ${
+                    className={`px-2 py-1 rounded-md ${
                       isDark
                         ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
                         : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
@@ -325,7 +367,7 @@ const WorkingHoursPage = () => {
                 )}
                 {filters.endDate && (
                   <span
-                    className={`ml-2 px-2 py-1 rounded-md ${
+                    className={`px-2 py-1 rounded-md ${
                       isDark
                         ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
                         : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
@@ -336,7 +378,7 @@ const WorkingHoursPage = () => {
                 )}
                 {filters.category && (
                   <span
-                    className={`ml-2 px-2 py-1 rounded-md ${
+                    className={`px-2 py-1 rounded-md ${
                       isDark
                         ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
                         : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
@@ -350,7 +392,7 @@ const WorkingHoursPage = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={clearFilters}
-                className={`text-sm px-3 py-1 rounded-lg ${
+                className={`text-sm px-3 py-1 rounded-lg whitespace-nowrap ${
                   isDark
                     ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
                     : "bg-red-100/50 text-red-600 hover:bg-red-200/70 border border-red-300/50"
@@ -387,127 +429,7 @@ const WorkingHoursPage = () => {
           </motion.div>
         )}
 
-        {/* Working Hours Cards Section */}
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2
-              className={`text-3xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
-              Recent Entries
-              <div
-                className={`w-24 h-1 bg-gradient-to-r ${
-                  isDark
-                    ? "from-white to-gray-500"
-                    : "from-indigo-600 to-indigo-300"
-                } mt-4 rounded-full`}
-              />
-            </h2>
-
-            {/* Sort Controls */}
-            <div className="flex items-center gap-2">
-              <ArrowUpDown
-                className={`w-4 h-4 ${
-                  isDark ? "text-indigo-400" : "text-indigo-600"
-                }`}
-              />
-              <select
-                className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
-                  isDark
-                    ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500"
-                    : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500"
-                }`}
-                onChange={(e) => setSortOrder(e.target.value)}
-                value={sortOrder}
-              >
-                <option value="desc">Newest First</option>
-                <option value="asc">Oldest First</option>
-              </select>
-            </div>
-          </div>
-
-          {filteredWorkingHours.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className={`text-center py-12 ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="text-base">No working hours entries found</p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setShowForm(true);
-                  setSelectedEntry(null);
-                }}
-                className={`mt-4 inline-flex items-center px-4 py-2 rounded-lg ${
-                  isDark
-                    ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
-                    : "bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600 border border-indigo-300/50"
-                }`}
-              >
-                <Plus size={18} className="mr-1" />
-                Add Your First Entry
-              </motion.button>
-            </motion.div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AnimatePresence>
-                {filteredWorkingHours.map((entry) => (
-                  <motion.div
-                    key={entry._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <WorkingHoursCard
-                      key={entry._id}
-                      entry={entry}
-                      onEdit={() => handleEdit(entry)}
-                      onDelete={() => handleDelete(entry)}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatsCard
-            title="Total Days"
-            value={stats.totalDays}
-            icon={Calendar}
-            color={isDark ? "text-indigo-400" : "text-indigo-600"}
-          />
-          <StatsCard
-            title="Target Hours"
-            value={stats.totalTargetHours?.toFixed(1)}
-            icon={Target}
-            color={isDark ? "text-emerald-400" : "text-emerald-600"}
-          />
-          <StatsCard
-            title="Achieved Hours"
-            value={stats.totalAchievedHours?.toFixed(1)}
-            icon={Clock}
-            color={isDark ? "text-blue-400" : "text-blue-600"}
-          />
-          <StatsCard
-            title="Completion Rate"
-            value={`${stats.averageCompletion?.toFixed(1)}%`}
-            icon={Activity}
-            color={isDark ? "text-purple-400" : "text-purple-600"}
-          />
-        </div>
-
-        {/* Chart Section */}
+        {/* Chart Section - Moved before entries for better visual hierarchy */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -573,6 +495,102 @@ const WorkingHoursPage = () => {
             )}
           </div>
         </motion.div>
+
+        {/* Working Hours Cards Section - Consistent section heading style */}
+        <div className="mt-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
+            <div>
+              <h2
+                className={`text-2xl font-bold ${
+                  isDark ? "text-white" : "text-gray-900"
+                }`}
+              >
+                Recent Entries
+              </h2>
+              <div
+                className={`w-24 h-1 bg-gradient-to-r ${
+                  isDark
+                    ? "from-indigo-500 to-indigo-300/70"
+                    : "from-indigo-600 to-indigo-300"
+                } mt-2 rounded-full`}
+              />
+            </div>
+
+            {/* Sort Controls - Better aligned */}
+            <div className="flex items-center gap-2 mt-4 sm:mt-0">
+              <ArrowUpDown
+                className={`w-4 h-4 ${
+                  isDark ? "text-indigo-400" : "text-indigo-600"
+                }`}
+              />
+              <select
+                className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+                  isDark
+                    ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500"
+                    : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500"
+                }`}
+                onChange={(e) => setSortOrder(e.target.value)}
+                value={sortOrder}
+              >
+                <option value="desc">Newest First</option>
+                <option value="asc">Oldest First</option>
+              </select>
+            </div>
+          </div>
+
+          {filteredWorkingHours.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className={`text-center py-12 rounded-lg border ${
+                isDark
+                  ? "bg-gray-900/50 border-gray-800 text-gray-400"
+                  : "bg-gray-50 border-gray-200 text-gray-600"
+              }`}
+            >
+              <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p className="text-base">No working hours entries found</p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setShowForm(true);
+                  setSelectedEntry(null);
+                }}
+                className={`mt-4 inline-flex items-center px-4 py-2 rounded-lg ${
+                  isDark
+                    ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+                    : "bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600 border border-indigo-300/50"
+                }`}
+              >
+                <Plus size={18} className="mr-1" />
+                Add Your First Entry
+              </motion.button>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <AnimatePresence>
+                {filteredWorkingHours.map((entry) => (
+                  <motion.div
+                    key={entry._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <WorkingHoursCard
+                      key={entry._id}
+                      entry={entry}
+                      onEdit={() => handleEdit(entry)}
+                      onDelete={() => handleDelete(entry)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Modal Styles with improved backdrop blur */}
@@ -812,7 +830,7 @@ const LoadingWorkingHoursSkeleton = () => {
 
   return (
     <section
-      className={`py-20 min-h-screen relative ${
+      className={`py-16 min-h-screen relative ${
         isDark ? "bg-black" : "bg-gray-50"
       }`}
     >
@@ -834,31 +852,19 @@ const LoadingWorkingHoursSkeleton = () => {
       {/* Additional subtle patterns for visual depth */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
-      <div className="mx-auto px-6 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Header Skeleton */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+        <div className="mb-8">
           <div
-            className={`h-10 w-64 rounded-lg ${
+            className={`h-8 w-48 rounded-lg ${
+              isDark ? "bg-gray-800/70" : "bg-gray-200/70"
+            } animate-pulse mb-2`}
+          ></div>
+          <div
+            className={`h-1 w-32 rounded-full ${
               isDark ? "bg-gray-800/70" : "bg-gray-200/70"
             } animate-pulse`}
           ></div>
-          <div className="flex gap-3">
-            <div
-              className={`h-10 w-32 rounded-lg ${
-                isDark ? "bg-gray-800/70" : "bg-gray-200/70"
-              } animate-pulse`}
-            ></div>
-            <div
-              className={`h-10 w-32 rounded-lg ${
-                isDark ? "bg-gray-800/70" : "bg-gray-200/70"
-              } animate-pulse`}
-            ></div>
-            <div
-              className={`h-10 w-32 rounded-lg ${
-                isDark ? "bg-gray-800/70" : "bg-gray-200/70"
-              } animate-pulse`}
-            ></div>
-          </div>
         </div>
 
         {/* Stats Grid Skeleton */}
@@ -895,6 +901,25 @@ const LoadingWorkingHoursSkeleton = () => {
           ))}
         </div>
 
+        {/* Controls Skeleton */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div
+            className={`h-10 w-full sm:w-72 rounded-lg ${
+              isDark ? "bg-gray-800/70" : "bg-gray-200/70"
+            } animate-pulse`}
+          ></div>
+          <div className="flex gap-2">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className={`h-10 w-24 rounded-lg ${
+                  isDark ? "bg-gray-800/70" : "bg-gray-200/70"
+                } animate-pulse`}
+              ></div>
+            ))}
+          </div>
+        </div>
+
         {/* Chart Skeleton */}
         <div
           className={`p-6 rounded-lg border shadow-md mb-8 ${
@@ -924,11 +949,25 @@ const LoadingWorkingHoursSkeleton = () => {
 
         {/* Entries Section Skeleton */}
         <div className="mt-8">
-          <div
-            className={`h-10 w-48 rounded mb-8 ${
-              isDark ? "bg-gray-800" : "bg-gray-200"
-            } animate-pulse`}
-          ></div>
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <div
+                className={`h-8 w-40 rounded ${
+                  isDark ? "bg-gray-800" : "bg-gray-200"
+                } animate-pulse mb-2`}
+              ></div>
+              <div
+                className={`h-1 w-24 rounded-full ${
+                  isDark ? "bg-gray-800" : "bg-gray-200"
+                } animate-pulse`}
+              ></div>
+            </div>
+            <div
+              className={`h-10 w-32 rounded-lg ${
+                isDark ? "bg-gray-800" : "bg-gray-200"
+              } animate-pulse`}
+            ></div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
               <div
