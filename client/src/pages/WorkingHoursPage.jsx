@@ -207,7 +207,7 @@ const WorkingHoursPage = () => {
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
       <div
-        className={`container mx-auto px-4 sm:px-6 relative z-10 transition-all duration-300 ${
+        className={`w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 transition-all duration-300 ${
           isAnyModalOpen ? "blur-sm" : ""
         }`}
       >
@@ -221,12 +221,12 @@ const WorkingHoursPage = () => {
             Working Hours
           </h1>
           <div
-              className={`w-24 h-1 bg-gradient-to-r ${
-                isDark
-                  ? "from-white to-gray-500"
-                  : "from-indigo-600 to-indigo-300"
-              } mt-4 rounded-full`}
-            />
+            className={`w-32 h-1 bg-gradient-to-r ${
+              isDark
+                ? "from-indigo-500 to-indigo-300/70"
+                : "from-indigo-600 to-indigo-300"
+            } rounded-full`}
+          />
         </div>
 
         {/* Stats Grid - Moved to top for better information hierarchy */}
@@ -852,7 +852,7 @@ const LoadingWorkingHoursSkeleton = () => {
       {/* Additional subtle patterns for visual depth */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
-      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+      <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header Skeleton */}
         <div className="mb-8">
           <div
