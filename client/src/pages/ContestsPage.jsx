@@ -236,7 +236,7 @@ const ContestsPage = () => {
               isDark ? "text-white" : "text-gray-900"
             }`}
           >
-            Coding Contests Tracker
+            Coding Contests
             <div
               className={`w-16 md:w-24 h-1 bg-gradient-to-r ${
                 isDark
@@ -378,7 +378,7 @@ const ContestsPage = () => {
             >
               <Eye className="w-3 h-3 md:w-4 md:h-4" />
               <span className="hidden md:inline text-xs md:text-sm">
-                Expand
+                Visualize
               </span>
             </button>
 
