@@ -15,22 +15,16 @@ const ForgotPassword = () => {
   const { forgotPassword } = useAuth();
   const { isDark } = useTheme();
 
-  // Fix for mobile viewport height (adjust for navbar)
   useEffect(() => {
     const setVh = () => {
-      // First get the viewport height and multiply it by 1% to get a value for a vh unit
       const vh = window.innerHeight * 0.01;
-      // Set the value in the --vh custom property to the root of the document
       document.documentElement.style.setProperty("--vh", `${vh}px`);
     };
 
-    // Set the height initially
     setVh();
 
-    // Add event listener to reset on window resize
     window.addEventListener("resize", setVh);
 
-    // Clean up
     return () => window.removeEventListener("resize", setVh);
   }, []);
 
@@ -39,7 +33,6 @@ const ForgotPassword = () => {
 
     if (isSubmitting) return;
 
-    // Form validation
     if (!email.trim()) {
       setFormError("Email is required");
       return;
@@ -69,8 +62,7 @@ const ForgotPassword = () => {
       className={`flex items-center justify-center px-4 pt-6 pb-6 sm:pb-8
       ${isDark ? "bg-black" : "bg-gray-50"}
       `}
-      // Use calculated height instead of min-h-screen
-      style={{ minHeight: "calc(100vh - 60px)" }} // Subtract approximate navbar height
+      style={{ minHeight: "calc(100vh - 60px)" }}
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
