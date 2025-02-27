@@ -687,7 +687,6 @@ const TimetablePage = () => {
               />
             </div>
           </motion.div>
-
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -700,6 +699,17 @@ const TimetablePage = () => {
             >
               Add Activity
             </ActivityButton>
+            <motion.button
+              onClick={openCreateTimetableModal}
+              className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium ${
+                isDark
+                  ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30"
+                  : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
+              }`}
+            >
+              <PlusCircle className="w-4 h-4" />
+              Create New Timetable
+            </motion.button>
             <CollapsibleTimetableButtons
               isDark={isDark}
               onManage={openManageActivitiesModal}
@@ -856,13 +866,13 @@ const TimetablePage = () => {
           <CreateTimetableModal
             onClose={closeAllModals}
             onSubmit={
-              activeModal === "edit" && localCurrentTimetable
+              activeModal === "editTimetable" && localCurrentTimetable
                 ? (data) =>
                     handleUpdateTimetable(localCurrentTimetable.id, data)
                 : handleCreateTimetable
             }
             initialData={
-              activeModal === "edit" && localCurrentTimetable
+              activeModal === "editTimetable" && localCurrentTimetable
                 ? localCurrentTimetable
                 : null
             }
