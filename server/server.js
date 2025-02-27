@@ -20,18 +20,20 @@ app.use(xss()); // Prevent XSS attacks
 const limiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again after 10 minutes'
+  message: "Too many requests from this IP, please try again after 10 minutes",
 });
-app.use('/api/auth', limiter); // Apply rate limiting to auth routes
+app.use("/api/auth", limiter); // Apply rate limiting to auth routes
 
 // Prevent HTTP param pollution
 app.use(hpp());
 
 // Regular middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "*",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
@@ -68,21 +70,21 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({
     status: "success",
     message: "API is running",
-    serverTime: new Date()
+    serverTime: new Date(),
   });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  
+
   const statusCode = err.statusCode || 500;
   const message = err.message || "Something went wrong!";
-  
-  res.status(statusCode).json({ 
+
+  res.status(statusCode).json({
     success: false,
     message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
   });
 });
 
