@@ -113,8 +113,11 @@ const SkillsPage = () => {
     setShowAddModal(true);
   };
 
-  const handleCloseAddModal = () => {
+  // Modified to explicitly fetch skills after modal is closed
+  const handleCloseAddModal = async () => {
     setShowAddModal(false);
+    // Explicitly fetch skills to ensure UI is updated with new data
+    await fetchSkills();
   };
 
   const handleToggleStats = () => {
