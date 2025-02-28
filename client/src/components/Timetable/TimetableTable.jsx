@@ -1,38 +1,63 @@
 // src/components/Timetable/TimetableTable.jsx
 import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, CheckCircle, XCircle, Info, Undo } from "lucide-react";
+import { Clock, CheckCircle, XCircle, Undo } from "lucide-react";
 
-// Toast Component
-const Toast = ({ message, type, onClose, onUndo }) => {
+// Minimal Toast Component
+const Toast = ({ toast, isDark, onClose, onUndo }) => {
+  if (!toast) return null;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
-      className={`fixed top-4 right-4 z-50 p-3 rounded-lg shadow-lg flex items-center space-x-3
+      className={`fixed top-4 right-4 z-50 p-3 rounded-lg shadow-md flex items-center space-x-3 
         ${
-          type === "success"
-            ? "bg-green-500 text-white"
-            : type === "error"
-            ? "bg-red-500 text-white"
-            : "bg-blue-500 text-white"
+          toast.type === "success"
+            ? isDark
+              ? "bg-green-950 text-green-300 border border-green-900"
+              : "bg-green-50 text-green-700 border border-green-200"
+            : toast.type === "error"
+            ? isDark
+              ? "bg-red-950 text-red-300 border border-red-900"
+              : "bg-red-50 text-red-700 border border-red-200"
+            : isDark
+            ? "bg-blue-950 text-blue-300 border border-blue-900"
+            : "bg-blue-50 text-blue-700 border border-blue-200"
         }`}
     >
-      <Info className="w-5 h-5" />
-      <span className="text-sm flex-grow">{message}</span>
-      {onUndo && (
+      {toast.type === "success" ? (
+        <CheckCircle className="w-5 h-5" />
+      ) : toast.type === "error" ? (
+        <XCircle className="w-5 h-5" />
+      ) : null}
+
+      <span className="text-sm flex-grow ml-2">{toast.message}</span>
+
+      {toast.undoAction && (
         <button
           onClick={onUndo}
-          className="ml-2 flex items-center gap-1 bg-white/20 hover:bg-white/30 px-2 py-1 rounded transition-all"
+          className={`flex items-center gap-1 px-2 py-1 rounded transition-all
+            ${
+              isDark
+                ? "hover:bg-white/10 text-gray-300"
+                : "hover:bg-black/5 text-gray-600"
+            }`}
         >
           <Undo className="w-4 h-4" />
           Undo
         </button>
       )}
+
       <button
         onClick={onClose}
-        className="ml-2 hover:opacity-75 transition-opacity"
+        className={`ml-2 rounded-full p-1 transition-all hover:bg-black/10
+          ${
+            isDark
+              ? "hover:bg-white/10 text-gray-300"
+              : "hover:bg-black/5 text-gray-600"
+          }`}
       >
         ✕
       </button>
@@ -42,34 +67,39 @@ const Toast = ({ message, type, onClose, onUndo }) => {
 
 // Toast Manager Hook
 const useToast = () => {
-  const [toasts, setToasts] = useState([]);
-  const [lastAction, setLastAction] = useState(null);
+  const [toast, setToast] = useState(null);
 
   const addToast = (message, type = "info", undoAction = null) => {
     const id = Date.now();
     const newToast = { id, message, type, undoAction };
-    setToasts((current) => [...current, newToast]);
-    setLastAction(newToast);
 
-    // Automatically remove toast after 5 seconds
-    setTimeout(() => {
-      removeToast(id);
-    }, 5000);
+    // Replace existing toast immediately
+    setToast(newToast);
+
+    // Automatically remove toast after 4 seconds (reduced from 5)
+    const timeoutId = setTimeout(() => {
+      setToast(null);
+    }, 4000);
+
+    // Return a method to clear the toast early if needed
+    return () => {
+      clearTimeout(timeoutId);
+      setToast(null);
+    };
   };
 
-  const removeToast = (id) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id));
+  const removeToast = () => {
+    setToast(null);
   };
 
   const undoLastAction = () => {
-    if (lastAction && lastAction.undoAction) {
-      lastAction.undoAction();
-      removeToast(lastAction.id);
-      setLastAction(null);
+    if (toast && toast.undoAction) {
+      toast.undoAction();
+      removeToast();
     }
   };
 
-  return { toasts, addToast, removeToast, undoLastAction };
+  return { toast, addToast, removeToast, undoLastAction };
 };
 
 const TimetableTable = ({
@@ -79,7 +109,7 @@ const TimetableTable = ({
   getCategoryStyle,
   formatTimeRange,
 }) => {
-  const { toasts, addToast, removeToast, undoLastAction } = useToast();
+  const { toast, addToast, removeToast, undoLastAction } = useToast();
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   // Memoized variants to prevent unnecessary re-renders
@@ -184,15 +214,14 @@ const TimetableTable = ({
     <div className="relative overflow-x-auto">
       {/* Toast Container with Undo Functionality */}
       <AnimatePresence>
-        {toasts.map((toast) => (
+        {toast && (
           <Toast
-            key={toast.id}
-            message={toast.message}
-            type={toast.type}
-            onClose={() => removeToast(toast.id)}
+            toast={toast}
+            isDark={isDark}
+            onClose={removeToast}
             onUndo={toast.undoAction ? undoLastAction : undefined}
           />
-        ))}
+        )}
       </AnimatePresence>
 
       <motion.table
