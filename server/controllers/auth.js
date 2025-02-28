@@ -130,23 +130,195 @@ exports.verifyEmail = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or expired token",
-      });
+      // Send an error HTML page
+      return res.status(400).send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Verification Failed</title>
+          <style>
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background-color: #f7f9fc;
+              margin: 0;
+              padding: 0;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              color: #333;
+            }
+            .container {
+              background-color: white;
+              border-radius: 8px;
+              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+              padding: 40px;
+              text-align: center;
+              max-width: 500px;
+              width: 90%;
+            }
+            .icon {
+              width: 70px;
+              height: 70px;
+              margin: 0 auto 20px;
+              background-color: #ff5252;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            h1 {
+              font-size: 24px;
+              margin-bottom: 15px;
+              color: #ff5252;
+            }
+            p {
+              font-size: 16px;
+              line-height: 1.6;
+              margin-bottom: 25px;
+              color: #666;
+            }
+            .btn {
+              display: inline-block;
+              background-color: #5469d4;
+              color: white;
+              text-decoration: none;
+              padding: 12px 25px;
+              border-radius: 4px;
+              font-weight: 600;
+              transition: background-color 0.2s;
+            }
+            .btn:hover {
+              background-color: #4054c7;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </div>
+            <h1>Verification Failed</h1>
+            <p>The verification link is invalid or has expired. Please request a new verification email.</p>
+            <a href="https://www.hustlex.in/" class="btn">Back to Home</a>
+          </div>
+        </body>
+        </html>
+      `);
     }
 
     // Set email as verified
     user.isEmailVerified = true;
     user.emailVerificationToken = undefined;
     user.emailVerificationExpire = undefined;
-
     await user.save();
 
-    return res.status(200).json({
-      success: true,
-      message: "Email verified successfully",
-    });
+    // Send a beautiful success HTML page
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Email Verified</title>
+        <style>
+          @keyframes checkmark {
+            0% {
+              stroke-dashoffset: 100;
+            }
+            100% {
+              stroke-dashoffset: 0;
+            }
+          }
+          @keyframes scale {
+            0%, 100% {
+              transform: scale(1);
+            }
+            50% {
+              transform: scale(1.1);
+            }
+          }
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f9fc;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+          }
+          .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+          }
+          .checkmark-circle {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background-color: #4caf50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scale 1.5s ease-in-out;
+          }
+          .checkmark {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: checkmark 1s forwards;
+          }
+          h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #4caf50;
+          }
+          p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #666;
+          }
+          .btn {
+            display: inline-block;
+            background-color: #5469d4;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+          }
+          .btn:hover {
+            background-color: #4054c7;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="checkmark-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="checkmark">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <h1>Email Verified Successfully!</h1>
+          <p>Your email address has been successfully verified. You can now access all features of your account.</p>
+          <a href="https://www.hustlex.in/" class="btn">Continue to Home</a>
+        </div>
+      </body>
+      </html>
+    `);
   } catch (error) {
     next(error);
   }
