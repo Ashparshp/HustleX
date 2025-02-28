@@ -128,7 +128,6 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     setLoading(true);
     setError(null);
-    const loadingToast = showToast.loading("Creating your account...");
 
     try {
       const response = await fetch(`${API_URL}/api/auth/register`, {

@@ -72,7 +72,13 @@ const LoginForm = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner size="lg" text="Loading..." />
+        <LoadingSpinner
+          size="large"
+          color="indigo"
+          text="Getting your account ready..."
+          showText={true}
+          fullPage={true}
+        />
       </div>
     );
   }
@@ -239,12 +245,20 @@ const LoginForm = () => {
                     ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30"
                     : "bg-emerald-100/50 text-emerald-600 hover:bg-emerald-200/70 border border-emerald-300/50"
                 }
-                ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}
+                ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}
                 transition-all duration-300
               `}
             >
               {isSubmitting ? (
-                <div className="animate-spin h-4 w-4 border-2 border-current rounded-full border-t-transparent" />
+                <div className="flex items-center justify-center">
+                  <LoadingSpinner
+                    size="small"
+                    color="green"
+                    showText={false}
+                    fullPage={false}
+                  />
+                  <span className="ml-2">Signing in...</span>
+                </div>
               ) : (
                 <>
                   Log In
