@@ -534,6 +534,7 @@ const TimetablePage = () => {
       />
 
       <div className="mx-auto px-4 relative z-10 sm:py-8">
+        {/* Header Section with Aligned Title and Buttons */}
         <div className="mb-8">
           <div className="flex justify-between items-center gap-4">
             <div className="flex items-center gap-4">
@@ -555,7 +556,33 @@ const TimetablePage = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2"></div>
+            <div className="flex items-center gap-2 flex-wrap justify-end">
+              <ActivityButton
+                type="add"
+                onClick={openAddActivityModal}
+                icon={Plus}
+              >
+                Add Activity
+              </ActivityButton>
+              <motion.button
+                onClick={openCreateTimetableModal}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium ${
+                  isDark
+                    ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30"
+                    : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
+                }`}
+                disabled={isSubmitting}
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                New Timetable
+              </motion.button>
+              <CollapsibleTimetableButtons
+                isDark={isDark}
+                onHistory={openHistoryModal}
+                onStats={openStatsModal}
+                onCategories={openCategoryManagementModal}
+              />
+            </div>
           </div>
         </div>
 
@@ -569,45 +596,7 @@ const TimetablePage = () => {
           />
         )}
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3"
-          ></motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex gap-2 flex-wrap justify-end"
-          >
-            <ActivityButton
-              type="add"
-              onClick={openAddActivityModal}
-              icon={Plus}
-            >
-              Add Activity
-            </ActivityButton>
-            <motion.button
-              onClick={openCreateTimetableModal}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium ${
-                isDark
-                  ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30"
-                  : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
-              }`}
-              disabled={isSubmitting}
-            >
-              <PlusCircle className="w-3.5 h-3.5" />
-              New Timetable
-            </motion.button>
-            <CollapsibleTimetableButtons
-              isDark={isDark}
-              onHistory={openHistoryModal}
-              onStats={openStatsModal}
-              onCategories={openCategoryManagementModal}
-            />
-          </motion.div>
-        </div>
-
+        {/* Main Timetable Component */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -915,6 +904,7 @@ const TimetablePage = () => {
           </div>
         </motion.div>
 
+        {/* Modals */}
         <ModalWrapper isOpen={activeModal === "add"} onClose={closeAllModals}>
           <AddActivityModal
             isOpen={activeModal === "add"}
