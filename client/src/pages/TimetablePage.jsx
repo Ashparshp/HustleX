@@ -553,120 +553,7 @@ const TimetablePage = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <button
-                  onClick={() =>
-                    setShowTimetableSelector(!showTimetableSelector)
-                  }
-                  aria-expanded={showTimetableSelector}
-                  aria-controls="timetable-dropdown"
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isDark
-                      ? "bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/30 shadow-md shadow-indigo-900/20"
-                      : "bg-indigo-50 border border-indigo-300/70 text-indigo-700 hover:bg-indigo-100 shadow-sm"
-                  }`}
-                  disabled={isSubmitting}
-                >
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span className="truncate max-w-[120px]">
-                    {localCurrentTimetable
-                      ? localCurrentTimetable.name
-                      : "Select Timetable"}
-                  </span>
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 ml-1 transition-transform ${
-                      showTimetableSelector ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                {showTimetableSelector && (
-                  <div
-                    id="timetable-dropdown"
-                    className={`absolute mt-2 py-2 w-72 rounded-lg shadow-xl border z-50 ${
-                      isDark
-                        ? "bg-gray-900 border-gray-700 shadow-black/50"
-                        : "bg-white border-gray-200 shadow-gray-200/70"
-                    }`}
-                  >
-                    <div
-                      className={`px-4 py-2 mb-1 border-b ${
-                        isDark ? "border-gray-800" : "border-gray-100"
-                      }`}
-                    >
-                      <h3
-                        className={`font-medium ${
-                          isDark ? "text-gray-200" : "text-gray-700"
-                        }`}
-                      >
-                        Your Timetables
-                      </h3>
-                    </div>
-
-                    <div className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
-                      {timetables && timetables.length > 0 ? (
-                        timetables.map((timetable) => (
-                          <button
-                            key={timetable.id}
-                            onClick={() => {
-                              handleTimetableChange(timetable.id);
-                            }}
-                            className={`w-full px-4 py-2.5 text-left transition-colors ${
-                              isDark ? "hover:bg-gray-800" : "hover:bg-gray-50"
-                            } flex justify-between items-center ${
-                              timetable.isActive
-                                ? isDark
-                                  ? "bg-indigo-900/30 text-indigo-200"
-                                  : "bg-indigo-50 text-indigo-700"
-                                : isDark
-                                ? "text-gray-300"
-                                : "text-gray-700"
-                            }`}
-                            disabled={isSubmitting}
-                          >
-                            <span className="truncate">{timetable.name}</span>
-                            {timetable.isActive && (
-                              <CheckCircle
-                                className={`w-3.5 h-3.5 flex-shrink-0 ml-2 ${
-                                  isDark ? "text-indigo-400" : "text-indigo-600"
-                                }`}
-                              />
-                            )}
-                          </button>
-                        ))
-                      ) : (
-                        <div className="px-4 py-3 text-center text-gray-500 italic text-sm">
-                          No timetables found
-                        </div>
-                      )}
-                    </div>
-
-                    <div
-                      className={`border-t mt-1 pt-3 px-3 ${
-                        isDark ? "border-gray-800" : "border-gray-200"
-                      }`}
-                    >
-                      <button
-                        onClick={() => {
-                          openCreateTimetableModal();
-                          setShowTimetableSelector(false);
-                        }}
-                        className={`w-full px-3 py-2 rounded-lg text-center text-sm font-medium transition-colors flex items-center justify-center ${
-                          isDark
-                            ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/30"
-                            : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200"
-                        }`}
-                        disabled={isSubmitting}
-                      >
-                        <PlusCircle className="w-3.5 h-3.5 mr-2" />
-                        Create New Timetable
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <div className="flex items-center gap-2"></div>
           </div>
         </div>
 
@@ -726,36 +613,131 @@ const TimetablePage = () => {
           className="relative group"
         >
           <div
-            className={`relative rounded-xl p-6 backdrop-blur-sm border shadow-xl 
+            className={`relative rounded-xl p-4 backdrop-blur-sm border shadow-xl 
             ${
               isDark
                 ? "bg-indigo-950/20 border-gray-700"
                 : "bg-white border-gray-200"
             }`}
           >
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="flex flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div className="flex items-center gap-4">
-                <div
-                  className={`p-2.5 rounded-xl ${
-                    isDark ? "bg-indigo-500/20" : "bg-indigo-100"
-                  }`}
-                >
-                  <Calendar
-                    className={`w-5 h-5 ${
-                      isDark ? "text-indigo-300" : "text-indigo-600"
-                    }`}
-                  />
-                </div>
                 <div>
-                  <h3
-                    className={`text-lg font-bold ${
-                      isDark ? "text-gray-100" : "text-gray-900"
+                  <button
+                    onClick={() =>
+                      setShowTimetableSelector(!showTimetableSelector)
+                    }
+                    aria-expanded={showTimetableSelector}
+                    aria-controls="timetable-dropdown"
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isDark
+                        ? "bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/30 shadow-md shadow-indigo-900/20"
+                        : "bg-indigo-50 border border-indigo-300/70 text-indigo-700 hover:bg-indigo-100 shadow-sm"
                     }`}
+                    disabled={isSubmitting}
                   >
-                    {localCurrentTimetable
-                      ? localCurrentTimetable.name
-                      : "Timetable"}
-                  </h3>
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span className="truncate max-w-[120px]">
+                      {localCurrentTimetable
+                        ? localCurrentTimetable.name
+                        : "Select Timetable"}
+                    </span>
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 ml-1 transition-transform ${
+                        showTimetableSelector ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {showTimetableSelector && (
+                    <div
+                      id="timetable-dropdown"
+                      className={`absolute mt-2 py-2 w-72 rounded-lg shadow-xl border z-50 ${
+                        isDark
+                          ? "bg-gray-900 border-gray-700 shadow-black/50"
+                          : "bg-white border-gray-200 shadow-gray-200/70"
+                      }`}
+                    >
+                      <div
+                        className={`px-4 py-2 mb-1 border-b ${
+                          isDark ? "border-gray-800" : "border-gray-100"
+                        }`}
+                      >
+                        <h3
+                          className={`font-medium ${
+                            isDark ? "text-gray-200" : "text-gray-700"
+                          }`}
+                        >
+                          Your Timetables
+                        </h3>
+                      </div>
+
+                      <div className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
+                        {timetables && timetables.length > 0 ? (
+                          timetables.map((timetable) => (
+                            <button
+                              key={timetable.id}
+                              onClick={() => {
+                                handleTimetableChange(timetable.id);
+                              }}
+                              className={`w-full px-4 py-2.5 text-left transition-colors ${
+                                isDark
+                                  ? "hover:bg-gray-800"
+                                  : "hover:bg-gray-50"
+                              } flex justify-between items-center ${
+                                timetable.isActive
+                                  ? isDark
+                                    ? "bg-indigo-900/30 text-indigo-200"
+                                    : "bg-indigo-50 text-indigo-700"
+                                  : isDark
+                                  ? "text-gray-300"
+                                  : "text-gray-700"
+                              }`}
+                              disabled={isSubmitting}
+                            >
+                              <span className="truncate">{timetable.name}</span>
+                              {timetable.isActive && (
+                                <CheckCircle
+                                  className={`w-3.5 h-3.5 flex-shrink-0 ml-2 ${
+                                    isDark
+                                      ? "text-indigo-400"
+                                      : "text-indigo-600"
+                                  }`}
+                                />
+                              )}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-4 py-3 text-center text-gray-500 italic text-sm">
+                            No timetables found
+                          </div>
+                        )}
+                      </div>
+
+                      <div
+                        className={`border-t mt-1 pt-3 px-3 ${
+                          isDark ? "border-gray-800" : "border-gray-200"
+                        }`}
+                      >
+                        <button
+                          onClick={() => {
+                            openCreateTimetableModal();
+                            setShowTimetableSelector(false);
+                          }}
+                          className={`w-full px-3 py-2 rounded-lg text-center text-sm font-medium transition-colors flex items-center justify-center ${
+                            isDark
+                              ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/30"
+                              : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200"
+                          }`}
+                          disabled={isSubmitting}
+                        >
+                          <PlusCircle className="w-3.5 h-3.5 mr-2" />
+                          Create New Timetable
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {currentWeek && (
                     <p
                       className={`text-sm ${
@@ -778,7 +760,7 @@ const TimetablePage = () => {
                         : "bg-indigo-100 text-indigo-600 border border-indigo-200"
                     }`}
                   >
-                    {currentWeek.overallCompletionRate?.toFixed(1)}% Complete
+                    {currentWeek.overallCompletionRate?.toFixed(1)}%
                   </div>
                 )}
 
@@ -796,7 +778,9 @@ const TimetablePage = () => {
                       disabled={isSubmitting}
                     >
                       <Edit className="w-3.5 h-3.5 mr-1" />
-                      <span className="font-medium text-xs">Edit</span>
+                      <span className="font-medium text-xs hidden sm:inline">
+                        Edit
+                      </span>
                     </button>
 
                     <button
@@ -813,7 +797,9 @@ const TimetablePage = () => {
                       disabled={isSubmitting}
                     >
                       <Trash2 className="w-3.5 h-3.5 mr-1" />
-                      <span className="font-medium text-xs">Delete</span>
+                      <span className="font-medium text-xs hidden sm:inline">
+                        Delete
+                      </span>
                     </button>
                   </>
                 )}
