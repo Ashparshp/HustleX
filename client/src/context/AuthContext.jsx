@@ -37,7 +37,7 @@ const toastConfig = {
     },
   },
   info: {
-    duration: 3000,
+    duration: 1000,
     style: {
       background: "#3B82F6",
       color: "white",
@@ -184,7 +184,6 @@ export const AuthProvider = ({ children }) => {
       setToken(data.token);
       localStorage.setItem("token", data.token);
       setCurrentUser(data.user);
-      showToast.success("Welcome back!");
       return data;
     } catch (err) {
       setError(err.message);
