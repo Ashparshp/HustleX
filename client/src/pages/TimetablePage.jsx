@@ -566,7 +566,7 @@ const TimetablePage = () => {
       <div className="mx-auto px-4 relative z-10 sm:py-8">
         {/* Timetable Selector */}
         <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+          <div className="flex md:flex-row md:justify-between md:items-center gap-4">
             {/* Left Section - Title and Selector */}
             <div className="relative">
               <div className="flex items-center gap-4">
