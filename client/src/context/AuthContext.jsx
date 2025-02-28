@@ -149,12 +149,10 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", data.token);
       setCurrentUser(data.user);
 
-      toast.dismiss(loadingToast);
       showToast.success("Account created! Please verify your email");
       return data;
     } catch (err) {
       setError(err.message);
-      toast.dismiss(loadingToast);
       showToast.error(err.message);
       throw err;
     } finally {
