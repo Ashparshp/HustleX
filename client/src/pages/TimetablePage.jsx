@@ -613,6 +613,7 @@ const TimetablePage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative group"
+          key="timetable-container"
         >
           <div
             className={`relative rounded-xl p-5 backdrop-blur-sm border shadow-xl 
@@ -744,71 +745,77 @@ const TimetablePage = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                {currentWeek && (
-                  <>
-                    <div
-                      className={`hidden sm:flex items-center gap-1.5 mr-3 ${
-                        isDark ? "text-gray-300" : "text-gray-600"
-                      }`}
-                    >
-                      <Clock className="w-3.5 h-3.5" />
-                      <p className="text-sm font-medium">
-                        {formatDate(currentWeek.weekStartDate)} -{" "}
-                        {formatDate(currentWeek.weekEndDate)}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2 mr-1">
+                {currentWeek &&
+                  currentWeek.overallCompletionRate !== undefined && (
+                    <>
                       <div
-                        className="relative h-8 rounded-xl overflow-hidden w-32 border shadow-sm
-                        ${isDark ? 'border-indigo-500/30' : 'border-indigo-200'}"
+                        className={`hidden sm:flex items-center gap-1.5 mr-3 ${
+                          isDark ? "text-gray-300" : "text-gray-600"
+                        }`}
                       >
+                        <Clock className="w-3.5 h-3.5" />
+                        <p className="text-sm font-medium">
+                          {formatDate(currentWeek.weekStartDate)} -{" "}
+                          {formatDate(currentWeek.weekEndDate)}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 mr-1">
                         <div
-                          className={`absolute inset-0 h-full bg-gradient-to-r ${
-                            currentWeek.overallCompletionRate >= 80
-                              ? isDark
-                                ? "from-emerald-600/80 to-emerald-400/80"
-                                : "from-emerald-600 to-emerald-400"
-                              : currentWeek.overallCompletionRate >= 60
-                              ? isDark
-                                ? "from-teal-600/80 to-teal-400/80"
-                                : "from-teal-600 to-teal-400"
-                              : currentWeek.overallCompletionRate >= 40
-                              ? isDark
-                                ? "from-blue-600/80 to-blue-400/80"
-                                : "from-blue-600 to-blue-400"
-                              : currentWeek.overallCompletionRate >= 20
-                              ? isDark
-                                ? "from-amber-600/80 to-amber-400/80"
-                                : "from-amber-600 to-amber-400"
-                              : isDark
-                              ? "from-red-600/80 to-red-400/80"
-                              : "from-red-600 to-red-400"
-                          }`}
-                          style={{
-                            width: `${Math.max(
-                              5,
-                              currentWeek.overallCompletionRate || 0
-                            )}%`,
-                          }}
-                        ></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span
-                            className={`text-sm font-bold ${
-                              isDark
-                                ? "text-white"
-                                : currentWeek.overallCompletionRate > 40
-                                ? "text-white"
-                                : "text-gray-800"
+                          className={`relative h-8 rounded-xl overflow-hidden w-32 border shadow-sm
+                        ${
+                          isDark ? "border-indigo-500/30" : "border-indigo-200"
+                        }`}
+                        >
+                          <div
+                            className={`absolute inset-0 h-full bg-gradient-to-r ${
+                              currentWeek.overallCompletionRate >= 80
+                                ? isDark
+                                  ? "from-emerald-600/80 to-emerald-400/80"
+                                  : "from-emerald-600 to-emerald-400"
+                                : currentWeek.overallCompletionRate >= 60
+                                ? isDark
+                                  ? "from-teal-600/80 to-teal-400/80"
+                                  : "from-teal-600 to-teal-400"
+                                : currentWeek.overallCompletionRate >= 40
+                                ? isDark
+                                  ? "from-blue-600/80 to-blue-400/80"
+                                  : "from-blue-600 to-blue-400"
+                                : currentWeek.overallCompletionRate >= 20
+                                ? isDark
+                                  ? "from-amber-600/80 to-amber-400/80"
+                                  : "from-amber-600 to-amber-400"
+                                : isDark
+                                ? "from-red-600/80 to-red-400/80"
+                                : "from-red-600 to-red-400"
                             }`}
-                          >
-                            {currentWeek.overallCompletionRate?.toFixed(1)}%
-                          </span>
+                            style={{
+                              width:
+                                currentWeek.overallCompletionRate === 0
+                                  ? "0%"
+                                  : `${Math.max(
+                                      3,
+                                      currentWeek.overallCompletionRate || 0
+                                    )}%`,
+                            }}
+                          ></div>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span
+                              className={`text-sm font-bold ${
+                                isDark
+                                  ? "text-white"
+                                  : currentWeek.overallCompletionRate > 40
+                                  ? "text-white"
+                                  : "text-gray-800"
+                              }`}
+                            >
+                              {currentWeek.overallCompletionRate?.toFixed(1)}%
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </>
-                )}
+                    </>
+                  )}
 
                 {localCurrentTimetable && (
                   <div className="flex items-center gap-2">
