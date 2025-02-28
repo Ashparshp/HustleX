@@ -70,6 +70,7 @@ const Navbar = () => {
     await logout();
     navigate("/login");
     setShowUserMenu(false);
+    setIsOpen(false);
   };
 
   const isActive = (path) => {
