@@ -601,7 +601,6 @@ const TimetablePage = () => {
             </motion.button>
             <CollapsibleTimetableButtons
               isDark={isDark}
-              onManage={openManageActivitiesModal}
               onHistory={openHistoryModal}
               onStats={openStatsModal}
               onCategories={openCategoryManagementModal}

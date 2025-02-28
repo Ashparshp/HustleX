@@ -1,15 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Settings,
-  History,
-  ChartBar,
-  ChevronDown,
-  Sliders,
-} from "lucide-react";
+import { History, ChartBar, ChevronDown, Sliders } from "lucide-react";
 
 const CollapsibleTimetableButtons = ({
-  onManage,
   onHistory,
   onStats,
   onCategories,
@@ -24,7 +17,6 @@ const CollapsibleTimetableButtons = ({
   };
 
   const buttons = [
-    { icon: Settings, label: "Manage", onClick: onManage },
     { icon: History, label: "History", onClick: onHistory },
     { icon: ChartBar, label: "Stats", onClick: onStats },
   ];
@@ -40,7 +32,7 @@ const CollapsibleTimetableButtons = ({
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsExpanded(!isExpanded)}
         className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border
-          backdrop-blur-sm transition-all duration-300 shadow-sm ${getButtonStyles()}`}
+        backdrop-blur-sm transition-all duration-300 shadow-sm ${getButtonStyles()}`}
       >
         <motion.div
           animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -50,7 +42,6 @@ const CollapsibleTimetableButtons = ({
         </motion.div>
         More Options
       </motion.button>
-
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -70,7 +61,7 @@ const CollapsibleTimetableButtons = ({
                   setIsExpanded(false);
                 }}
                 className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border
-                  backdrop-blur-sm transition-all duration-300 shadow-sm ${getButtonStyles()}`}
+                backdrop-blur-sm transition-all duration-300 shadow-sm ${getButtonStyles()}`}
               >
                 <button.icon className="w-4 h-4" />
                 {button.label}
