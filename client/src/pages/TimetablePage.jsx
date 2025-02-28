@@ -10,6 +10,8 @@ import {
   Tag,
   ChevronDown,
   X,
+  Clock,
+  Settings,
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import useTimetable from "../hooks/useTimetable";
@@ -613,37 +615,37 @@ const TimetablePage = () => {
           className="relative group"
         >
           <div
-            className={`relative rounded-xl p-4 backdrop-blur-sm border shadow-xl 
+            className={`relative rounded-xl p-5 backdrop-blur-sm border shadow-xl 
             ${
               isDark
                 ? "bg-indigo-950/20 border-gray-700"
                 : "bg-white border-gray-200"
             }`}
           >
-            <div className="flex flex-row justify-between items-start sm:items-center gap-4 mb-6">
-              <div className="flex items-center gap-4">
-                <div>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <div className="w-full sm:w-auto">
                   <button
                     onClick={() =>
                       setShowTimetableSelector(!showTimetableSelector)
                     }
                     aria-expanded={showTimetableSelector}
                     aria-controls="timetable-dropdown"
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                       isDark
                         ? "bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/30 shadow-md shadow-indigo-900/20"
                         : "bg-indigo-50 border border-indigo-300/70 text-indigo-700 hover:bg-indigo-100 shadow-sm"
                     }`}
                     disabled={isSubmitting}
                   >
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span className="truncate max-w-[120px]">
+                    <Calendar className="w-4 h-4" />
+                    <span className="truncate max-w-[150px] font-semibold">
                       {localCurrentTimetable
                         ? localCurrentTimetable.name
                         : "Select Timetable"}
                     </span>
                     <ChevronDown
-                      className={`w-3.5 h-3.5 ml-1 transition-transform ${
+                      className={`w-4 h-4 ml-1.5 transition-transform ${
                         showTimetableSelector ? "rotate-180" : ""
                       }`}
                     />
@@ -652,14 +654,14 @@ const TimetablePage = () => {
                   {showTimetableSelector && (
                     <div
                       id="timetable-dropdown"
-                      className={`absolute mt-2 py-2 w-72 rounded-lg shadow-xl border z-50 ${
+                      className={`absolute mt-2 py-2 w-80 rounded-lg shadow-xl border z-50 ${
                         isDark
-                          ? "bg-gray-900 border-gray-700 shadow-black/50"
-                          : "bg-white border-gray-200 shadow-gray-200/70"
+                          ? "bg-gray-900/95 border-gray-700 shadow-black/50"
+                          : "bg-white/95 border-gray-200 shadow-gray-200/70"
                       }`}
                     >
                       <div
-                        className={`px-4 py-2 mb-1 border-b ${
+                        className={`px-4 py-2.5 mb-1 border-b ${
                           isDark ? "border-gray-800" : "border-gray-100"
                         }`}
                       >
@@ -680,7 +682,7 @@ const TimetablePage = () => {
                               onClick={() => {
                                 handleTimetableChange(timetable.id);
                               }}
-                              className={`w-full px-4 py-2.5 text-left transition-colors ${
+                              className={`w-full px-4 py-3 text-left transition-colors ${
                                 isDark
                                   ? "hover:bg-gray-800"
                                   : "hover:bg-gray-50"
@@ -695,10 +697,12 @@ const TimetablePage = () => {
                               }`}
                               disabled={isSubmitting}
                             >
-                              <span className="truncate">{timetable.name}</span>
+                              <span className="truncate font-medium">
+                                {timetable.name}
+                              </span>
                               {timetable.isActive && (
                                 <CheckCircle
-                                  className={`w-3.5 h-3.5 flex-shrink-0 ml-2 ${
+                                  className={`w-4 h-4 flex-shrink-0 ml-2 ${
                                     isDark
                                       ? "text-indigo-400"
                                       : "text-indigo-600"
@@ -724,51 +728,110 @@ const TimetablePage = () => {
                             openCreateTimetableModal();
                             setShowTimetableSelector(false);
                           }}
-                          className={`w-full px-3 py-2 rounded-lg text-center text-sm font-medium transition-colors flex items-center justify-center ${
+                          className={`w-full px-3 py-2.5 rounded-lg text-center text-sm font-medium transition-colors flex items-center justify-center ${
                             isDark
                               ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/30"
                               : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200"
                           }`}
                           disabled={isSubmitting}
                         >
-                          <PlusCircle className="w-3.5 h-3.5 mr-2" />
+                          <PlusCircle className="w-4 h-4 mr-2" />
                           Create New Timetable
                         </button>
                       </div>
                     </div>
                   )}
-
-                  {currentWeek && (
-                    <p
-                      className={`text-sm ${
-                        isDark ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      {formatDate(currentWeek.weekStartDate)} -{" "}
-                      {formatDate(currentWeek.weekEndDate)}
-                    </p>
-                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                 {currentWeek && (
-                  <div
-                    className={`px-3 py-1.5 rounded-xl text-sm font-medium
-                    ${
-                      isDark
-                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
-                        : "bg-indigo-100 text-indigo-600 border border-indigo-200"
-                    }`}
-                  >
-                    {currentWeek.overallCompletionRate?.toFixed(1)}%
-                  </div>
+                  <>
+                    <div
+                      className={`hidden sm:flex items-center gap-1.5 mr-3 ${
+                        isDark ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
+                      <Clock className="w-3.5 h-3.5" />
+                      <p className="text-sm font-medium">
+                        {formatDate(currentWeek.weekStartDate)} -{" "}
+                        {formatDate(currentWeek.weekEndDate)}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 mr-1">
+                      <div
+                        className="relative h-8 rounded-xl overflow-hidden w-32 border shadow-sm
+                        ${isDark ? 'border-indigo-500/30' : 'border-indigo-200'}"
+                      >
+                        <div
+                          className={`absolute inset-0 h-full bg-gradient-to-r ${
+                            currentWeek.overallCompletionRate >= 80
+                              ? isDark
+                                ? "from-emerald-600/80 to-emerald-400/80"
+                                : "from-emerald-600 to-emerald-400"
+                              : currentWeek.overallCompletionRate >= 60
+                              ? isDark
+                                ? "from-teal-600/80 to-teal-400/80"
+                                : "from-teal-600 to-teal-400"
+                              : currentWeek.overallCompletionRate >= 40
+                              ? isDark
+                                ? "from-blue-600/80 to-blue-400/80"
+                                : "from-blue-600 to-blue-400"
+                              : currentWeek.overallCompletionRate >= 20
+                              ? isDark
+                                ? "from-amber-600/80 to-amber-400/80"
+                                : "from-amber-600 to-amber-400"
+                              : isDark
+                              ? "from-red-600/80 to-red-400/80"
+                              : "from-red-600 to-red-400"
+                          }`}
+                          style={{
+                            width: `${Math.max(
+                              5,
+                              currentWeek.overallCompletionRate || 0
+                            )}%`,
+                          }}
+                        ></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span
+                            className={`text-sm font-bold ${
+                              isDark
+                                ? "text-white"
+                                : currentWeek.overallCompletionRate > 40
+                                ? "text-white"
+                                : "text-gray-800"
+                            }`}
+                          >
+                            {currentWeek.overallCompletionRate?.toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 {localCurrentTimetable && (
-                  <>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={openManageActivitiesModal}
+                      className={`p-2.5 rounded-lg inline-flex items-center transition-colors ${
+                        isDark
+                          ? "bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25 border border-indigo-500/30"
+                          : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200"
+                      }`}
+                      title="Manage Activities"
+                      aria-label="Manage Activities"
+                      disabled={isSubmitting}
+                    >
+                      <Settings className="w-3.5 h-3.5 mr-1" />
+                      <span className="font-medium text-xs hidden sm:inline">
+                        Manage
+                      </span>
+                    </button>
+
                     <button
                       onClick={() => openCreateTimetableModal("edit")}
-                      className={`p-2 rounded-lg inline-flex items-center transition-colors ${
+                      className={`p-2.5 rounded-lg inline-flex items-center transition-colors ${
                         isDark
                           ? "bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25 border border-indigo-500/30"
                           : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200"
@@ -787,7 +850,7 @@ const TimetablePage = () => {
                       onClick={() =>
                         handleDeleteTimetable(localCurrentTimetable.id)
                       }
-                      className={`p-2 rounded-lg inline-flex items-center transition-colors ${
+                      className={`p-2.5 rounded-lg inline-flex items-center transition-colors ${
                         isDark
                           ? "bg-red-500/15 text-red-300 hover:bg-red-500/25 border border-red-500/30"
                           : "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
@@ -801,7 +864,7 @@ const TimetablePage = () => {
                         Delete
                       </span>
                     </button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
@@ -815,22 +878,32 @@ const TimetablePage = () => {
                 formatTimeRange={formatTimeRange}
               />
             ) : (
-              <div className="text-center py-10">
-                <p className={isDark ? "text-gray-400" : "text-gray-600"}>
-                  No activities found. Add some activities to get started.
-                </p>
-                <button
+              <div className="text-center py-12 px-4">
+                <div
+                  className={`mb-4 ${
+                    isDark ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
+                  <Calendar className="w-12 h-12 mx-auto mb-3 opacity-60" />
+                  <p className="text-lg font-medium">No activities found</p>
+                  <p className="text-sm mt-1 opacity-80">
+                    Add some activities to get started with your schedule
+                  </p>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={openAddActivityModal}
-                  className={`mt-4 px-3 py-1.5 rounded-lg ${
+                  className={`mt-2 px-4 py-2 rounded-lg shadow-md ${
                     isDark
-                      ? "bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30"
-                      : "bg-indigo-100 text-indigo-600 hover:bg-indigo-200"
+                      ? "bg-indigo-500/30 text-indigo-200 hover:bg-indigo-500/40 border border-indigo-500/40"
+                      : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border border-indigo-300"
                   }`}
                   disabled={isSubmitting}
                 >
-                  <Plus className="w-3.5 h-3.5 inline mr-2" />
+                  <Plus className="w-4 h-4 inline mr-2" />
                   Add First Activity
-                </button>
+                </motion.button>
               </div>
             )}
           </div>
