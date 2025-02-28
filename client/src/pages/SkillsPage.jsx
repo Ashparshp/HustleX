@@ -1,4 +1,3 @@
-// src/pages/SkillsPage.jsx
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -42,38 +41,30 @@ const SkillsPage = () => {
     fetchCategories,
   } = useCategories("skills");
 
-  // Filter and search states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
 
-  // Modal and panel states
   const [showAddModal, setShowAddModal] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showCategoryManagement, setShowCategoryManagement] = useState(false);
 
-  // Check if any modal is open to apply blur effect
   const isAnyModalOpen = showAddModal || showCategoryManagement;
 
-  // Filter skills based on category, status, and search query
   const filteredSkills = useMemo(() => {
     if (!skills) return {};
 
     return Object.entries(skills).reduce(
       (filteredCategories, [category, categorySkills]) => {
-        // Filter by category if selected
         if (selectedCategory && category !== selectedCategory) {
           return filteredCategories;
         }
 
-        // Filter skills within the category
         const filteredSkillsInCategory = categorySkills.filter((skill) => {
-          // Filter by status
           const statusMatch =
             !selectedStatus || skill.status === selectedStatus;
 
-          // Filter by search query
           const searchMatch =
             !searchQuery ||
             skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -85,7 +76,6 @@ const SkillsPage = () => {
           return statusMatch && searchMatch;
         });
 
-        // Only add category if it has skills after filtering
         if (filteredSkillsInCategory.length > 0) {
           filteredCategories[category] = filteredSkillsInCategory;
         }
@@ -96,27 +86,22 @@ const SkillsPage = () => {
     );
   }, [skills, selectedCategory, selectedStatus, searchQuery]);
 
-  // Fetch statistics when showing stats panel
   useEffect(() => {
     if (showStats) {
       getSkillStats();
     }
   }, [showStats, getSkillStats]);
 
-  // Fetch skills when filters change
   useEffect(() => {
     fetchSkills();
   }, [fetchSkills]);
 
-  // Handlers for various actions
   const handleAddSkill = () => {
     setShowAddModal(true);
   };
 
-  // Modified to explicitly fetch skills after modal is closed
   const handleCloseAddModal = async () => {
     setShowAddModal(false);
-    // Explicitly fetch skills to ensure UI is updated with new data
     await fetchSkills();
   };
 
@@ -128,7 +113,6 @@ const SkillsPage = () => {
     setShowFilters(!showFilters);
   };
 
-  // Category and status filter handlers
   const handleCategoryFilter = (category) => {
     setSelectedCategory(category === selectedCategory ? null : category);
   };
@@ -137,27 +121,23 @@ const SkillsPage = () => {
     setSelectedStatus(status === selectedStatus ? null : status);
   };
 
-  // Clear all filters
   const handleClearFilters = () => {
     setSelectedCategory(null);
     setSelectedStatus(null);
     setSearchQuery("");
   };
 
-  // Handler for when categories are updated
   const handleCategoryChange = async () => {
     await getSkillCategories();
     await fetchCategories();
   };
 
-  // Loading Skeleton
   if (loading && !skills) {
     return <LoadingSkillsSkeleton />;
   }
 
   return (
     <section className={`py-16 relative ${isDark ? "bg-black" : "bg-white"}`}>
-      {/* Background gradients */}
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
           isDark
@@ -178,7 +158,6 @@ const SkillsPage = () => {
           isAnyModalOpen ? "blur-sm" : ""
         }`}
       >
-        {/* Page Header */}
         <div className="mb-8">
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
@@ -198,9 +177,7 @@ const SkillsPage = () => {
           />
         </div>
 
-        {/* Search and Controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          {/* Search Input */}
           <div className="relative w-full sm:w-auto sm:min-w-72">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search
@@ -222,7 +199,6 @@ const SkillsPage = () => {
             />
           </div>
 
-          {/* Action Buttons */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -266,7 +242,6 @@ const SkillsPage = () => {
           </motion.div>
         </div>
 
-        {/* Active filters */}
         {(selectedCategory || selectedStatus || searchQuery) && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -336,7 +311,6 @@ const SkillsPage = () => {
           </motion.div>
         )}
 
-        {/* Error message */}
         {error && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -361,7 +335,6 @@ const SkillsPage = () => {
           </motion.div>
         )}
 
-        {/* Stats Panel */}
         <AnimatePresence>
           {showStats && stats && (
             <motion.div
@@ -390,7 +363,6 @@ const SkillsPage = () => {
           )}
         </AnimatePresence>
 
-        {/* Filters Panel */}
         <AnimatePresence>
           {showFilters && (
             <motion.div
@@ -436,7 +408,6 @@ const SkillsPage = () => {
           )}
         </AnimatePresence>
 
-        {/* Skills Grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -458,7 +429,6 @@ const SkillsPage = () => {
         </motion.div>
       </div>
 
-      {/* Add Skill Modal with improved backdrop */}
       <AnimatePresence>
         {showAddModal && (
           <motion.div
@@ -494,7 +464,6 @@ const SkillsPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Category Management Modal with improved backdrop */}
       <AnimatePresence>
         {showCategoryManagement && (
           <motion.div
