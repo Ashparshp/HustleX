@@ -1,4 +1,3 @@
-// src/pages/TimetablePage.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,7 +17,6 @@ import useCategories from "../hooks/useCategories";
 import { toast } from "react-hot-toast";
 import { debounce } from "lodash";
 
-// Import all the components we'll need
 import TimetableHistory from "../components/Timetable/TimetableHistory";
 import TimetableStats from "../components/Timetable/TimetableStats";
 import AddActivityModal from "../components/Timetable/AddActivityModal";
@@ -74,7 +72,6 @@ const TimetablePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCategoryLoading, setIsCategoryLoading] = useState(true);
 
-  // Debounced refresh function to prevent multiple refreshes
   const debouncedRefresh = useCallback(
     debounce(() => {
       setRefreshKey((prev) => prev + 1);
@@ -88,7 +85,6 @@ const TimetablePage = () => {
     }
   }, [currentTimetable]);
 
-  // Optimized to only update on ID changes
   useEffect(() => {
     if (localCurrentTimetable) {
       debouncedRefresh();
@@ -107,10 +103,8 @@ const TimetablePage = () => {
     }
   }, [currentWeek]);
 
-  // Pre-fetch categories when component mounts or timetable changes
   useEffect(() => {
     if (currentTimetable) {
-      // Set initial empty array to prevent undefined errors
       setTimetableCategories([]);
       setIsCategoryLoading(true);
 
@@ -126,12 +120,9 @@ const TimetablePage = () => {
     }
   }, [currentTimetable, getTimetableCategories]);
 
-  // Optional: Periodically refresh categories in the background
   useEffect(() => {
-    // Create a function to periodically refresh categories in the background
     const refreshCategoriesInBackground = async () => {
       if (!activeModal) {
-        // Only refresh when no modal is open
         try {
           const categories = await getTimetableCategories();
           if (categories && categories.length > 0) {
@@ -143,10 +134,8 @@ const TimetablePage = () => {
       }
     };
 
-    // Set up interval (every 5 minutes)
     const intervalId = setInterval(refreshCategoriesInBackground, 300000);
 
-    // Clean up on unmount
     return () => clearInterval(intervalId);
   }, [getTimetableCategories, activeModal]);
 
@@ -155,14 +144,11 @@ const TimetablePage = () => {
     setEditingActivity(null);
   };
 
-  // Optimized modal opening function - no longer fetches on click
   const openAddActivityModal = () => {
-    // Just open modal immediately without fetching
     setActiveModal("add");
     setEditingActivity(null);
   };
 
-  // Optimized categories refresh function
   const refreshTimetableCategories = async () => {
     try {
       setIsCategoryLoading(true);
@@ -175,9 +161,7 @@ const TimetablePage = () => {
     }
   };
 
-  // Optimized manage activities modal opening - no longer fetches on click
   const openManageActivitiesModal = () => {
-    // Open modal immediately
     setActiveModal("manage");
   };
 
@@ -203,22 +187,17 @@ const TimetablePage = () => {
     setActiveModal("categoryManagement");
   };
 
-  // UPDATED: Fixed handleAddActivity to prevent blinking
   const handleAddActivity = async (activityData) => {
     try {
       setIsSubmitting(true);
 
-      // 1. Close the modal first for a smoother user experience
       closeAllModals();
 
-      // 2. Process the update in the background after modal is closed
       const updatedActivities = [...activities, activityData];
       await updateDefaultActivities(updatedActivities, { silent: true });
 
-      // 3. Show success toast after both modal is closed and update is complete
       toast.success("Activity added successfully");
 
-      // 4. Refresh the data in the background - no need to await this
       fetchCurrentWeek().catch((err) => {
         console.error("Error refreshing week data:", err);
       });
@@ -230,22 +209,17 @@ const TimetablePage = () => {
     }
   };
 
-  // UPDATED: Fixed handleManageActivities to prevent blinking
   const handleManageActivities = async (updatedActivities) => {
     try {
       setIsSubmitting(true);
 
-      // Close modal first
       closeAllModals();
 
-      // Then do data updates
       await updateDefaultActivities(updatedActivities, { silent: true });
       setActivities(updatedActivities);
 
-      // Show toast after everything is done
       toast.success("Activities updated successfully");
 
-      // Refresh data in background
       fetchCurrentWeek().catch((err) => {
         console.error("Error refreshing week data:", err);
       });
@@ -257,7 +231,6 @@ const TimetablePage = () => {
     }
   };
 
-  // UPDATED: Fixed handleDeleteActivity to follow the same pattern
   const handleDeleteActivity = async (index) => {
     try {
       setIsSubmitting(true);
@@ -265,13 +238,11 @@ const TimetablePage = () => {
       const updatedActivities = [...activities];
       updatedActivities.splice(index, 1);
 
-      // Use silent:true to prevent the default toast notification
       await updateDefaultActivities(updatedActivities, { silent: true });
       setActivities(updatedActivities);
 
       toast.success("Activity deleted successfully");
 
-      // Refresh data in background
       fetchCurrentWeek().catch((err) => {
         console.error("Error refreshing week data:", err);
       });
@@ -283,29 +254,23 @@ const TimetablePage = () => {
     }
   };
 
-  // Optimized timetable management functions
   const handleCreateTimetable = async (data) => {
     try {
       setIsSubmitting(true);
 
-      // Close modal first
       closeAllModals();
 
       const createdTimetable = await createTimetable(data);
 
-      // Fetch updated timetables list
       const fetchedTimetables = await fetchTimetables();
 
-      // Find the newly created timetable
       const newTimetable = fetchedTimetables.find(
         (t) => t.id === createdTimetable?.id || t.id === createdTimetable?._id
       );
 
       if (newTimetable) {
-        // Update local state only once
         setLocalCurrentTimetable(newTimetable);
 
-        // If this timetable is set to active, fetch its data
         if (data.isActive) {
           fetchCurrentWeek(newTimetable.id).catch((err) => {
             console.error("Error loading new timetable week:", err);
@@ -313,7 +278,6 @@ const TimetablePage = () => {
         }
       }
 
-      // Show success notification
       toast.success("Timetable created successfully");
 
       return createdTimetable;
@@ -330,13 +294,11 @@ const TimetablePage = () => {
     try {
       setIsSubmitting(true);
 
-      // Close modal first
       closeAllModals();
 
       await updateTimetable(id, data);
       const updatedTimetables = await fetchTimetables();
 
-      // If updating the current timetable, update the local state
       if (localCurrentTimetable && localCurrentTimetable.id === id) {
         const updatedTimetable = updatedTimetables.find((t) => t.id === id);
         if (updatedTimetable) {
@@ -354,7 +316,6 @@ const TimetablePage = () => {
   };
 
   const handleDeleteTimetable = async (id) => {
-    // Find the timetable to delete
     const timetableToDelete = timetables.find((t) => t.id === id);
     if (timetableToDelete) {
       setTimetableToDelete(timetableToDelete);
@@ -362,51 +323,38 @@ const TimetablePage = () => {
     }
   };
 
-  // Updated confirmDeleteTimetable function for TimetablePage.jsx
-
   const confirmDeleteTimetable = async () => {
     try {
       setIsSubmitting(true);
 
-      // Close modal first
       closeAllModals();
 
       if (!timetableToDelete) return;
 
-      // Store the ID of the timetable being deleted
       const deletedTimetableId = timetableToDelete.id;
 
-      // Check if we're deleting the current timetable
       const isDeletingCurrentTimetable =
         localCurrentTimetable &&
         localCurrentTimetable.id === deletedTimetableId;
 
-      // Delete the timetable (with silent option)
       await deleteTimetable(deletedTimetableId, { silent: true });
 
-      // Fetch updated timetables list
       const updatedTimetables = await fetchTimetables();
 
-      // If we just deleted the current timetable, we need to switch to another one
       if (isDeletingCurrentTimetable && updatedTimetables.length > 0) {
-        // Find the first active timetable or just use the first one
         const newCurrentTimetable =
           updatedTimetables.find((t) => t.isActive) || updatedTimetables[0];
 
-        // Update the current timetable
         setLocalCurrentTimetable(newCurrentTimetable);
 
-        // Fetch data for the new timetable
         fetchCurrentWeek(newCurrentTimetable.id).catch((err) => {
           console.error("Error loading new timetable data:", err);
         });
       } else if (isDeletingCurrentTimetable && updatedTimetables.length === 0) {
-        // If there are no timetables left
         setLocalCurrentTimetable(null);
         setCurrentWeek(null);
       }
 
-      // Show success toast
       toast.success("Timetable deleted successfully");
     } catch (error) {
       console.error("Error deleting timetable:", error);
@@ -420,18 +368,14 @@ const TimetablePage = () => {
     try {
       setIsSubmitting(true);
 
-      // Find the timetable in our list
       const selected = timetables.find((t) => t.id === id);
 
       if (selected) {
-        // Immediately update the local current timetable for UI
         setLocalCurrentTimetable(selected);
 
-        // If not active, make it active
         if (!selected.isActive) {
           await updateTimetable(id, { isActive: true });
         }
-        // Load the current week for this timetable
         await fetchCurrentWeek(id);
         setShowTimetableSelector(false);
       }
@@ -443,7 +387,6 @@ const TimetablePage = () => {
     }
   };
 
-  // Format date for display
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       weekday: "short",
@@ -452,7 +395,6 @@ const TimetablePage = () => {
     });
   };
 
-  // Format time range for display
   const formatTimeRange = (timeRange) => {
     if (!timeRange) return "N/A";
     const times = timeRange.split("-");
@@ -469,7 +411,6 @@ const TimetablePage = () => {
     return `${format(times[0])} - ${format(times[1])}`;
   };
 
-  // Style helper for categories
   const getCategoryStyle = () => {
     return isDark
       ? {
@@ -484,7 +425,6 @@ const TimetablePage = () => {
         };
   };
 
-  // Activity button component
   const ActivityButton = ({ onClick, icon: Icon, children, type }) => {
     const getColorClasses = () => {
       if (type === "add") {
@@ -512,27 +452,25 @@ const TimetablePage = () => {
     );
   };
 
-  // UPDATED: Improved modal wrapper component with better exit animations
   const ModalWrapper = ({ isOpen, onClose, children }) => {
     const modalVariants = {
       hidden: {
         opacity: 0,
         scale: 0.98,
         transition: {
-          duration: 0.1, // Fast exit
+          duration: 0.1,
         },
       },
       visible: {
         opacity: 1,
         scale: 1,
         transition: {
-          type: "tween", // Simpler animation type
+          type: "tween",
           duration: 0.15,
         },
       },
     };
 
-    // Using AnimatePresence for cleaner enter/exit animations
     return (
       <AnimatePresence mode="wait">
         {isOpen && (
@@ -559,12 +497,10 @@ const TimetablePage = () => {
     );
   };
 
-  // Show loading skeleton
   if (loading && !currentWeek) {
     return <SkeletonTimetable />;
   }
 
-  // Show error state
   if (error && !loading && !currentWeek) {
     return (
       <TimetableError
@@ -580,7 +516,6 @@ const TimetablePage = () => {
       className={`py-6 lg:px-3 relative ${isDark ? "bg-black" : "bg-white"}`}
       key={refreshKey}
     >
-      {/* Background Gradients */}
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
           isDark
@@ -597,13 +532,10 @@ const TimetablePage = () => {
       />
 
       <div className="mx-auto px-4 relative z-10 sm:py-8">
-        {/* Timetable Selector */}
         <div className="mb-8">
           <div className="flex md:flex-row md:justify-between md:items-center gap-4">
-            {/* Left Section - Title and Selector */}
             <div className="relative">
               <div className="flex items-center gap-4">
-                {/* Header with Gradient Underline */}
                 <div className="space-y-2">
                   <h2
                     className={`text-2xl font-bold ${
@@ -621,7 +553,6 @@ const TimetablePage = () => {
                   />
                 </div>
 
-                {/* Timetable Selector Button */}
                 <button
                   onClick={() =>
                     setShowTimetableSelector(!showTimetableSelector)
@@ -649,7 +580,6 @@ const TimetablePage = () => {
                 </button>
               </div>
 
-              {/* Dropdown Menu */}
               {showTimetableSelector && (
                 <div
                   id="timetable-dropdown"
@@ -659,7 +589,6 @@ const TimetablePage = () => {
                       : "bg-white border-gray-200 shadow-gray-200/70"
                   }`}
                 >
-                  {/* Dropdown Header */}
                   <div
                     className={`px-4 py-2 mb-1 border-b ${
                       isDark ? "border-gray-800" : "border-gray-100"
@@ -674,7 +603,6 @@ const TimetablePage = () => {
                     </h3>
                   </div>
 
-                  {/* Timetable List */}
                   <div className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
                     {timetables && timetables.length > 0 ? (
                       timetables.map((timetable) => (
@@ -713,7 +641,6 @@ const TimetablePage = () => {
                     )}
                   </div>
 
-                  {/* Create New Button */}
                   <div
                     className={`border-t mt-1 pt-3 px-3 ${
                       isDark ? "border-gray-800" : "border-gray-200"
@@ -739,7 +666,6 @@ const TimetablePage = () => {
               )}
             </div>
 
-            {/* Right Section - Action Buttons */}
             <div className="flex items-center gap-3">
               {localCurrentTimetable && (
                 <>
@@ -790,7 +716,6 @@ const TimetablePage = () => {
           />
         )}
 
-        {/* Enhanced Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -831,7 +756,6 @@ const TimetablePage = () => {
           </motion.div>
         </div>
 
-        {/* Main Tracker Container */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -845,7 +769,6 @@ const TimetablePage = () => {
                 : "bg-white border-gray-200"
             }`}
           >
-            {/* Week Info Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div className="flex items-center gap-4">
                 <div
@@ -893,7 +816,6 @@ const TimetablePage = () => {
               )}
             </div>
 
-            {/* Activity Table */}
             {currentWeek ? (
               <TimetableTable
                 currentWeek={currentWeek}
@@ -924,8 +846,6 @@ const TimetablePage = () => {
           </div>
         </motion.div>
 
-        {/* Modals */}
-        {/* Add Activity Modal */}
         <ModalWrapper isOpen={activeModal === "add"} onClose={closeAllModals}>
           <AddActivityModal
             isOpen={activeModal === "add"}
@@ -938,7 +858,6 @@ const TimetablePage = () => {
           />
         </ModalWrapper>
 
-        {/* Manage Activities Modal */}
         <ModalWrapper
           isOpen={activeModal === "manage"}
           onClose={closeAllModals}
@@ -955,7 +874,6 @@ const TimetablePage = () => {
           />
         </ModalWrapper>
 
-        {/* History Modal */}
         <ModalWrapper
           isOpen={activeModal === "history"}
           onClose={closeAllModals}
@@ -967,12 +885,10 @@ const TimetablePage = () => {
           />
         </ModalWrapper>
 
-        {/* Stats Modal */}
         <ModalWrapper isOpen={activeModal === "stats"} onClose={closeAllModals}>
           {stats && <TimetableStats stats={stats} onClose={closeAllModals} />}
         </ModalWrapper>
 
-        {/* Create Timetable Modal */}
         <ModalWrapper
           isOpen={
             activeModal === "createTimetable" || activeModal === "editTimetable"
@@ -996,7 +912,6 @@ const TimetablePage = () => {
           />
         </ModalWrapper>
 
-        {/* Category Management Modal */}
         <AnimatePresence>
           {activeModal === "categoryManagement" && (
             <motion.div
@@ -1053,7 +968,6 @@ const TimetablePage = () => {
                     onAdd={async (data) => {
                       try {
                         await addCategory(data);
-                        // Force a fresh fetch
                         await refreshTimetableCategories();
                       } catch (err) {
                         console.error("Error adding category:", err);
@@ -1062,7 +976,6 @@ const TimetablePage = () => {
                     onUpdate={async (id, data) => {
                       try {
                         await updateCategory(id, data);
-                        // Force a fresh fetch
                         await refreshTimetableCategories();
                       } catch (err) {
                         console.error("Error updating category:", err);
@@ -1071,7 +984,6 @@ const TimetablePage = () => {
                     onDelete={async (id) => {
                       try {
                         await deleteCategory(id);
-                        // Force a fresh fetch
                         await refreshTimetableCategories();
                       } catch (err) {
                         console.error("Error deleting category:", err);
