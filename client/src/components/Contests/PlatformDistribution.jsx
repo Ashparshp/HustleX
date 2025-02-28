@@ -1,4 +1,3 @@
-// src/components/Contests/PlatformDistribution.jsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
@@ -17,27 +16,24 @@ const PlatformDistribution = ({ data = {} }) => {
   const [chartData, setChartData] = useState([]);
   const [activeIndex, setActiveIndex] = useState(null);
 
-  // Colors for different platforms
   const PLATFORM_COLORS = {
-    LeetCode: "#FCD34D", // yellow-300
-    CodeChef: "#60A5FA", // blue-400
-    CodeForces: "#F87171", // red-400
-    HackerRank: "#34D399", // green-400
-    AtCoder: "#A78BFA", // purple-400
-    TopCoder: "#FB923C", // orange-400
+    LeetCode: "#FCD34D",
+    CodeChef: "#60A5FA",
+    CodeForces: "#F87171",
+    HackerRank: "#34D399",
+    AtCoder: "#A78BFA",
+    TopCoder: "#FB923C",
   };
 
-  // Default colors for other platforms
   const DEFAULT_COLORS = [
-    "#6366F1", // indigo-500
-    "#EC4899", // pink-500
-    "#8B5CF6", // violet-500
-    "#14B8A6", // teal-500
-    "#F97316", // orange-500
-    "#06B6D4", // cyan-500
+    "#6366F1",
+    "#EC4899",
+    "#8B5CF6",
+    "#14B8A6",
+    "#F97316",
+    "#06B6D4",
   ];
 
-  // Process data when it changes
   useEffect(() => {
     if (!data || Object.keys(data).length === 0) {
       setChartData([]);
@@ -59,18 +55,15 @@ const PlatformDistribution = ({ data = {} }) => {
       }
     );
 
-    // Sort by total contests
     processedData.sort((a, b) => b.total - a.total);
 
     setChartData(processedData);
   }, [data]);
 
-  // Handle pie slice hover
   const handlePieEnter = (_, index) => {
     setActiveIndex(index);
   };
 
-  // Custom tooltip component
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload || !payload.length) {
       return null;
@@ -99,7 +92,6 @@ const PlatformDistribution = ({ data = {} }) => {
     );
   };
 
-  // Generate the summary table
   const renderSummaryTable = () => {
     return (
       <div className="mt-4">
@@ -176,7 +168,6 @@ const PlatformDistribution = ({ data = {} }) => {
     );
   };
 
-  // Get color for participation rate
   const getParticipationRateColor = (rate) => {
     if (rate >= 70) {
       return isDark ? "text-green-400" : "text-green-600";
