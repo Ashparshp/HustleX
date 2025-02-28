@@ -362,6 +362,8 @@ const TimetablePage = () => {
     }
   };
 
+  // Updated confirmDeleteTimetable function for TimetablePage.jsx
+
   const confirmDeleteTimetable = async () => {
     try {
       setIsSubmitting(true);
@@ -371,9 +373,40 @@ const TimetablePage = () => {
 
       if (!timetableToDelete) return;
 
-      await deleteTimetable(timetableToDelete.id);
-      await fetchTimetables();
+      // Store the ID of the timetable being deleted
+      const deletedTimetableId = timetableToDelete.id;
 
+      // Check if we're deleting the current timetable
+      const isDeletingCurrentTimetable =
+        localCurrentTimetable &&
+        localCurrentTimetable.id === deletedTimetableId;
+
+      // Delete the timetable (with silent option)
+      await deleteTimetable(deletedTimetableId, { silent: true });
+
+      // Fetch updated timetables list
+      const updatedTimetables = await fetchTimetables();
+
+      // If we just deleted the current timetable, we need to switch to another one
+      if (isDeletingCurrentTimetable && updatedTimetables.length > 0) {
+        // Find the first active timetable or just use the first one
+        const newCurrentTimetable =
+          updatedTimetables.find((t) => t.isActive) || updatedTimetables[0];
+
+        // Update the current timetable
+        setLocalCurrentTimetable(newCurrentTimetable);
+
+        // Fetch data for the new timetable
+        fetchCurrentWeek(newCurrentTimetable.id).catch((err) => {
+          console.error("Error loading new timetable data:", err);
+        });
+      } else if (isDeletingCurrentTimetable && updatedTimetables.length === 0) {
+        // If there are no timetables left
+        setLocalCurrentTimetable(null);
+        setCurrentWeek(null);
+      }
+
+      // Show success toast
       toast.success("Timetable deleted successfully");
     } catch (error) {
       console.error("Error deleting timetable:", error);

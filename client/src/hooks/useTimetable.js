@@ -166,7 +166,9 @@ const useTimetable = (timetableId = null) => {
 
   // Delete a timetable
   const deleteTimetable = useCallback(
-    async (id) => {
+    async (id, options = {}) => {
+      const { silent = false } = options;
+
       if (!token) return;
 
       try {
@@ -185,12 +187,21 @@ const useTimetable = (timetableId = null) => {
           throw new Error(data.message || "Failed to delete timetable");
         }
 
-        toast.success("Timetable deleted successfully");
+        // Only show toast if not silent
+        if (!silent) {
+          toast.success("Timetable deleted successfully");
+        }
+
         await fetchTimetables();
         return true;
       } catch (err) {
         console.error("Error deleting timetable:", err);
-        toast.error(err.message || "Failed to delete timetable");
+
+        // Only show error toast if not silent
+        if (!silent) {
+          toast.error(err.message || "Failed to delete timetable");
+        }
+
         throw err;
       }
     },
