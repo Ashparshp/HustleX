@@ -2,6 +2,78 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 
+// Custom toast configuration
+const toastConfig = {
+  success: {
+    duration: 3000,
+    style: {
+      background: "#10B981",
+      color: "white",
+      padding: "16px",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+      borderRadius: "8px",
+      fontSize: "14px",
+      fontWeight: "500",
+    },
+    iconTheme: {
+      primary: "white",
+      secondary: "#10B981",
+    },
+  },
+  error: {
+    duration: 3000,
+    style: {
+      background: "#EF4444",
+      color: "white",
+      padding: "16px",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+      borderRadius: "8px",
+      fontSize: "14px",
+      fontWeight: "500",
+    },
+    iconTheme: {
+      primary: "white",
+      secondary: "#EF4444",
+    },
+  },
+  info: {
+    duration: 3000,
+    style: {
+      background: "#3B82F6",
+      color: "white",
+      padding: "16px",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+      borderRadius: "8px",
+      fontSize: "14px",
+      fontWeight: "500",
+    },
+    iconTheme: {
+      primary: "white",
+      secondary: "#3B82F6",
+    },
+  },
+};
+
+// Enhanced toast functions
+const showToast = {
+  success: (message) => toast.success(message, toastConfig.success),
+  error: (message) => toast.error(message, toastConfig.error),
+  info: (message) => toast(message, toastConfig.info),
+  loading: (message) =>
+    toast.loading(message, {
+      style: {
+        background: "#6B7280",
+        color: "white",
+        padding: "16px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+        borderRadius: "8px",
+        fontSize: "14px",
+        fontWeight: "500",
+      },
+    }),
+  dismiss: () => toast.dismiss(),
+};
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -56,6 +128,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     setLoading(true);
     setError(null);
+    const loadingToast = showToast.loading("Creating your account...");
+
     try {
       const response = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
@@ -76,11 +150,13 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", data.token);
       setCurrentUser(data.user);
 
-      toast.success("Registration successful! Please verify your email.");
+      toast.dismiss(loadingToast);
+      showToast.success("Account created! Please verify your email");
       return data;
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
+      toast.dismiss(loadingToast);
+      showToast.error(err.message);
       throw err;
     } finally {
       setLoading(false);
@@ -91,6 +167,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     setLoading(true);
     setError(null);
+    const loadingToast = showToast.loading("Signing you in...");
+
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
@@ -111,11 +189,13 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", data.token);
       setCurrentUser(data.user);
 
-      toast.success("Login successful!");
+      toast.dismiss(loadingToast);
+      showToast.success("Welcome back!");
       return data;
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
+      toast.dismiss(loadingToast);
+      showToast.error(err.message);
       throw err;
     } finally {
       setLoading(false);
@@ -140,7 +220,7 @@ export const AuthProvider = ({ children }) => {
       setToken(null);
       setCurrentUser(null);
       localStorage.removeItem("token");
-      toast.success("Logged out successfully");
+      showToast.info("You've been logged out");
     }
   };
 
@@ -148,6 +228,8 @@ export const AuthProvider = ({ children }) => {
   const forgotPassword = async (email) => {
     setLoading(true);
     setError(null);
+    const loadingToast = showToast.loading("Processing your request...");
+
     try {
       const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
         method: "POST",
@@ -163,11 +245,13 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || "Failed to send reset email");
       }
 
-      toast.success("Password reset email sent. Please check your inbox.");
+      toast.dismiss(loadingToast);
+      showToast.success("Reset link sent! Check your email inbox");
       return data;
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
+      toast.dismiss(loadingToast);
+      showToast.error(err.message);
       throw err;
     } finally {
       setLoading(false);
@@ -178,6 +262,8 @@ export const AuthProvider = ({ children }) => {
   const resetPassword = async (token, password) => {
     setLoading(true);
     setError(null);
+    const loadingToast = showToast.loading("Resetting your password...");
+
     try {
       const response = await fetch(
         `${API_URL}/api/auth/reset-password/${token}`,
@@ -196,13 +282,13 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || "Failed to reset password");
       }
 
-      toast.success(
-        "Password reset successful. You can now login with your new password."
-      );
+      toast.dismiss(loadingToast);
+      showToast.success("Password reset successful! You can now login");
       return data;
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
+      toast.dismiss(loadingToast);
+      showToast.error(err.message);
       throw err;
     } finally {
       setLoading(false);
@@ -213,6 +299,8 @@ export const AuthProvider = ({ children }) => {
   const verifyEmail = async (token) => {
     setLoading(true);
     setError(null);
+    const loadingToast = showToast.loading("Verifying your email...");
+
     try {
       const response = await fetch(
         `${API_URL}/api/auth/verify-email/${token}`,
@@ -227,11 +315,13 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || "Failed to verify email");
       }
 
-      toast.success("Email verified successfully! You can now login.");
+      toast.dismiss(loadingToast);
+      showToast.success("Email verified successfully!");
       return data;
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
+      toast.dismiss(loadingToast);
+      showToast.error(err.message);
       throw err;
     } finally {
       setLoading(false);
@@ -241,12 +331,14 @@ export const AuthProvider = ({ children }) => {
   // Update user profile
   const updateProfile = async (userData) => {
     if (!token) {
-      toast.error("You must be logged in");
+      showToast.error("You must be logged in");
       return;
     }
 
     setLoading(true);
     setError(null);
+    const loadingToast = showToast.loading("Updating your profile...");
+
     try {
       const response = await fetch(`${API_URL}/api/auth/update-details`, {
         method: "PUT",
@@ -268,11 +360,13 @@ export const AuthProvider = ({ children }) => {
         ...data.data,
       });
 
-      toast.success("Profile updated successfully!");
+      toast.dismiss(loadingToast);
+      showToast.success("Profile updated successfully!");
       return data;
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
+      toast.dismiss(loadingToast);
+      showToast.error(err.message);
       throw err;
     } finally {
       setLoading(false);
@@ -282,12 +376,14 @@ export const AuthProvider = ({ children }) => {
   // Change password
   const changePassword = async (passwordData) => {
     if (!token) {
-      toast.error("You must be logged in");
+      showToast.error("You must be logged in");
       return;
     }
 
     setLoading(true);
     setError(null);
+    const loadingToast = showToast.loading("Changing your password...");
+
     try {
       const response = await fetch(`${API_URL}/api/auth/update-password`, {
         method: "PUT",
@@ -304,11 +400,13 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || "Failed to change password");
       }
 
-      toast.success("Password changed successfully!");
+      toast.dismiss(loadingToast);
+      showToast.success("Password updated successfully!");
       return data;
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
+      toast.dismiss(loadingToast);
+      showToast.error(err.message);
       throw err;
     } finally {
       setLoading(false);
@@ -318,12 +416,14 @@ export const AuthProvider = ({ children }) => {
   // Verify phone
   const verifyPhone = async (verificationCode) => {
     if (!token) {
-      toast.error("You must be logged in");
+      showToast.error("You must be logged in");
       return;
     }
 
     setLoading(true);
     setError(null);
+    const loadingToast = showToast.loading("Verifying your phone...");
+
     try {
       const response = await fetch(`${API_URL}/api/auth/verify-phone`, {
         method: "POST",
@@ -346,11 +446,13 @@ export const AuthProvider = ({ children }) => {
         isPhoneVerified: true,
       });
 
-      toast.success("Phone verified successfully!");
+      toast.dismiss(loadingToast);
+      showToast.success("Phone verified successfully!");
       return data;
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
+      toast.dismiss(loadingToast);
+      showToast.error(err.message);
       throw err;
     } finally {
       setLoading(false);
@@ -360,12 +462,14 @@ export const AuthProvider = ({ children }) => {
   // Resend email verification
   const resendEmailVerification = async () => {
     if (!token) {
-      toast.error("You must be logged in");
+      showToast.error("You must be logged in");
       return;
     }
 
     setLoading(true);
     setError(null);
+    const loadingToast = showToast.loading("Sending verification email...");
+
     try {
       const response = await fetch(`${API_URL}/api/auth/resend-verification`, {
         method: "POST",
@@ -380,11 +484,13 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || "Failed to resend verification email");
       }
 
-      toast.success("Verification email sent. Please check your inbox.");
+      toast.dismiss(loadingToast);
+      showToast.success("Verification email sent to your inbox");
       return data;
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
+      toast.dismiss(loadingToast);
+      showToast.error(err.message);
       throw err;
     } finally {
       setLoading(false);
@@ -394,12 +500,14 @@ export const AuthProvider = ({ children }) => {
   // Resend phone verification
   const resendPhoneVerification = async () => {
     if (!token) {
-      toast.error("You must be logged in");
+      showToast.error("You must be logged in");
       return;
     }
 
     setLoading(true);
     setError(null);
+    const loadingToast = showToast.loading("Sending verification code...");
+
     try {
       const response = await fetch(
         `${API_URL}/api/auth/resend-phone-verification`,
@@ -417,11 +525,13 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || "Failed to resend phone verification");
       }
 
-      toast.success("Verification code sent to your phone.");
+      toast.dismiss(loadingToast);
+      showToast.success("Verification code sent to your phone");
       return data;
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
+      toast.dismiss(loadingToast);
+      showToast.error(err.message);
       throw err;
     } finally {
       setLoading(false);
