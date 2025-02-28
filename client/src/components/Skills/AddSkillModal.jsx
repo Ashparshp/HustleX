@@ -1,4 +1,3 @@
-// src/components/Skills/AddSkillModal.jsx
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { X, Plus, Check } from "lucide-react";
@@ -31,31 +30,26 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [newCategory, setNewCategory] = useState("");
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === "progress") {
-      // Ensure progress is between 0 and 100
       const progress = Math.min(100, Math.max(0, parseInt(value) || 0));
       setFormData({ ...formData, progress });
     } else {
       setFormData({ ...formData, [name]: value });
     }
 
-    // If status changes to completed, set progress to 100
     if (name === "status" && value === "completed") {
       setFormData((prev) => ({ ...prev, progress: 100 }));
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (isSubmitting) return;
 
-    // Validation
     if (!formData.name.trim()) {
       setError("Skill name is required");
       return;
@@ -79,7 +73,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
     }
   };
 
-  // Handle adding a new category
   const handleAddCategory = async () => {
     if (!newCategory.trim()) {
       setError("Category name is required");
@@ -96,7 +89,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
     }
   };
 
-  // Modal animation variants
   const modalVariants = {
     hidden: { opacity: 0, y: 50, scale: 0.95 },
     visible: {
@@ -119,7 +111,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
     exit: { opacity: 0, transition: { duration: 0.2 } },
   };
 
-  // Get priority color
   const getPriorityColor = (priority) => {
     switch (priority) {
       case "high":
@@ -133,7 +124,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
     }
   };
 
-  // Get status color
   const getStatusColor = (status) => {
     switch (status) {
       case "completed":
@@ -147,7 +137,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
     }
   };
 
-  // Styling classes based on theme
   const modalBgClass = isDark
     ? "bg-black bg-gradient-to-br from-indigo-900/20 to-blue-900/10"
     : "bg-white bg-gradient-to-br from-indigo-100/50 to-blue-100/30";
@@ -210,7 +199,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
 
   return (
     <>
-      {/* Overlay with improved blur */}
       <motion.div
         initial="hidden"
         animate="visible"
@@ -220,7 +208,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
         onClick={onClose}
       />
 
-      {/* Modal with animation and improved styling */}
       <motion.div
         initial="hidden"
         animate="visible"
@@ -234,7 +221,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
           } max-h-[90vh] overflow-y-auto my-4`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header with improved styling */}
           <div className="flex justify-between items-center mb-6 sticky top-0 z-10 backdrop-blur-md bg-opacity-90 pb-2 -mx-6 px-6 pt-2">
             <h2 className={`text-2xl font-bold ${headingClass}`}>
               Add New Skill
@@ -254,7 +240,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
             </motion.button>
           </div>
 
-          {/* Error message with improved styling */}
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -269,10 +254,8 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
             </motion.div>
           )}
 
-          {/* Form with improved spacing and styling */}
           <form onSubmit={handleSubmit}>
             <div className="space-y-5">
-              {/* Skill Name */}
               <div>
                 <label htmlFor="name" className={labelClass}>
                   Skill Name*
@@ -289,7 +272,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
                 />
               </div>
 
-              {/* Category with improved styling */}
               <div>
                 <label htmlFor="category" className={labelClass}>
                   Category*
@@ -380,9 +362,7 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
                 )}
               </div>
 
-              {/* Grid layout for form fields on larger screens */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {/* Status with color indicators */}
                 <div>
                   <label htmlFor="status" className={labelClass}>
                     Status
@@ -419,7 +399,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
                   </div>
                 </div>
 
-                {/* Priority with color indicators */}
                 <div>
                   <label htmlFor="priority" className={labelClass}>
                     Priority
@@ -457,7 +436,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
                 </div>
               </div>
 
-              {/* Progress with improved slider */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label htmlFor="progress" className={labelClass}>
@@ -487,7 +465,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
                 </div>
               </div>
 
-              {/* Description with improved styling */}
               <div>
                 <label htmlFor="description" className={labelClass}>
                   Description
@@ -502,7 +479,6 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
                 />
               </div>
 
-              {/* Form Actions with improved buttons */}
               <div className="flex justify-end space-x-3 mt-6 sticky bottom-0 pb-2 pt-4 -mx-6 px-6 backdrop-blur-md bg-opacity-90">
                 <motion.button
                   whileHover={{ scale: 1.03 }}
