@@ -164,7 +164,6 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     setLoading(true);
     setError(null);
-    const loadingToast = showToast.loading("Signing you in...");
 
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
@@ -185,13 +184,10 @@ export const AuthProvider = ({ children }) => {
       setToken(data.token);
       localStorage.setItem("token", data.token);
       setCurrentUser(data.user);
-
-      toast.dismiss(loadingToast);
       showToast.success("Welcome back!");
       return data;
     } catch (err) {
       setError(err.message);
-      toast.dismiss(loadingToast);
       showToast.error(err.message);
       throw err;
     } finally {
