@@ -10,9 +10,10 @@ const AddActivityModal = ({
   onSubmit,
   initialData = null,
   categories = [],
+  isLoading = false,
+  isSubmitting = false,
 }) => {
   const { isDark } = useTheme();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -73,17 +74,25 @@ const AddActivityModal = ({
     }
 
     try {
-      setIsSubmitting(true);
       setError(null);
       await onSubmit(formData);
     } catch (err) {
       setError(err.message || "Failed to save activity");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   if (!isOpen) return null;
+
+  // Loading spinner component
+  const LoadingSpinner = () => (
+    <div className="flex justify-center py-2">
+      <div
+        className={`animate-spin rounded-full h-5 w-5 border-b-2 ${
+          isDark ? "border-indigo-400" : "border-indigo-600"
+        }`}
+      ></div>
+    </div>
+  );
 
   return (
     <div className="p-6">
@@ -150,6 +159,7 @@ const AddActivityModal = ({
               }`}
               placeholder="Enter activity name"
               required
+              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -183,6 +193,7 @@ const AddActivityModal = ({
               }`}
               placeholder="HH:MM-HH:MM"
               required
+              disabled={isSubmitting}
             />
           </div>
           <p
@@ -209,37 +220,53 @@ const AddActivityModal = ({
                 isDark ? "text-indigo-400" : "text-indigo-600"
               }`}
             />
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border appearance-none ${
-                isDark
-                  ? "bg-gray-800 border-gray-700 text-white"
-                  : "bg-white border-gray-300 text-gray-900"
-              } focus:ring-2 focus:border-transparent ${
-                isDark ? "focus:ring-indigo-500/50" : "focus:ring-indigo-500/50"
-              }`}
-              required
-            >
-              {categories && categories.length > 0 ? (
-                // Map through the provided categories
-                categories.map((category, index) => (
-                  <option key={`${category}-${index}`} value={category}>
-                    {category}
-                  </option>
-                ))
-              ) : (
-                // Default categories if none provided
-                <>
-                  <option value="Career">Career</option>
-                  <option value="Backend">Backend</option>
-                  <option value="Core">Core</option>
-                  <option value="Frontend">Frontend</option>
-                  <option value="Mobile">Mobile</option>
-                </>
-              )}
-            </select>
+
+            {isLoading ? (
+              <div
+                className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border ${
+                  isDark
+                    ? "bg-gray-800 border-gray-700"
+                    : "bg-gray-50 border-gray-300"
+                }`}
+              >
+                <LoadingSpinner />
+              </div>
+            ) : (
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border appearance-none ${
+                  isDark
+                    ? "bg-gray-800 border-gray-700 text-white"
+                    : "bg-white border-gray-300 text-gray-900"
+                } focus:ring-2 focus:border-transparent ${
+                  isDark
+                    ? "focus:ring-indigo-500/50"
+                    : "focus:ring-indigo-500/50"
+                }`}
+                required
+                disabled={isSubmitting}
+              >
+                {categories && categories.length > 0 ? (
+                  // Map through the provided categories
+                  categories.map((category, index) => (
+                    <option key={`${category}-${index}`} value={category}>
+                      {category}
+                    </option>
+                  ))
+                ) : (
+                  // Default categories if none provided
+                  <>
+                    <option value="Career">Career</option>
+                    <option value="Backend">Backend</option>
+                    <option value="Core">Core</option>
+                    <option value="Frontend">Frontend</option>
+                    <option value="Mobile">Mobile</option>
+                  </>
+                )}
+              </select>
+            )}
           </div>
         </div>
 
@@ -261,18 +288,23 @@ const AddActivityModal = ({
             type="submit"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoading}
             className={`px-4 py-2 rounded-lg ${
               isDark
                 ? "bg-indigo-600 hover:bg-indigo-700 text-white"
                 : "bg-indigo-600 hover:bg-indigo-700 text-white"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+            } disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]`}
           >
-            {isSubmitting
-              ? "Saving..."
-              : initialData
-              ? "Update Activity"
-              : "Add Activity"}
+            {isSubmitting ? (
+              <span className="flex items-center">
+                <div className="animate-spin h-4 w-4 mr-2 border-b-2 border-white rounded-full"></div>
+                Saving...
+              </span>
+            ) : initialData ? (
+              "Update Activity"
+            ) : (
+              "Add Activity"
+            )}
           </motion.button>
         </div>
       </form>

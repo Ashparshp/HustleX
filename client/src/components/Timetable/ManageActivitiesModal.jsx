@@ -30,6 +30,17 @@ const DragVertical = (props) => (
   </svg>
 );
 
+// Loading spinner component
+const LoadingSpinner = ({ isDark }) => (
+  <div className="flex justify-center py-2">
+    <div
+      className={`animate-spin rounded-full h-5 w-5 border-b-2 ${
+        isDark ? "border-indigo-400" : "border-indigo-600"
+      }`}
+    ></div>
+  </div>
+);
+
 const ManageActivitiesModal = ({
   isOpen,
   onClose,
@@ -37,9 +48,10 @@ const ManageActivitiesModal = ({
   onSubmit,
   onDelete,
   categories = [],
+  isLoading = false,
+  isSubmitting = false,
 }) => {
   const { isDark } = useTheme();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [managedActivities, setManagedActivities] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -144,13 +156,10 @@ const ManageActivitiesModal = ({
     if (isSubmitting) return;
 
     try {
-      setIsSubmitting(true);
       setError(null);
       await onSubmit(managedActivities);
     } catch (err) {
       setError(err.message || "Failed to save activities");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -324,38 +333,53 @@ const ManageActivitiesModal = ({
                                       : "text-indigo-600"
                                   }`}
                                 />
-                                <select
-                                  name="category"
-                                  value={editFormData.category}
-                                  onChange={handleEditChange}
-                                  className={`w-full pl-10 pr-4 py-2 text-sm rounded-lg border appearance-none ${
-                                    isDark
-                                      ? "bg-gray-700 border-gray-600 text-white"
-                                      : "bg-white border-gray-300 text-gray-900"
-                                  } focus:ring-2 focus:border-transparent ${
-                                    isDark
-                                      ? "focus:ring-indigo-500/50"
-                                      : "focus:ring-indigo-500/50"
-                                  }`}
-                                  required
-                                >
-                                  {categories.length > 0 ? (
-                                    categories.map((category) => (
-                                      <option key={category} value={category}>
-                                        {category}
-                                      </option>
-                                    ))
-                                  ) : (
-                                    // Default categories if none provided
-                                    <>
-                                      <option value="Career">Career</option>
-                                      <option value="Backend">Backend</option>
-                                      <option value="Core">Core</option>
-                                      <option value="Frontend">Frontend</option>
-                                      <option value="Mobile">Mobile</option>
-                                    </>
-                                  )}
-                                </select>
+
+                                {isLoading ? (
+                                  <div
+                                    className={`w-full pl-10 pr-4 py-2 text-sm rounded-lg border ${
+                                      isDark
+                                        ? "bg-gray-700 border-gray-600"
+                                        : "bg-gray-50 border-gray-300"
+                                    }`}
+                                  >
+                                    <LoadingSpinner isDark={isDark} />
+                                  </div>
+                                ) : (
+                                  <select
+                                    name="category"
+                                    value={editFormData.category}
+                                    onChange={handleEditChange}
+                                    className={`w-full pl-10 pr-4 py-2 text-sm rounded-lg border appearance-none ${
+                                      isDark
+                                        ? "bg-gray-700 border-gray-600 text-white"
+                                        : "bg-white border-gray-300 text-gray-900"
+                                    } focus:ring-2 focus:border-transparent ${
+                                      isDark
+                                        ? "focus:ring-indigo-500/50"
+                                        : "focus:ring-indigo-500/50"
+                                    }`}
+                                    required
+                                  >
+                                    {categories.length > 0 ? (
+                                      categories.map((category) => (
+                                        <option key={category} value={category}>
+                                          {category}
+                                        </option>
+                                      ))
+                                    ) : (
+                                      // Default categories if none provided
+                                      <>
+                                        <option value="Career">Career</option>
+                                        <option value="Backend">Backend</option>
+                                        <option value="Core">Core</option>
+                                        <option value="Frontend">
+                                          Frontend
+                                        </option>
+                                        <option value="Mobile">Mobile</option>
+                                      </>
+                                    )}
+                                  </select>
+                                )}
                               </div>
                             </div>
 
@@ -518,6 +542,7 @@ const ManageActivitiesModal = ({
             whileTap={{ scale: 0.98 }}
             disabled={
               isSubmitting ||
+              isLoading ||
               managedActivities.length === 0 ||
               editingIndex !== null
             }
@@ -525,10 +550,19 @@ const ManageActivitiesModal = ({
               isDark
                 ? "bg-indigo-600 hover:bg-indigo-700 text-white"
                 : "bg-indigo-600 hover:bg-indigo-700 text-white"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+            } disabled:opacity-50 disabled:cursor-not-allowed min-w-[150px] justify-center`}
           >
-            <Save size={16} />
-            {isSubmitting ? "Saving..." : "Save Activities"}
+            {isSubmitting ? (
+              <span className="flex items-center">
+                <div className="animate-spin h-4 w-4 mr-2 border-b-2 border-white rounded-full"></div>
+                Saving...
+              </span>
+            ) : (
+              <>
+                <Save size={16} />
+                Save Activities
+              </>
+            )}
           </motion.button>
         </div>
       </form>

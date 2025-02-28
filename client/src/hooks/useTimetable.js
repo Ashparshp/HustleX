@@ -115,8 +115,6 @@ const useTimetable = (timetableId = null) => {
           throw new Error(data.message || "Failed to create timetable");
         }
 
-        toast.success("Timetable created successfully");
-
         // Always return the created timetable data
         return data.data;
       } catch (err) {
@@ -150,7 +148,11 @@ const useTimetable = (timetableId = null) => {
           throw new Error(data.message || "Failed to update timetable");
         }
 
-        toast.success("Switched!");
+        // Only show toast for timetable switching, remove it for regular updates
+        if (timetableData.isActive !== undefined && timetableData.isActive) {
+          toast.success("Switched!");
+        }
+
         await fetchTimetables();
         return data.data;
       } catch (err) {
@@ -443,14 +445,16 @@ const useTimetable = (timetableId = null) => {
     }
   }, [API_URL, getAuthHeaders, token]);
 
-  // Update default activities for a timetable
+  // Update default activities for a timetable with silent option
   const updateDefaultActivities = useCallback(
-    async (activities, id = null) => {
+    async (activities, options = {}) => {
+      const { silent = false } = options;
+
       if (!token) return;
 
       try {
         const timetableIdToUse =
-          id || (currentTimetable ? currentTimetable.id : null);
+          options.id || (currentTimetable ? currentTimetable.id : null);
 
         if (!timetableIdToUse) {
           throw new Error("No timetable selected");
@@ -475,16 +479,24 @@ const useTimetable = (timetableId = null) => {
           throw new Error(data.message || "Failed to update activities");
         }
 
-        toast.success("Activities updated successfully");
-        await fetchCurrentWeek(timetableIdToUse);
+        // Only show toast if not silent
+        if (!silent) {
+          toast.success("Activities updated successfully");
+        }
+
         return data.data;
       } catch (err) {
         console.error("Error updating activities:", err);
-        toast.error(err.message || "Failed to update activities");
+
+        // Only show error toast if not silent
+        if (!silent) {
+          toast.error(err.message || "Failed to update activities");
+        }
+
         throw err;
       }
     },
-    [API_URL, currentTimetable, fetchCurrentWeek, getAuthHeaders, token]
+    [API_URL, currentTimetable, getAuthHeaders, token]
   );
 
   // Force start a new week

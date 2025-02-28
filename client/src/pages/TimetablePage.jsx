@@ -1,5 +1,5 @@
 // src/pages/TimetablePage.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle,
@@ -16,6 +16,7 @@ import { useTheme } from "../context/ThemeContext";
 import useTimetable from "../hooks/useTimetable";
 import useCategories from "../hooks/useCategories";
 import { toast } from "react-hot-toast";
+import { debounce } from "lodash";
 
 // Import all the components we'll need
 import TimetableHistory from "../components/Timetable/TimetableHistory";
@@ -70,6 +71,16 @@ const TimetablePage = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [localCurrentTimetable, setLocalCurrentTimetable] = useState(null);
   const [timetableToDelete, setTimetableToDelete] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(true);
+
+  // Debounced refresh function to prevent multiple refreshes
+  const debouncedRefresh = useCallback(
+    debounce(() => {
+      setRefreshKey((prev) => prev + 1);
+    }, 300),
+    []
+  );
 
   useEffect(() => {
     if (currentTimetable) {
@@ -77,12 +88,12 @@ const TimetablePage = () => {
     }
   }, [currentTimetable]);
 
+  // Optimized to only update on ID changes
   useEffect(() => {
     if (localCurrentTimetable) {
-      console.log("Current timetable updated:", localCurrentTimetable.name);
-      setRefreshKey((prev) => prev + 1);
+      debouncedRefresh();
     }
-  }, [localCurrentTimetable?.id, localCurrentTimetable?.name]);
+  }, [localCurrentTimetable?.id, debouncedRefresh]);
 
   useEffect(() => {
     if (currentWeek && currentWeek.activities) {
@@ -94,72 +105,80 @@ const TimetablePage = () => {
 
       setActivities(extractedActivities);
     }
+  }, [currentWeek]);
 
-    const loadCategories = async () => {
-      try {
-        const cats = await getTimetableCategories();
-        setTimetableCategories(cats || []);
-      } catch (err) {
-        console.error("Failed to load timetable categories:", err);
+  // Pre-fetch categories when component mounts or timetable changes
+  useEffect(() => {
+    if (currentTimetable) {
+      // Set initial empty array to prevent undefined errors
+      setTimetableCategories([]);
+      setIsCategoryLoading(true);
+
+      getTimetableCategories()
+        .then((categories) => {
+          setTimetableCategories(categories || []);
+          setIsCategoryLoading(false);
+        })
+        .catch((err) => {
+          console.error("Failed to load categories:", err);
+          setIsCategoryLoading(false);
+        });
+    }
+  }, [currentTimetable, getTimetableCategories]);
+
+  // Optional: Periodically refresh categories in the background
+  useEffect(() => {
+    // Create a function to periodically refresh categories in the background
+    const refreshCategoriesInBackground = async () => {
+      if (!activeModal) {
+        // Only refresh when no modal is open
+        try {
+          const categories = await getTimetableCategories();
+          if (categories && categories.length > 0) {
+            setTimetableCategories(categories);
+          }
+        } catch (err) {
+          console.error("Background category refresh failed:", err);
+        }
       }
     };
 
-    loadCategories();
-  }, [currentWeek, getTimetableCategories]);
+    // Set up interval (every 5 minutes)
+    const intervalId = setInterval(refreshCategoriesInBackground, 300000);
+
+    // Clean up on unmount
+    return () => clearInterval(intervalId);
+  }, [getTimetableCategories, activeModal]);
 
   const closeAllModals = () => {
     setActiveModal(null);
     setEditingActivity(null);
   };
 
-  const openAddActivityModal = async () => {
-    try {
-      const freshCategories = await getTimetableCategories();
-      setTimetableCategories(freshCategories || []);
-
-      setTimeout(() => {
-        setActiveModal("add");
-        setEditingActivity(null);
-      }, 50);
-    } catch (err) {
-      console.error("Failed to refresh categories:", err);
-      setActiveModal("add");
-      setEditingActivity(null);
-    }
+  // Optimized modal opening function - no longer fetches on click
+  const openAddActivityModal = () => {
+    // Just open modal immediately without fetching
+    setActiveModal("add");
+    setEditingActivity(null);
   };
 
+  // Optimized categories refresh function
   const refreshTimetableCategories = async () => {
     try {
+      setIsCategoryLoading(true);
       const cats = await getTimetableCategories();
-      // Force clear and update the categories array with spread operator
-      // to ensure React recognizes the state change
-      setTimetableCategories([...(cats || [])]);
+      setTimetableCategories((prevCats) => [...(cats || [])]);
+      setIsCategoryLoading(false);
     } catch (err) {
       console.error("Failed to refresh timetable categories:", err);
+      setIsCategoryLoading(false);
     }
   };
 
-  const openManageActivitiesModal = async () => {
-    try {
-      // Force a fresh fetch of categories right before opening the modal
-      const freshCategories = await getTimetableCategories();
-      console.log(
-        "Fresh categories before opening manage modal:",
-        freshCategories
-      );
-
-      // Make sure we're setting the state with the fresh data
-      setTimetableCategories(freshCategories || []);
-
-      // Wait a tiny bit to ensure state is updated before opening modal
-      setTimeout(() => {
-        setActiveModal("manage");
-      }, 50);
-    } catch (err) {
-      console.error("Failed to refresh categories for manage modal:", err);
-      // Still open the modal even if category refresh fails
-      setActiveModal("manage");
-    }
+  // Optimized manage activities modal opening - no longer fetches on click
+  const openManageActivitiesModal = () => {
+    // Open modal immediately
+    setActiveModal("manage");
   };
 
   const openHistoryModal = () => {
@@ -184,94 +203,136 @@ const TimetablePage = () => {
     setActiveModal("categoryManagement");
   };
 
-  // Activity handlers
+  // UPDATED: Fixed handleAddActivity to prevent blinking
   const handleAddActivity = async (activityData) => {
     try {
-      const updatedActivities = [...activities, activityData];
-      await updateDefaultActivities(updatedActivities);
-      await fetchCurrentWeek();
+      setIsSubmitting(true);
+
+      // 1. Close the modal first for a smoother user experience
       closeAllModals();
+
+      // 2. Process the update in the background after modal is closed
+      const updatedActivities = [...activities, activityData];
+      await updateDefaultActivities(updatedActivities, { silent: true });
+
+      // 3. Show success toast after both modal is closed and update is complete
       toast.success("Activity added successfully");
+
+      // 4. Refresh the data in the background - no need to await this
+      fetchCurrentWeek().catch((err) => {
+        console.error("Error refreshing week data:", err);
+      });
     } catch (error) {
       console.error("Error adding activity:", error);
       toast.error("Failed to add activity");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  // UPDATED: Fixed handleManageActivities to prevent blinking
   const handleManageActivities = async (updatedActivities) => {
     try {
-      await updateDefaultActivities(updatedActivities);
-      setActivities(updatedActivities);
+      setIsSubmitting(true);
+
+      // Close modal first
       closeAllModals();
+
+      // Then do data updates
+      await updateDefaultActivities(updatedActivities, { silent: true });
+      setActivities(updatedActivities);
+
+      // Show toast after everything is done
       toast.success("Activities updated successfully");
+
+      // Refresh data in background
+      fetchCurrentWeek().catch((err) => {
+        console.error("Error refreshing week data:", err);
+      });
     } catch (error) {
       console.error("Error managing activities:", error);
       toast.error("Failed to update activities");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  // UPDATED: Fixed handleDeleteActivity to follow the same pattern
   const handleDeleteActivity = async (index) => {
     try {
+      setIsSubmitting(true);
+
       const updatedActivities = [...activities];
       updatedActivities.splice(index, 1);
-      await updateDefaultActivities(updatedActivities);
+
+      // Use silent:true to prevent the default toast notification
+      await updateDefaultActivities(updatedActivities, { silent: true });
       setActivities(updatedActivities);
+
       toast.success("Activity deleted successfully");
+
+      // Refresh data in background
+      fetchCurrentWeek().catch((err) => {
+        console.error("Error refreshing week data:", err);
+      });
     } catch (error) {
       console.error("Error deleting activity:", error);
       toast.error("Failed to delete activity");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Timetable management
+  // Optimized timetable management functions
   const handleCreateTimetable = async (data) => {
     try {
-      console.log("Creating new timetable with data:", data);
-      const createdTimetable = await createTimetable(data);
-      console.log("Timetable created successfully:", createdTimetable);
+      setIsSubmitting(true);
 
-      // Force refresh to update the dropdown
-      const fetchedTimetables = await fetchTimetables();
-      console.log("Fetched timetables after creation:", fetchedTimetables);
-
+      // Close modal first
       closeAllModals();
-      toast.success("Timetable created successfully");
 
-      // Find the newly created timetable in the updated list and set it as current
+      const createdTimetable = await createTimetable(data);
+
+      // Fetch updated timetables list
+      const fetchedTimetables = await fetchTimetables();
+
+      // Find the newly created timetable
       const newTimetable = fetchedTimetables.find(
-        (t) =>
-          t.name === data.name ||
-          t.id === createdTimetable?.id ||
-          t.id === createdTimetable?._id
+        (t) => t.id === createdTimetable?.id || t.id === createdTimetable?._id
       );
 
       if (newTimetable) {
-        console.log(
-          "Setting newly created timetable as current:",
-          newTimetable
-        );
-        // Update both hook state and local state
+        // Update local state only once
         setLocalCurrentTimetable(newTimetable);
 
         // If this timetable is set to active, fetch its data
         if (data.isActive) {
-          await fetchCurrentWeek(newTimetable.id);
+          fetchCurrentWeek(newTimetable.id).catch((err) => {
+            console.error("Error loading new timetable week:", err);
+          });
         }
       }
 
-      // Force re-render the component
-      setRefreshKey((prevKey) => prevKey + 1);
+      // Show success notification
+      toast.success("Timetable created successfully");
 
       return createdTimetable;
     } catch (error) {
       console.error("Error creating timetable:", error);
       toast.error("Failed to create timetable");
       throw error;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleUpdateTimetable = async (id, data) => {
     try {
+      setIsSubmitting(true);
+
+      // Close modal first
+      closeAllModals();
+
       await updateTimetable(id, data);
       const updatedTimetables = await fetchTimetables();
 
@@ -283,11 +344,12 @@ const TimetablePage = () => {
         }
       }
 
-      closeAllModals();
       toast.success("Timetable updated successfully");
     } catch (error) {
       console.error("Error updating timetable:", error);
       toast.error("Failed to update timetable");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -302,25 +364,31 @@ const TimetablePage = () => {
 
   const confirmDeleteTimetable = async () => {
     try {
+      setIsSubmitting(true);
+
+      // Close modal first
+      closeAllModals();
+
       if (!timetableToDelete) return;
 
       await deleteTimetable(timetableToDelete.id);
       await fetchTimetables();
-      closeAllModals();
+
       toast.success("Timetable deleted successfully");
     } catch (error) {
       console.error("Error deleting timetable:", error);
       toast.error("Failed to delete timetable");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleTimetableChange = async (id) => {
     try {
-      console.log("Changing to timetable ID:", id);
+      setIsSubmitting(true);
 
       // Find the timetable in our list
       const selected = timetables.find((t) => t.id === id);
-      console.log("Selected timetable:", selected);
 
       if (selected) {
         // Immediately update the local current timetable for UI
@@ -337,6 +405,8 @@ const TimetablePage = () => {
     } catch (error) {
       console.error("Error changing timetable:", error);
       toast.error("Failed to change timetable");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -401,6 +471,7 @@ const TimetablePage = () => {
         onClick={onClick}
         className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border
           backdrop-blur-sm transition-all duration-300 shadow-sm ${getColorClasses()}`}
+        disabled={isSubmitting}
       >
         <Icon className="w-4 h-4" />
         {children}
@@ -408,33 +479,29 @@ const TimetablePage = () => {
     );
   };
 
-  // Modal wrapper component
+  // UPDATED: Improved modal wrapper component with better exit animations
   const ModalWrapper = ({ isOpen, onClose, children }) => {
     const modalVariants = {
       hidden: {
         opacity: 0,
-        scale: 0.95,
-        y: 20,
+        scale: 0.98,
         transition: {
-          duration: 0.2,
-          ease: "easeInOut",
+          duration: 0.1, // Fast exit
         },
       },
       visible: {
         opacity: 1,
         scale: 1,
-        y: 0,
         transition: {
-          type: "spring",
-          damping: 15,
-          stiffness: 300,
-          duration: 0.3,
+          type: "tween", // Simpler animation type
+          duration: 0.15,
         },
       },
     };
 
+    // Using AnimatePresence for cleaner enter/exit animations
     return (
-      <>
+      <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
             initial="hidden"
@@ -455,7 +522,7 @@ const TimetablePage = () => {
             </div>
           </motion.div>
         )}
-      </>
+      </AnimatePresence>
     );
   };
 
@@ -533,6 +600,7 @@ const TimetablePage = () => {
                       ? "bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/30 shadow-md shadow-indigo-900/20"
                       : "bg-indigo-50 border border-indigo-300/70 text-indigo-700 hover:bg-indigo-100 shadow-sm"
                   }`}
+                  disabled={isSubmitting}
                 >
                   <Calendar className="w-4 h-4" />
                   <span className="truncate max-w-[120px]">
@@ -581,7 +649,6 @@ const TimetablePage = () => {
                           key={timetable.id}
                           onClick={() => {
                             handleTimetableChange(timetable.id);
-                            setShowTimetableSelector(false);
                           }}
                           className={`w-full px-4 py-2.5 text-left transition-colors ${
                             isDark ? "hover:bg-gray-800" : "hover:bg-gray-50"
@@ -594,6 +661,7 @@ const TimetablePage = () => {
                               ? "text-gray-300"
                               : "text-gray-700"
                           }`}
+                          disabled={isSubmitting}
                         >
                           <span className="truncate">{timetable.name}</span>
                           {timetable.isActive && (
@@ -628,6 +696,7 @@ const TimetablePage = () => {
                           ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/30"
                           : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200"
                       }`}
+                      disabled={isSubmitting}
                     >
                       <PlusCircle className="w-4 h-4 mr-2" />
                       Create New Timetable
@@ -650,6 +719,7 @@ const TimetablePage = () => {
                     }`}
                     title="Edit Timetable"
                     aria-label="Edit Timetable"
+                    disabled={isSubmitting}
                   >
                     <Edit className="w-4 h-4 mr-1.5" />
                     <span className="font-medium">Edit</span>
@@ -666,6 +736,7 @@ const TimetablePage = () => {
                     }`}
                     title="Delete Timetable"
                     aria-label="Delete Timetable"
+                    disabled={isSubmitting}
                   >
                     <Trash2 className="w-4 h-4 mr-1.5" />
                     <span className="font-medium">Delete</span>
@@ -712,6 +783,7 @@ const TimetablePage = () => {
                   ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30"
                   : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
               }`}
+              disabled={isSubmitting}
             >
               <PlusCircle className="w-4 h-4" />
               New Timetable
@@ -809,6 +881,7 @@ const TimetablePage = () => {
                       ? "bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30"
                       : "bg-indigo-100 text-indigo-600 hover:bg-indigo-200"
                   }`}
+                  disabled={isSubmitting}
                 >
                   <Plus className="w-4 h-4 inline mr-2" />
                   Add First Activity
@@ -819,7 +892,7 @@ const TimetablePage = () => {
         </motion.div>
 
         {/* Modals */}
-        {/* Add Modal */}
+        {/* Add Activity Modal */}
         <ModalWrapper isOpen={activeModal === "add"} onClose={closeAllModals}>
           <AddActivityModal
             isOpen={activeModal === "add"}
@@ -827,10 +900,12 @@ const TimetablePage = () => {
             onSubmit={handleAddActivity}
             initialData={editingActivity}
             categories={timetableCategories}
+            isLoading={isCategoryLoading}
+            isSubmitting={isSubmitting}
           />
         </ModalWrapper>
 
-        {/* Manage Modal */}
+        {/* Manage Activities Modal */}
         <ModalWrapper
           isOpen={activeModal === "manage"}
           onClose={closeAllModals}
@@ -842,6 +917,8 @@ const TimetablePage = () => {
             onSubmit={handleManageActivities}
             onDelete={handleDeleteActivity}
             categories={timetableCategories}
+            isLoading={isCategoryLoading}
+            isSubmitting={isSubmitting}
           />
         </ModalWrapper>
 
@@ -882,6 +959,7 @@ const TimetablePage = () => {
                 ? localCurrentTimetable
                 : null
             }
+            isSubmitting={isSubmitting}
           />
         </ModalWrapper>
 
@@ -942,19 +1020,8 @@ const TimetablePage = () => {
                     onAdd={async (data) => {
                       try {
                         await addCategory(data);
-                        // Wait for backend to process
-                        await new Promise((resolve) =>
-                          setTimeout(resolve, 100)
-                        );
                         // Force a fresh fetch
-                        const freshCategories = await getTimetableCategories();
-                        setTimetableCategories(freshCategories || []);
-                        // Force component to re-render
-                        setActiveModal((prev) => null);
-                        setTimeout(
-                          () => setActiveModal("categoryManagement"),
-                          10
-                        );
+                        await refreshTimetableCategories();
                       } catch (err) {
                         console.error("Error adding category:", err);
                       }
@@ -962,13 +1029,8 @@ const TimetablePage = () => {
                     onUpdate={async (id, data) => {
                       try {
                         await updateCategory(id, data);
-                        // Wait for backend to process
-                        await new Promise((resolve) =>
-                          setTimeout(resolve, 100)
-                        );
                         // Force a fresh fetch
-                        const freshCategories = await getTimetableCategories();
-                        setTimetableCategories(freshCategories || []);
+                        await refreshTimetableCategories();
                       } catch (err) {
                         console.error("Error updating category:", err);
                       }
@@ -976,13 +1038,8 @@ const TimetablePage = () => {
                     onDelete={async (id) => {
                       try {
                         await deleteCategory(id);
-                        // Wait for backend to process
-                        await new Promise((resolve) =>
-                          setTimeout(resolve, 100)
-                        );
                         // Force a fresh fetch
-                        const freshCategories = await getTimetableCategories();
-                        setTimetableCategories(freshCategories || []);
+                        await refreshTimetableCategories();
                       } catch (err) {
                         console.error("Error deleting category:", err);
                       }
@@ -1008,6 +1065,7 @@ const TimetablePage = () => {
           onClose={closeAllModals}
           onConfirm={confirmDeleteTimetable}
           timetableName={timetableToDelete?.name || ""}
+          isSubmitting={isSubmitting}
         />
       </ModalWrapper>
     </section>
