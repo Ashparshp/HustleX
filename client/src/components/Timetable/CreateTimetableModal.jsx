@@ -1,4 +1,3 @@
-// src/components/Timetable/CreateTimetableModal.jsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Save, Calendar, Clipboard, AlertCircle } from "lucide-react";

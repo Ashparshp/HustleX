@@ -1,4 +1,3 @@
-// src/components/LeetCode/LeetCodeDifficultyChart.jsx
 import {
   PieChart,
   Pie,
@@ -14,21 +13,19 @@ import { AlertCircle } from "lucide-react";
 const LeetCodeDifficultyChart = ({ easy = 0, medium = 0, hard = 0 }) => {
   const { isDark } = useTheme();
 
-  // Prepare data for the chart
   const createChartData = () => {
     const total = easy + medium + hard;
     if (total === 0) return [];
 
     return [
-      { name: "Easy", value: easy, color: isDark ? "#34d399" : "#10b981" }, // green
-      { name: "Medium", value: medium, color: isDark ? "#fbbf24" : "#d97706" }, // amber
-      { name: "Hard", value: hard, color: isDark ? "#f87171" : "#ef4444" }, // red
+      { name: "Easy", value: easy, color: isDark ? "#34d399" : "#10b981" },
+      { name: "Medium", value: medium, color: isDark ? "#fbbf24" : "#d97706" },
+      { name: "Hard", value: hard, color: isDark ? "#f87171" : "#ef4444" },
     ].filter((item) => item.value > 0);
   };
 
   const chartData = createChartData();
 
-  // Handle empty data
   if (chartData.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
@@ -43,7 +40,6 @@ const LeetCodeDifficultyChart = ({ easy = 0, medium = 0, hard = 0 }) => {
     );
   }
 
-  // Custom tooltip component
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload || !payload.length) return null;
 
@@ -84,7 +80,6 @@ const LeetCodeDifficultyChart = ({ easy = 0, medium = 0, hard = 0 }) => {
     );
   };
 
-  // Render detailed stats alongside the chart
   const renderStats = () => {
     const total = easy + medium + hard;
 

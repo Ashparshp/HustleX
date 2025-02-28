@@ -1,4 +1,3 @@
-// src/components/Timetable/CollapsibleTimetableButtons.jsx
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -30,7 +29,6 @@ const CollapsibleTimetableButtons = ({
     { icon: ChartBar, label: "Stats", onClick: onStats },
   ];
 
-  // Add Categories button if handler is provided
   if (onCategories) {
     buttons.push({ icon: Sliders, label: "Categories", onClick: onCategories });
   }

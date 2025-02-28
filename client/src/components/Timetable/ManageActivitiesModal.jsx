@@ -1,4 +1,3 @@
-// src/components/Timetable/ManageActivitiesModal.jsx
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
@@ -30,7 +29,6 @@ const DragVertical = (props) => (
   </svg>
 );
 
-// Loading spinner component
 const LoadingSpinner = ({ isDark }) => (
   <div className="flex justify-center py-2">
     <div
@@ -101,7 +99,6 @@ const ManageActivitiesModal = ({
       return;
     }
 
-    // Validate time format
     const timePattern =
       /^([0-1][0-9]|2[0-3]):([0-5][0-9])-([0-1][0-9]|2[0-3]):([0-5][0-9])$/;
     if (!timePattern.test(editFormData.time)) {
@@ -142,7 +139,6 @@ const ManageActivitiesModal = ({
     const updatedActivities = [...managedActivities];
     const newIndex = direction === "up" ? index - 1 : index + 1;
 
-    // Swap activities
     [updatedActivities[index], updatedActivities[newIndex]] = [
       updatedActivities[newIndex],
       updatedActivities[index],
@@ -242,7 +238,6 @@ const ManageActivitiesModal = ({
                           }`}
                         >
                           <div className="grid grid-cols-1 gap-3">
-                            {/* Activity Name */}
                             <div>
                               <label
                                 className={`block text-xs font-medium mb-1 ${
@@ -279,7 +274,6 @@ const ManageActivitiesModal = ({
                               </div>
                             </div>
 
-                            {/* Time */}
                             <div>
                               <label
                                 className={`block text-xs font-medium mb-1 ${
@@ -316,7 +310,6 @@ const ManageActivitiesModal = ({
                               </div>
                             </div>
 
-                            {/* Category */}
                             <div>
                               <label
                                 className={`block text-xs font-medium mb-1 ${
@@ -367,7 +360,6 @@ const ManageActivitiesModal = ({
                                         </option>
                                       ))
                                     ) : (
-                                      // Default categories if none provided
                                       <>
                                         <option value="Career">Career</option>
                                         <option value="Backend">Backend</option>
@@ -383,7 +375,6 @@ const ManageActivitiesModal = ({
                               </div>
                             </div>
 
-                            {/* Actions */}
                             <div className="flex justify-end gap-2 mt-2">
                               <button
                                 type="button"
@@ -522,7 +513,6 @@ const ManageActivitiesModal = ({
           </AnimatePresence>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-2 border-t border-gray-700">
           <button
             type="button"
