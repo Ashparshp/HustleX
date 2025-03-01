@@ -719,7 +719,7 @@ const TimetablePage = () => {
               </ActivityButton>
               <motion.button
                 onClick={openCreateTimetableModal}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium ${
+                className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium ${
                   isDark
                     ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30"
                     : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
