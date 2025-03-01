@@ -21,6 +21,12 @@ const AddActivityModal = ({
     category: "Core",
   });
 
+  // Time input specific state
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [rawStartTime, setRawStartTime] = useState("");
+  const [rawEndTime, setRawEndTime] = useState("");
+
   // Load initial data when editing
   useEffect(() => {
     if (initialData) {
@@ -29,12 +35,25 @@ const AddActivityModal = ({
         time: initialData.time || "",
         category: initialData.category || "Core",
       });
+
+      // If time exists, split it into start and end times
+      if (initialData.time) {
+        const [start, end] = initialData.time.split("-");
+        setStartTime(start || "");
+        setEndTime(end || "");
+        setRawStartTime(start || "");
+        setRawEndTime(end || "");
+      }
     } else {
       setFormData({
         name: "",
         time: "",
         category: categories.length > 0 ? categories[0] : "Core",
       });
+      setStartTime("");
+      setEndTime("");
+      setRawStartTime("");
+      setRawEndTime("");
     }
   }, [initialData, categories]);
 
@@ -46,15 +65,162 @@ const AddActivityModal = ({
     }));
   };
 
-  const validateTime = (time) => {
-    // Check for format HH:MM-HH:MM where both times are valid
-    const timePattern =
-      /^([0-1][0-9]|2[0-3]):([0-5][0-9])-([0-1][0-9]|2[0-3]):([0-5][0-9])$/;
-    if (!timePattern.test(time)) {
-      return false;
+  // Handle time input changes for start time
+  const handleStartTimeChange = (e) => {
+    const rawValue = e.target.value;
+    setRawStartTime(rawValue);
+
+    // Allow empty input for better UX
+    if (!rawValue) {
+      setStartTime("");
+      setFormData((prev) => ({ ...prev, time: endTime ? `-${endTime}` : "" }));
+      return;
     }
 
-    // Further validation can be added here
+    // Only store the raw value while typing - don't format yet
+    setStartTime(rawValue);
+
+    // Update the combined time value with raw input
+    setFormData((prev) => ({
+      ...prev,
+      time: `${rawValue}${endTime ? `-${endTime}` : ""}`,
+    }));
+  };
+
+  // Handle time input changes for end time
+  const handleEndTimeChange = (e) => {
+    const rawValue = e.target.value;
+    setRawEndTime(rawValue);
+
+    // Allow empty input for better UX
+    if (!rawValue) {
+      setEndTime("");
+      setFormData((prev) => ({
+        ...prev,
+        time: startTime ? `${startTime}-` : "",
+      }));
+      return;
+    }
+
+    // Only store the raw value while typing - don't format yet
+    setEndTime(rawValue);
+
+    // Update the combined time value with raw input
+    setFormData((prev) => ({
+      ...prev,
+      time: `${startTime ? startTime : ""}${rawValue ? `-${rawValue}` : ""}`,
+    }));
+  };
+
+  // Format times when input loses focus
+  const handleTimeBlur = (field) => {
+    setTimeout(() => {
+      // Format the time when the user finishes typing
+      if (field === "start" && rawStartTime) {
+        const formattedTime = formatTimeInput(rawStartTime);
+        setStartTime(formattedTime);
+        setFormData((prev) => ({
+          ...prev,
+          time: `${formattedTime}${endTime ? `-${endTime}` : ""}`,
+        }));
+      } else if (field === "end" && rawEndTime) {
+        const formattedTime = formatTimeInput(rawEndTime);
+        setEndTime(formattedTime);
+        setFormData((prev) => ({
+          ...prev,
+          time: `${startTime ? startTime : ""}${
+            formattedTime ? `-${formattedTime}` : ""
+          }`,
+        }));
+      }
+    }, 200);
+  };
+
+  // Format time input to HH:MM format, handling various input patterns
+  const formatTimeInput = (input) => {
+    // Remove all non-digit characters
+    let digits = input.replace(/\D/g, "");
+
+    // Special case: handle inputs like "930" to mean "9:30" not "93:0"
+    if (digits.length === 3) {
+      // Interpret as 1 digit hour, 2 digit minute
+      const hours = digits.slice(0, 1).padStart(2, "0");
+      const minutes = digits.slice(1).padStart(2, "0");
+
+      // Validate hours and minutes
+      const hoursInt = parseInt(hours);
+      const minutesInt = parseInt(minutes);
+
+      if (hoursInt > 23) return "23:00";
+      if (minutesInt > 59) return `${hours}:59`;
+
+      return `${hours}:${minutes}`;
+    }
+
+    // Handle other common time formats
+    if (digits.length <= 1) {
+      // Single digit treated as hour (e.g., "9" -> "09:00")
+      const hours = digits.padStart(2, "0");
+      return `${hours}:00`;
+    } else if (digits.length === 2) {
+      // Two digits could be hour or minutes depending on value
+      const num = parseInt(digits);
+      if (num <= 23) {
+        // Likely an hour (e.g., "14" -> "14:00")
+        return `${digits}:00`;
+      } else if (num < 60) {
+        // Likely minutes (e.g., "45" -> "00:45")
+        return `00:${digits}`;
+      } else {
+        // Over 59, treat as invalid minutes
+        return "00:59";
+      }
+    } else if (digits.length === 4) {
+      // Four digits is standard HHMM format (e.g., "1430" -> "14:30")
+      const hours = digits.slice(0, 2);
+      const minutes = digits.slice(2, 4);
+
+      // Validate hours and minutes
+      const hoursInt = parseInt(hours);
+      const minutesInt = parseInt(minutes);
+
+      if (hoursInt > 23) return "23:00";
+      if (minutesInt > 59) return `${hours}:59`;
+
+      return `${hours}:${minutes}`;
+    } else {
+      // Truncate to hours and minutes if too long
+      const hours = digits.slice(0, 2);
+      const minutes = digits.slice(2, 4);
+
+      // Validate hours and minutes
+      const hoursInt = parseInt(hours);
+      const minutesInt = parseInt(minutes);
+
+      if (hoursInt > 23) return "23:00";
+      if (minutesInt > 59) return `${hours}:59`;
+
+      return `${hours}:${minutes}`;
+    }
+  };
+
+  // Try to intelligently interpret time input for validation
+  const validateTime = (timeStr) => {
+    if (!timeStr) return false;
+
+    // Check if we have both start and end times
+    const parts = timeStr.split("-");
+    if (parts.length !== 2) return false;
+
+    // Empty parts are not valid
+    if (!parts[0].trim() || !parts[1].trim()) return false;
+
+    const [start, end] = parts;
+
+    // Basic format check for each part
+    const timePattern = /^([0-1][0-9]|2[0-3]):([0-5][0-9])$/;
+    if (!timePattern.test(start) || !timePattern.test(end)) return false;
+
     return true;
   };
 
@@ -68,17 +234,65 @@ const AddActivityModal = ({
       return;
     }
 
-    if (!formData.time || !validateTime(formData.time)) {
-      setError("Please enter a valid time format (HH:MM-HH:MM)");
+    // Apply final formatting to any raw input
+    let finalStartTime = startTime;
+    let finalEndTime = endTime;
+
+    if (rawStartTime) {
+      finalStartTime = formatTimeInput(rawStartTime);
+    }
+
+    if (rawEndTime) {
+      finalEndTime = formatTimeInput(rawEndTime);
+    }
+
+    // Construct the final time string
+    const timeString = `${finalStartTime}-${finalEndTime}`;
+
+    // Validate the final time string
+    if (!validateTime(timeString)) {
+      setError("Please enter valid start and end times (e.g., 09:00-11:30)");
       return;
     }
 
     try {
       setError(null);
-      await onSubmit(formData);
+
+      // Submit with properly formatted time
+      const finalFormData = {
+        ...formData,
+        time: timeString,
+      };
+
+      await onSubmit(finalFormData);
     } catch (err) {
       setError(err.message || "Failed to save activity");
     }
+  };
+
+  // Time suggestions for quick selection (limited to 10 essential options)
+  const timeSlots = [
+    { label: "Morning (8-10)", start: "08:00", end: "10:00" },
+    { label: "Mid-Morning (10-12)", start: "10:00", end: "12:00" },
+    { label: "Lunch (12-1)", start: "12:00", end: "13:00" },
+    { label: "Afternoon (1-5)", start: "13:00", end: "17:00" },
+    { label: "Evening (5-8)", start: "17:00", end: "20:00" },
+    { label: "30 min", start: "09:00", end: "09:30" },
+    { label: "1 hour", start: "10:00", end: "11:00" },
+    { label: "Work AM", start: "09:00", end: "12:00" },
+    { label: "Work PM", start: "13:00", end: "17:00" },
+    { label: "Workday", start: "09:00", end: "17:00" },
+  ];
+
+  const applyTimeSlot = (start, end) => {
+    setStartTime(start);
+    setEndTime(end);
+    setRawStartTime(start);
+    setRawEndTime(end);
+    setFormData((prev) => ({
+      ...prev,
+      time: `${start}-${end}`,
+    }));
   };
 
   if (!isOpen) return null;
@@ -164,7 +378,7 @@ const AddActivityModal = ({
           </div>
         </div>
 
-        {/* Time */}
+        {/* Time - Enhanced UI */}
         <div>
           <label
             className={`block text-sm font-medium mb-2 ${
@@ -173,35 +387,110 @@ const AddActivityModal = ({
           >
             Time
           </label>
-          <div className="relative">
-            <Clock
-              className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
-                isDark ? "text-indigo-400" : "text-indigo-600"
-              }`}
-            />
-            <input
-              type="text"
-              name="time"
-              value={formData.time}
-              onChange={handleChange}
-              className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border ${
-                isDark
-                  ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500"
-                  : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
-              } focus:ring-2 focus:border-transparent ${
-                isDark ? "focus:ring-indigo-500/50" : "focus:ring-indigo-500/50"
-              }`}
-              placeholder="HH:MM-HH:MM"
-              required
-              disabled={isSubmitting}
-            />
+
+          {/* Time input with split start/end fields */}
+          <div className="flex items-center gap-3 mb-2">
+            <div className="relative flex-1">
+              <Clock
+                className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                  isDark ? "text-indigo-400" : "text-indigo-600"
+                }`}
+              />
+              <input
+                type="text"
+                value={startTime}
+                onChange={handleStartTimeChange}
+                onBlur={() => handleTimeBlur("start")}
+                className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border ${
+                  isDark
+                    ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                } focus:ring-2 focus:border-transparent ${
+                  isDark
+                    ? "focus:ring-indigo-500/50"
+                    : "focus:ring-indigo-500/50"
+                }`}
+                placeholder="Start (e.g., 9 or 9:30)"
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <span className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
+              to
+            </span>
+
+            <div className="relative flex-1">
+              <Clock
+                className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                  isDark ? "text-indigo-400" : "text-indigo-600"
+                }`}
+              />
+              <input
+                type="text"
+                value={endTime}
+                onChange={handleEndTimeChange}
+                onBlur={() => handleTimeBlur("end")}
+                className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border ${
+                  isDark
+                    ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                } focus:ring-2 focus:border-transparent ${
+                  isDark
+                    ? "focus:ring-indigo-500/50"
+                    : "focus:ring-indigo-500/50"
+                }`}
+                placeholder="End (e.g., 11 or 11:30)"
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
+
+          {/* Time slot quick selections */}
+          <div className="flex flex-wrap gap-2 mt-2 mb-1">
+            {timeSlots.map((slot, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => applyTimeSlot(slot.start, slot.end)}
+                className={`text-xs px-2 py-1 rounded-full border transition-colors ${
+                  isDark
+                    ? "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
+                    : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                {slot.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                // Set custom time slots for current time rounded to nearest hour
+                const now = new Date();
+                const currentHour = now.getHours();
+                const nextHour = (currentHour + 1) % 24;
+
+                const startTime = `${String(currentHour).padStart(2, "0")}:00`;
+                const endTime = `${String(nextHour).padStart(2, "0")}:00`;
+
+                applyTimeSlot(startTime, endTime);
+              }}
+              className={`text-xs px-2 py-1 rounded-full border transition-colors ${
+                isDark
+                  ? "bg-indigo-900/50 border-indigo-700/70 text-indigo-300 hover:bg-indigo-800/50"
+                  : "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
+              }`}
+            >
+              Current hour
+            </button>
+          </div>
+
           <p
             className={`mt-1 text-xs ${
               isDark ? "text-gray-400" : "text-gray-500"
             }`}
           >
-            Format: 24-hour time (e.g., 09:00-11:30)
+            Format: 24-hour time (e.g., 09:00-11:30). You can type numbers like
+            "9" or "930" and they'll be formatted automatically.
           </p>
         </div>
 
