@@ -454,8 +454,8 @@ const AddActivityModal = ({
                 onClick={() => applyTimeSlot(slot.start, slot.end)}
                 className={`text-xs px-2 py-1 rounded-full border transition-colors ${
                   isDark
-                    ? "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
-                    : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                    ? "bg-indigo-900/40 border-indigo-700/60 text-indigo-300 hover:bg-indigo-800/60"
+                    : "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
                 }`}
               >
                 {slot.label}
@@ -476,22 +476,44 @@ const AddActivityModal = ({
               }}
               className={`text-xs px-2 py-1 rounded-full border transition-colors ${
                 isDark
-                  ? "bg-indigo-900/50 border-indigo-700/70 text-indigo-300 hover:bg-indigo-800/50"
-                  : "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
+                  ? "bg-emerald-900/40 border-emerald-700/60 text-emerald-300 hover:bg-emerald-800/60"
+                  : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
               }`}
             >
               Current hour
             </button>
           </div>
 
-          <p
+          <div
             className={`mt-1 text-xs ${
               isDark ? "text-gray-400" : "text-gray-500"
             }`}
           >
-            Format: 24-hour time (e.g., 09:00-11:30). You can type numbers like
-            "9" or "930" and they'll be formatted automatically.
-          </p>
+            <p className="flex items-center gap-1 mb-1">
+              <span
+                className={`inline-block w-1.5 h-1.5 rounded-full ${
+                  isDark ? "bg-indigo-400" : "bg-indigo-500"
+                }`}
+              ></span>
+              <span
+                className={`font-medium ${
+                  isDark ? "text-indigo-300" : "text-indigo-600"
+                }`}
+              >
+                Format:
+              </span>
+              24-hour time (HH:MM-HH:MM)
+            </p>
+            <p className="pl-3">
+              • Type just numbers like <span className="font-medium">9</span> →
+              09:00, <span className="font-medium">14</span> → 14:00
+            </p>
+            <p className="pl-3">
+              • Type hour & minutes together:{" "}
+              <span className="font-medium">930</span> → 09:30,{" "}
+              <span className="font-medium">1445</span> → 14:45
+            </p>
+          </div>
         </div>
 
         {/* Category */}
