@@ -473,7 +473,6 @@ const useTimetable = (timetableId = null) => {
     }
   }, [API_URL, getAuthHeaders, token]);
 
-  // Update default activities for a timetable with silent option
   const updateDefaultActivities = useCallback(
     async (activities, options = {}) => {
       const { silent = false } = options;

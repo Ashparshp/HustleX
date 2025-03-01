@@ -297,24 +297,17 @@ const TimetablePage = () => {
 
   const handleDeleteActivity = async (index) => {
     try {
-      setIsSubmitting(true);
-
       const updatedActivities = [...activities];
       updatedActivities.splice(index, 1);
 
       await updateDefaultActivities(updatedActivities, { silent: true });
-      setActivities(updatedActivities);
+      await fetchCurrentWeek();
 
-      toast.success("Deleted");
-
-      fetchCurrentWeek().catch((err) => {
-        console.error("Error refreshing week data:", err);
-      });
+      return updatedActivities;
     } catch (error) {
       console.error("Error deleting activity:", error);
       toast.error("Failed to delete activity");
-    } finally {
-      setIsSubmitting(false);
+      throw error;
     }
   };
 
@@ -1040,10 +1033,10 @@ const TimetablePage = () => {
             onClose={closeAllModals}
             activities={activities}
             onSubmit={handleManageActivities}
+            isSubmitting={isSubmitting}
             onDelete={handleDeleteActivity}
             categories={timetableCategories}
             isLoading={isCategoryLoading}
-            isSubmitting={isSubmitting}
           />
         </ModalWrapper>
 

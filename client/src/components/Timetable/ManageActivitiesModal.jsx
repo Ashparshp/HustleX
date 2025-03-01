@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
   X,
@@ -12,6 +12,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 import { useTheme } from "../../context/ThemeContext";
 
 const DragVertical = (props) => (
@@ -53,12 +54,14 @@ const ManageActivitiesModal = ({
   const [error, setError] = useState(null);
   const [managedActivities, setManagedActivities] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
+  const [localIsSubmitting, setLocalIsSubmitting] = useState(false);
   const [editFormData, setEditFormData] = useState({
     name: "",
     time: "",
     category: "",
   });
 
+  // Sync activities with local state
   useEffect(() => {
     if (activities && activities.length > 0) {
       setManagedActivities([...activities]);
@@ -118,13 +121,43 @@ const ManageActivitiesModal = ({
     setEditingIndex(null);
   };
 
-  const handleDeleteActivity = (index) => {
-    if (onDelete) {
-      onDelete(index);
-    } else {
+  const handleDeleteActivity = async (index) => {
+    // Prevent multiple submissions
+    if (localIsSubmitting || isSubmitting) return;
+
+    try {
+      // Set local submitting state
+      setLocalIsSubmitting(true);
+
+      // Create a copy of current activities
       const updatedActivities = [...managedActivities];
+
+      // Remove the activity at the specified index
       updatedActivities.splice(index, 1);
-      setManagedActivities(updatedActivities);
+
+      try {
+        // If onDelete prop is provided, use it
+        if (onDelete) {
+          await onDelete(index, { silent: true });
+        }
+
+        // Update local state
+        setManagedActivities(updatedActivities);
+
+        // Show success toast
+        toast.success("Deleted");
+      } catch (deleteError) {
+        console.error("Failed to delete activity:", deleteError);
+
+        // Show error toast
+        toast.error("Failed to delete activity");
+      } finally {
+        // Reset local submitting state
+        setLocalIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error("Unexpected error in handleDeleteActivity:", error);
+      setLocalIsSubmitting(false);
     }
   };
 
@@ -149,7 +182,7 @@ const ManageActivitiesModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || localIsSubmitting) return;
 
     try {
       setError(null);
@@ -493,10 +526,11 @@ const ManageActivitiesModal = ({
                             <button
                               type="button"
                               onClick={() => handleDeleteActivity(index)}
+                              disabled={localIsSubmitting || isSubmitting}
                               className={`p-1.5 rounded-lg ${
                                 isDark
-                                  ? "hover:bg-gray-700 text-red-400"
-                                  : "hover:bg-gray-100 text-red-600"
+                                  ? "hover:bg-gray-700 text-red-400 disabled:opacity-50"
+                                  : "hover:bg-gray-100 text-red-600 disabled:opacity-50"
                               }`}
                               title="Delete"
                             >
@@ -522,7 +556,7 @@ const ManageActivitiesModal = ({
                 ? "border-gray-700 text-gray-300 hover:bg-gray-800"
                 : "border-gray-300 text-gray-700 hover:bg-gray-100"
             }`}
-            disabled={isSubmitting}
+            disabled={isSubmitting || localIsSubmitting}
           >
             Cancel
           </button>
@@ -532,6 +566,7 @@ const ManageActivitiesModal = ({
             whileTap={{ scale: 0.98 }}
             disabled={
               isSubmitting ||
+              localIsSubmitting ||
               isLoading ||
               managedActivities.length === 0 ||
               editingIndex !== null
@@ -542,7 +577,7 @@ const ManageActivitiesModal = ({
                 : "bg-indigo-600 hover:bg-indigo-700 text-white"
             } disabled:opacity-50 disabled:cursor-not-allowed min-w-[150px] justify-center`}
           >
-            {isSubmitting ? (
+            {isSubmitting || localIsSubmitting ? (
               <span className="flex items-center">
                 <div className="animate-spin h-4 w-4 mr-2 border-b-2 border-white rounded-full"></div>
                 Saving...
