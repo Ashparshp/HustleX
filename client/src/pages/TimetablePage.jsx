@@ -759,7 +759,7 @@ const TimetablePage = () => {
               }`}
           >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-              <div className="flex items-center gap-4 w-full sm:w-auto">
+              <div className="flex items-center gap-4 w-full sm:w-auto justify-center sm:justify-start">
                 <div className="w-full sm:w-auto">
                   <button
                     onClick={() =>
@@ -890,7 +890,7 @@ const TimetablePage = () => {
                   currentWeek.overallCompletionRate !== undefined && (
                     <>
                       <div
-                        className={`sm:flex items-center gap-1.5 mr-3 ${
+                        className={`hidden sm:flex items-center gap-1.5 mr-3 ${
                           isDark ? "text-gray-300" : "text-gray-600"
                         }`}
                       >
