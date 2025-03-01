@@ -283,7 +283,7 @@ const TimetablePage = () => {
       const updatedActivities = [...activities, activityData];
       await updateDefaultActivities(updatedActivities, { silent: true });
 
-      toast.success("Activity added successfully");
+      toast.success("Added");
 
       fetchCurrentWeek().catch((err) => {
         console.error("Error refreshing week data:", err);
@@ -305,7 +305,7 @@ const TimetablePage = () => {
       await updateDefaultActivities(updatedActivities, { silent: true });
       setActivities(updatedActivities);
 
-      toast.success("Activities updated successfully");
+      toast.success("Updated");
 
       fetchCurrentWeek().catch((err) => {
         console.error("Error refreshing week data:", err);
@@ -328,7 +328,7 @@ const TimetablePage = () => {
       await updateDefaultActivities(updatedActivities, { silent: true });
       setActivities(updatedActivities);
 
-      toast.success("Activity deleted successfully");
+      toast.success("Deleted");
 
       fetchCurrentWeek().catch((err) => {
         console.error("Error refreshing week data:", err);
