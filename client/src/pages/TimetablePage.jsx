@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle,
@@ -17,7 +17,6 @@ import { useTheme } from "../context/ThemeContext";
 import useTimetable from "../hooks/useTimetable";
 import useCategories from "../hooks/useCategories";
 import { toast } from "react-hot-toast";
-import { debounce } from "lodash";
 
 import TimetableHistory from "../components/Timetable/TimetableHistory";
 import TimetableStats from "../components/Timetable/TimetableStats";
@@ -62,6 +61,8 @@ const TimetablePage = () => {
     fetchCategories,
   } = useCategories("timetable");
 
+  // Add a pageReady state to control the overall loading state
+  const [pageReady, setPageReady] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [editingActivity, setEditingActivity] = useState(null);
   const [stats, setStats] = useState(null);
@@ -74,25 +75,30 @@ const TimetablePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCategoryLoading, setIsCategoryLoading] = useState(true);
 
-  const debouncedRefresh = useCallback(
-    debounce(() => {
-      setRefreshKey((prev) => prev + 1);
-    }, 300),
-    []
-  );
+  // We'll completely replace the refresh mechanism with a more stable one
+  const stableRefreshRef = useRef(0);
 
+  // Use effect to set current timetable - with stabilization
   useEffect(() => {
     if (currentTimetable) {
-      setLocalCurrentTimetable(currentTimetable);
+      // Only update if it's actually different to prevent unnecessary re-renders
+      if (
+        !localCurrentTimetable ||
+        localCurrentTimetable.id !== currentTimetable.id
+      ) {
+        setLocalCurrentTimetable(currentTimetable);
+      }
     }
-  }, [currentTimetable]);
+  }, [currentTimetable, localCurrentTimetable]);
 
-  useEffect(() => {
-    if (localCurrentTimetable) {
-      debouncedRefresh();
-    }
-  }, [localCurrentTimetable?.id, debouncedRefresh]);
+  // Instead of using refreshKey for the whole component, we'll use a ref
+  // and only force updates when absolutely necessary
+  const forceUpdate = useCallback(() => {
+    stableRefreshRef.current += 1;
+    setRefreshKey(stableRefreshRef.current);
+  }, []);
 
+  // Extract activities from currentWeek
   useEffect(() => {
     if (currentWeek && currentWeek.activities) {
       const extractedActivities = currentWeek.activities.map((item) => ({
@@ -105,6 +111,7 @@ const TimetablePage = () => {
     }
   }, [currentWeek]);
 
+  // Fetch timetable categories
   useEffect(() => {
     if (currentTimetable) {
       setTimetableCategories([]);
@@ -122,6 +129,7 @@ const TimetablePage = () => {
     }
   }, [currentTimetable, getTimetableCategories]);
 
+  // Background refresh of categories
   useEffect(() => {
     const refreshCategoriesInBackground = async () => {
       if (!activeModal) {
@@ -140,6 +148,28 @@ const TimetablePage = () => {
 
     return () => clearInterval(intervalId);
   }, [getTimetableCategories, activeModal]);
+
+  // Enhanced effect to control the overall page loading state
+  useEffect(() => {
+    // Only mark page as ready when initial loading is done and we have
+    // either currentWeek data or have determined there's an error
+    if (!loading && (currentWeek || error)) {
+      // Keep track of component mounted state
+      let isMounted = true;
+
+      // Add a delay to ensure smooth transition and that data is fully processed
+      const timer = setTimeout(() => {
+        if (isMounted) {
+          setPageReady(true);
+        }
+      }, 300); // Increased from 200ms to 300ms for smoother transition
+
+      return () => {
+        isMounted = false;
+        clearTimeout(timer);
+      };
+    }
+  }, [loading, currentWeek, error]);
 
   const closeAllModals = () => {
     setActiveModal(null);
@@ -369,6 +399,8 @@ const TimetablePage = () => {
   const handleTimetableChange = async (id) => {
     try {
       setIsSubmitting(true);
+      // Temporarily set pageReady to false to show loading state
+      setPageReady(false);
 
       const selected = timetables.find((t) => t.id === id);
 
@@ -380,10 +412,14 @@ const TimetablePage = () => {
         }
         await fetchCurrentWeek(id);
         setShowTimetableSelector(false);
+
+        // Add slight delay before setting page ready again
+        setTimeout(() => setPageReady(true), 200);
       }
     } catch (error) {
       console.error("Error changing timetable:", error);
       toast.error("Failed to change timetable");
+      setPageReady(true); // Ensure page is set to ready even if there's an error
     } finally {
       setIsSubmitting(false);
     }
@@ -499,7 +535,9 @@ const TimetablePage = () => {
     );
   };
 
-  if (loading && !currentWeek) {
+  // Modified loading check - now we use the pageReady state
+  // to prevent flickering between skeleton and content
+  if (!pageReady) {
     return <SkeletonTimetable />;
   }
 
@@ -507,16 +545,22 @@ const TimetablePage = () => {
     return (
       <TimetableError
         error={error}
-        onRetry={() => fetchCurrentWeek()}
+        onRetry={() => {
+          setPageReady(false); // Show skeleton again
+          fetchCurrentWeek().finally(() => {
+            // Wait a moment before showing content again
+            setTimeout(() => setPageReady(true), 300);
+          });
+        }}
         retryText="Retry"
       />
     );
   }
 
+  // Ensure we don't unnecessarily recreate the section element
   return (
     <section
       className={`py-6 lg:px-3 relative ${isDark ? "bg-black" : "bg-white"}`}
-      key={refreshKey}
     >
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
@@ -596,20 +640,23 @@ const TimetablePage = () => {
           />
         )}
 
-        {/* Main Timetable Component */}
+        {/* Main Timetable Component - With stabilized rendering */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.4,
+            ease: "easeOut",
+          }}
           className="relative group"
-          key="timetable-container"
         >
           <div
             className={`relative rounded-xl p-5 backdrop-blur-sm border shadow-xl 
-            ${
-              isDark
-                ? "bg-indigo-950/20 border-gray-700"
-                : "bg-white border-gray-200"
-            }`}
+              ${
+                isDark
+                  ? "bg-indigo-950/20 border-gray-700"
+                  : "bg-white border-gray-200"
+              }`}
           >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -640,96 +687,103 @@ const TimetablePage = () => {
                     />
                   </button>
 
-                  {showTimetableSelector && (
-                    <div
-                      id="timetable-dropdown"
-                      className={`absolute mt-2 py-2 w-80 rounded-lg shadow-xl border z-50 ${
-                        isDark
-                          ? "bg-gray-900/95 border-gray-700 shadow-black/50"
-                          : "bg-white/95 border-gray-200 shadow-gray-200/70"
-                      }`}
-                    >
-                      <div
-                        className={`px-4 py-2.5 mb-1 border-b ${
-                          isDark ? "border-gray-800" : "border-gray-100"
+                  {/* Timetable Selector Dropdown */}
+                  <AnimatePresence>
+                    {showTimetableSelector && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        id="timetable-dropdown"
+                        className={`absolute mt-2 py-2 w-80 rounded-lg shadow-xl border z-50 ${
+                          isDark
+                            ? "bg-gray-900/95 border-gray-700 shadow-black/50"
+                            : "bg-white/95 border-gray-200 shadow-gray-200/70"
                         }`}
                       >
-                        <h3
-                          className={`font-medium ${
-                            isDark ? "text-gray-200" : "text-gray-700"
+                        <div
+                          className={`px-4 py-2.5 mb-1 border-b ${
+                            isDark ? "border-gray-800" : "border-gray-100"
                           }`}
                         >
-                          Your Timetables
-                        </h3>
-                      </div>
+                          <h3
+                            className={`font-medium ${
+                              isDark ? "text-gray-200" : "text-gray-700"
+                            }`}
+                          >
+                            Your Timetables
+                          </h3>
+                        </div>
 
-                      <div className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
-                        {timetables && timetables.length > 0 ? (
-                          timetables.map((timetable) => (
-                            <button
-                              key={timetable.id}
-                              onClick={() => {
-                                handleTimetableChange(timetable.id);
-                              }}
-                              className={`w-full px-4 py-3 text-left transition-colors ${
-                                isDark
-                                  ? "hover:bg-gray-800"
-                                  : "hover:bg-gray-50"
-                              } flex justify-between items-center ${
-                                timetable.isActive
-                                  ? isDark
-                                    ? "bg-indigo-900/30 text-indigo-200"
-                                    : "bg-indigo-50 text-indigo-700"
-                                  : isDark
-                                  ? "text-gray-300"
-                                  : "text-gray-700"
-                              }`}
-                              disabled={isSubmitting}
-                            >
-                              <span className="truncate font-medium">
-                                {timetable.name}
-                              </span>
-                              {timetable.isActive && (
-                                <CheckCircle
-                                  className={`w-4 h-4 flex-shrink-0 ml-2 ${
-                                    isDark
-                                      ? "text-indigo-400"
-                                      : "text-indigo-600"
-                                  }`}
-                                />
-                              )}
-                            </button>
-                          ))
-                        ) : (
-                          <div className="px-4 py-3 text-center text-gray-500 italic text-sm">
-                            No timetables found
-                          </div>
-                        )}
-                      </div>
+                        <div className="max-h-60 overflow-y-auto py-1 scrollbar-thin">
+                          {timetables && timetables.length > 0 ? (
+                            timetables.map((timetable) => (
+                              <button
+                                key={timetable.id}
+                                onClick={() => {
+                                  handleTimetableChange(timetable.id);
+                                }}
+                                className={`w-full px-4 py-3 text-left transition-colors ${
+                                  isDark
+                                    ? "hover:bg-gray-800"
+                                    : "hover:bg-gray-50"
+                                } flex justify-between items-center ${
+                                  timetable.isActive
+                                    ? isDark
+                                      ? "bg-indigo-900/30 text-indigo-200"
+                                      : "bg-indigo-50 text-indigo-700"
+                                    : isDark
+                                    ? "text-gray-300"
+                                    : "text-gray-700"
+                                }`}
+                                disabled={isSubmitting}
+                              >
+                                <span className="truncate font-medium">
+                                  {timetable.name}
+                                </span>
+                                {timetable.isActive && (
+                                  <CheckCircle
+                                    className={`w-4 h-4 flex-shrink-0 ml-2 ${
+                                      isDark
+                                        ? "text-indigo-400"
+                                        : "text-indigo-600"
+                                    }`}
+                                  />
+                                )}
+                              </button>
+                            ))
+                          ) : (
+                            <div className="px-4 py-3 text-center text-gray-500 italic text-sm">
+                              No timetables found
+                            </div>
+                          )}
+                        </div>
 
-                      <div
-                        className={`border-t mt-1 pt-3 px-3 ${
-                          isDark ? "border-gray-800" : "border-gray-200"
-                        }`}
-                      >
-                        <button
-                          onClick={() => {
-                            openCreateTimetableModal();
-                            setShowTimetableSelector(false);
-                          }}
-                          className={`w-full px-3 py-2.5 rounded-lg text-center text-sm font-medium transition-colors flex items-center justify-center ${
-                            isDark
-                              ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/30"
-                              : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200"
+                        <div
+                          className={`border-t mt-1 pt-3 px-3 ${
+                            isDark ? "border-gray-800" : "border-gray-200"
                           }`}
-                          disabled={isSubmitting}
                         >
-                          <PlusCircle className="w-4 h-4 mr-2" />
-                          Create New Timetable
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                          <button
+                            onClick={() => {
+                              openCreateTimetableModal();
+                              setShowTimetableSelector(false);
+                            }}
+                            className={`w-full px-3 py-2.5 rounded-lg text-center text-sm font-medium transition-colors flex items-center justify-center ${
+                              isDark
+                                ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/30"
+                                : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200"
+                            }`}
+                            disabled={isSubmitting}
+                          >
+                            <PlusCircle className="w-4 h-4 mr-2" />
+                            Create New Timetable
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
               <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
@@ -751,9 +805,11 @@ const TimetablePage = () => {
                       <div className="flex items-center gap-2 mr-1">
                         <div
                           className={`relative h-8 rounded-xl overflow-hidden w-32 border shadow-sm
-                        ${
-                          isDark ? "border-indigo-500/30" : "border-indigo-200"
-                        }`}
+                          ${
+                            isDark
+                              ? "border-indigo-500/30"
+                              : "border-indigo-200"
+                          }`}
                         >
                           <div
                             className={`absolute inset-0 h-full bg-gradient-to-r ${

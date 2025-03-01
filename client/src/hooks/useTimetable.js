@@ -1,4 +1,4 @@
-// hooks/useTimetable.js
+// hooks/useTimetable.js - Fixed Version
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
@@ -42,7 +42,12 @@ const useTimetable = (timetableId = null) => {
     if (!token) return;
 
     try {
-      setLoading(true);
+      // Don't set loading to true here if we already have timetables
+      // This prevents UI flashing when refreshing timetables
+      if (timetables.length === 0) {
+        setLoading(true);
+      }
+
       const timestamp = new Date().getTime();
       const response = await fetch(`${API_URL}/api/timetables?t=${timestamp}`, {
         headers: getAuthHeaders(),
@@ -91,7 +96,14 @@ const useTimetable = (timetableId = null) => {
     } finally {
       setLoading(false);
     }
-  }, [API_URL, getAuthHeaders, timetableId, token, currentTimetable]);
+  }, [
+    API_URL,
+    getAuthHeaders,
+    timetableId,
+    token,
+    currentTimetable,
+    timetables.length,
+  ]);
 
   // Create a new timetable
   const createTimetable = useCallback(
@@ -216,8 +228,13 @@ const useTimetable = (timetableId = null) => {
       }
 
       try {
-        setLoading(true);
         updateInProgress.current = true;
+
+        // Don't set loading to true if it's a refresh of existing data
+        // This prevents UI flashing when refreshing current week
+        if (!currentWeek) {
+          setLoading(true);
+        }
 
         const timetableIdToUse =
           id || (currentTimetable ? currentTimetable.id : null);
@@ -266,7 +283,7 @@ const useTimetable = (timetableId = null) => {
         updateInProgress.current = false;
       }
     },
-    [API_URL, currentTimetable, getAuthHeaders, token]
+    [API_URL, currentTimetable, getAuthHeaders, token, currentWeek]
   );
 
   // Toggle activity status for a day
@@ -581,30 +598,38 @@ const useTimetable = (timetableId = null) => {
     };
   }, [checkWeekTransition, currentTimetable, fetchCurrentWeek, token]);
 
-  // Initial data load - FIXED to prevent infinite loops
+  // Initial data load - FIXED to prevent infinite loops and reduce flickering
   useEffect(() => {
     const loadInitialData = async () => {
       if (!token || initialLoadComplete.current) return;
 
       try {
         setLoading(true);
-        initialLoadComplete.current = true; // Mark as completed to prevent repeated calls
+        // Mark as completed immediately to prevent repeated calls
+        initialLoadComplete.current = true;
 
         // First fetch timetables
-        await fetchTimetables();
+        const timetablesData = await fetchTimetables();
 
         // Then, if we have a current timetable, fetch its current week
-        if (currentTimetable) {
+        if (currentTimetable || (timetablesData && timetablesData.length > 0)) {
           try {
-            await fetchCurrentWeek(currentTimetable.id);
+            const timetableToUse =
+              currentTimetable ||
+              timetablesData.find((t) => t.isActive) ||
+              timetablesData[0];
+
+            if (timetableToUse) {
+              await fetchCurrentWeek(timetableToUse.id);
+            }
           } catch (err) {
             console.error("Failed to load current week:", err);
-            // No need to retry here - that would be handled by user action
           }
         }
       } catch (err) {
         console.error("Failed to load initial data:", err);
       } finally {
+        // Set loading to false at the end
         setLoading(false);
       }
     };
@@ -612,16 +637,21 @@ const useTimetable = (timetableId = null) => {
     loadInitialData();
 
     // Only run when token changes or component mounts/unmounts
-  }, [token, fetchTimetables]);
+  }, [token, fetchTimetables, fetchCurrentWeek, currentTimetable]);
 
-  // Effect to fetch current week when timetable changes
+  // Effect to fetch current week when timetable changes - added condition to prevent redundant fetches
   useEffect(() => {
-    if (token && currentTimetable && initialLoadComplete.current) {
+    if (
+      token &&
+      currentTimetable &&
+      initialLoadComplete.current &&
+      !currentWeek
+    ) {
       fetchCurrentWeek(currentTimetable.id).catch((err) => {
         console.error("Failed to load data for new timetable:", err);
       });
     }
-  }, [currentTimetable?.id, fetchCurrentWeek, token]);
+  }, [currentTimetable?.id, fetchCurrentWeek, token, currentWeek]);
 
   return {
     timetables,

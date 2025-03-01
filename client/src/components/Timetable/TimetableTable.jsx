@@ -1,5 +1,5 @@
-// src/components/Timetable/TimetableTable.jsx
-import React, { useState, useCallback } from "react";
+// src/components/Timetable/TimetableTable.jsx - Optimized version
+import React, { useState, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, CheckCircle, XCircle, Undo } from "lucide-react";
 
@@ -102,7 +102,8 @@ const useToast = () => {
   return { toast, addToast, removeToast, undoLastAction };
 };
 
-const TimetableTable = ({
+// The base TimetableTable component (then memoized below)
+const TimetableTableBase = ({
   currentWeek,
   isDark,
   toggleActivityStatus,
@@ -210,6 +211,9 @@ const TimetableTable = ({
     [handleToggleActivityStatus]
   );
 
+  // Use key that won't change unless the week itself changes
+  const tableKey = currentWeek?.weekStartDate || "timetable";
+
   return (
     <div className="relative overflow-x-auto">
       {/* Toast Container with Undo Functionality */}
@@ -225,6 +229,7 @@ const TimetableTable = ({
       </AnimatePresence>
 
       <motion.table
+        key={tableKey}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -375,5 +380,7 @@ const TimetableTable = ({
     </div>
   );
 };
+
+const TimetableTable = memo(TimetableTableBase);
 
 export default TimetableTable;
