@@ -62,7 +62,6 @@ const TimetablePage = () => {
     fetchCategories,
   } = useCategories("timetable");
 
-  // Add a pageReady state to control the overall loading state
   const [pageReady, setPageReady] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [editingActivity, setEditingActivity] = useState(null);
@@ -76,23 +75,17 @@ const TimetablePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCategoryLoading, setIsCategoryLoading] = useState(true);
 
-  // We'll completely replace the refresh mechanism with a more stable one
   const stableRefreshRef = useRef(0);
 
-  // Enhanced effect to control the overall page loading state
   useEffect(() => {
-    // Only mark page as ready when initial loading is done and we have
-    // either currentWeek data or have determined there's an error
     if (!loading && (currentWeek || error)) {
-      // Keep track of component mounted state
       let isMounted = true;
 
-      // Add a delay to ensure smooth transition and that data is fully processed
       const timer = setTimeout(() => {
         if (isMounted) {
           setPageReady(true);
         }
-      }, 300); // Increased from 200ms to 300ms for smoother transition
+      }, 300);
 
       return () => {
         isMounted = false;
@@ -101,17 +94,13 @@ const TimetablePage = () => {
     }
   }, [loading, currentWeek, error]);
 
-  // Cleanup and re-synchronize state when timetables or the current timetable changes
   useEffect(() => {
     if (timetables.length > 0 && currentTimetable) {
-      // Find the matching timetable in the updated list
       const matchingTimetable = timetables.find(
         (t) => t.id === currentTimetable.id
       );
 
-      // If we have a matching timetable, ensure local state is in sync
       if (matchingTimetable) {
-        // Only update if it actually changed to prevent unnecessary re-renders
         if (
           !localCurrentTimetable ||
           localCurrentTimetable.id !== matchingTimetable.id
@@ -120,20 +109,16 @@ const TimetablePage = () => {
         }
       }
 
-      // Force update when timetables list changes
       forceUpdate();
     }
   }, [timetables, currentTimetable]);
 
-  // Add a separate useEffect to sync timetable names and data
   useEffect(() => {
     if (localCurrentTimetable && timetables.length > 0) {
-      // Find the updated version of the local timetable (it might have changed)
       const updatedTimetable = timetables.find(
         (t) => t.id === localCurrentTimetable.id
       );
 
-      // If it exists but has changed, update it
       if (
         updatedTimetable &&
         (updatedTimetable.name !== localCurrentTimetable.name ||
@@ -144,7 +129,6 @@ const TimetablePage = () => {
     }
   }, [timetables, localCurrentTimetable]);
 
-  // Extract activities from currentWeek
   useEffect(() => {
     if (currentWeek && currentWeek.activities) {
       const extractedActivities = currentWeek.activities.map((item) => ({
@@ -157,7 +141,6 @@ const TimetablePage = () => {
     }
   }, [currentWeek]);
 
-  // Fetch timetable categories
   useEffect(() => {
     if (currentTimetable) {
       setTimetableCategories([]);
@@ -175,7 +158,6 @@ const TimetablePage = () => {
     }
   }, [currentTimetable, getTimetableCategories]);
 
-  // Background refresh of categories
   useEffect(() => {
     const refreshCategoriesInBackground = async () => {
       if (!activeModal) {
@@ -195,26 +177,21 @@ const TimetablePage = () => {
     return () => clearInterval(intervalId);
   }, [getTimetableCategories, activeModal]);
 
-  // Use effect to set current timetable with stabilization
   const forceUpdate = useCallback(() => {
     stableRefreshRef.current += 1;
     setRefreshKey(stableRefreshRef.current);
   }, []);
 
-  // Add a refresh function to handle manual refreshes
   const refreshTimetableData = async () => {
     try {
       setPageReady(false);
 
-      // Refresh timetables list
       await fetchTimetables();
 
-      // Refresh current timetable data if we have one
       if (localCurrentTimetable) {
         await fetchCurrentWeek(localCurrentTimetable.id);
       }
 
-      // Force UI update
       forceUpdate();
 
       setTimeout(() => {
@@ -404,16 +381,12 @@ const TimetablePage = () => {
 
   const handleDeleteTimetable = async (id) => {
     try {
-      // Find the timetable in the current list
       const timetableToDelete = timetables.find((t) => t.id === id);
       if (timetableToDelete) {
-        // Set it for the delete modal
         setTimetableToDelete(timetableToDelete);
-        // Open the delete modal
         setActiveModal("deleteTimetable");
       } else {
         toast.error("Timetable not found");
-        // Refresh to synchronize UI with server
         refreshTimetableData();
       }
     } catch (error) {
@@ -425,7 +398,7 @@ const TimetablePage = () => {
   const confirmDeleteTimetable = async () => {
     try {
       setIsSubmitting(true);
-      setPageReady(false); // Show loading state
+      setPageReady(false);
 
       closeAllModals();
 
@@ -437,42 +410,32 @@ const TimetablePage = () => {
         localCurrentTimetable &&
         localCurrentTimetable.id === deletedTimetableId;
 
-      // Delete from server
       await deleteTimetable(deletedTimetableId, { silent: true });
 
-      // Fetch updated list of timetables
       const updatedTimetables = await fetchTimetables();
 
-      // Clear the timetable to delete
       setTimetableToDelete(null);
 
       if (isDeletingCurrentTimetable) {
         if (updatedTimetables.length > 0) {
-          // Find and set a new current timetable
           const newCurrentTimetable =
             updatedTimetables.find((t) => t.isActive) || updatedTimetables[0];
 
-          // Update state with new timetable
           setLocalCurrentTimetable(newCurrentTimetable);
 
-          // Load the new timetable's data
           await fetchCurrentWeek(newCurrentTimetable.id);
 
-          // Force refresh UI
           forceUpdate();
         } else {
-          // No timetables left
           setLocalCurrentTimetable(null);
           setCurrentWeek(null);
         }
       } else {
-        // Still refresh UI if we're not deleting current timetable
         forceUpdate();
       }
 
       toast.success("Timetable deleted successfully");
 
-      // Restore UI
       setTimeout(() => setPageReady(true), 200);
     } catch (error) {
       console.error("Error deleting timetable:", error);
@@ -486,34 +449,28 @@ const TimetablePage = () => {
   const handleTimetableChange = async (id) => {
     try {
       setIsSubmitting(true);
-      // Temporarily set pageReady to false to show loading state
       setPageReady(false);
 
       const selected = timetables.find((t) => t.id === id);
 
       if (selected) {
-        // First set the local timetable for immediate UI update
         setLocalCurrentTimetable(selected);
         setShowTimetableSelector(false);
 
-        // Then update backend if needed
         if (!selected.isActive) {
           await updateTimetable(id, { isActive: true });
         }
 
-        // Force refresh current week data
         const weekData = await fetchCurrentWeek(id);
 
-        // Force a UI update
         forceUpdate();
 
-        // Add slight delay before setting page ready again
         setTimeout(() => setPageReady(true), 200);
       }
     } catch (error) {
       console.error("Error changing timetable:", error);
       toast.error("Failed to change timetable");
-      setPageReady(true); // Ensure page is set to ready even if there's an error
+      setPageReady(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -629,8 +586,6 @@ const TimetablePage = () => {
     );
   };
 
-  // Modified loading check - now we use the pageReady state
-  // to prevent flickering between skeleton and content
   if (!pageReady) {
     return <SkeletonTimetable />;
   }
@@ -640,9 +595,8 @@ const TimetablePage = () => {
       <TimetableError
         error={error}
         onRetry={() => {
-          setPageReady(false); // Show skeleton again
+          setPageReady(false);
           fetchCurrentWeek().finally(() => {
-            // Wait a moment before showing content again
             setTimeout(() => setPageReady(true), 300);
           });
         }}
@@ -671,7 +625,6 @@ const TimetablePage = () => {
       />
 
       <div className="mx-auto px-4 relative z-10 sm:py-8">
-        {/* Header Section with Aligned Title and Buttons */}
         <div className="mb-8">
           <div className="flex justify-between items-center gap-4">
             <div className="flex items-center gap-4">
@@ -694,7 +647,6 @@ const TimetablePage = () => {
             </div>
 
             <div className="flex items-center gap-2 flex-wrap justify-end">
-              {/* Refresh button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -749,7 +701,6 @@ const TimetablePage = () => {
           />
         )}
 
-        {/* Main Timetable Component - With stabilized rendering */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -796,7 +747,6 @@ const TimetablePage = () => {
                     />
                   </button>
 
-                  {/* Timetable Selector Dropdown */}
                   <AnimatePresence>
                     {showTimetableSelector && (
                       <motion.div
@@ -1069,7 +1019,6 @@ const TimetablePage = () => {
           </div>
         </motion.div>
 
-        {/* Modals */}
         <ModalWrapper isOpen={activeModal === "add"} onClose={closeAllModals}>
           <AddActivityModal
             isOpen={activeModal === "add"}
