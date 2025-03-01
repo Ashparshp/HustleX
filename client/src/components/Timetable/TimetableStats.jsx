@@ -103,12 +103,12 @@ const TimetableStats = ({ stats, onClose }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-16 bg-black/50 backdrop-blur-sm"
     >
       <motion.div
         initial={{ scale: 0.95, y: 20 }}
         animate={{ scale: 1, y: 0 }}
-        className="w-full max-w-6xl mx-auto"
+        className="w-full max-w-6xl mx-auto my-2 sm:my-4"
       >
         <div
           className={`rounded-2xl overflow-hidden border backdrop-blur-sm ${
