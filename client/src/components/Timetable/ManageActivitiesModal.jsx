@@ -122,37 +122,25 @@ const ManageActivitiesModal = ({
   };
 
   const handleDeleteActivity = async (index) => {
-    // Prevent multiple submissions
     if (localIsSubmitting || isSubmitting) return;
 
     try {
-      // Set local submitting state
       setLocalIsSubmitting(true);
 
-      // Create a copy of current activities
       const updatedActivities = [...managedActivities];
-
-      // Remove the activity at the specified index
       updatedActivities.splice(index, 1);
 
       try {
-        // If onDelete prop is provided, use it
         if (onDelete) {
           await onDelete(index, { silent: true });
         }
 
-        // Update local state
         setManagedActivities(updatedActivities);
-
-        // Show success toast
         toast.success("Deleted");
       } catch (deleteError) {
         console.error("Failed to delete activity:", deleteError);
-
-        // Show error toast
         toast.error("Failed to delete activity");
       } finally {
-        // Reset local submitting state
         setLocalIsSubmitting(false);
       }
     } catch (error) {
