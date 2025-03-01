@@ -32,6 +32,53 @@ import TimetableError from "../components/Timetable/TimetableError";
 import ManageActivitiesModal from "../components/Timetable/ManageActivitiesModal";
 import DeleteTimetableModal from "../components/Timetable/DeleteTimetableModal";
 
+const EnhancedDateDisplay = ({ dateString, isDark }) => {
+  const date = new Date(dateString);
+
+  const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "short" });
+  const month = date.toLocaleDateString("en-US", { month: "short" });
+  const dayOfMonth = date.getDate();
+
+  const colors = isDark
+    ? {
+        background: "bg-indigo-900/30",
+        text: "text-indigo-200",
+        shadow: "shadow-indigo-900/40",
+        day: "text-indigo-300",
+        date: "text-white",
+      }
+    : {
+        background: "bg-indigo-100",
+        text: "text-indigo-800",
+        shadow: "shadow-indigo-200",
+        day: "text-indigo-600",
+        date: "text-gray-900",
+      };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={`inline-flex items-center space-x-2 ${colors.background} ${colors.text} px-3 py-1.5 rounded-lg ${colors.shadow} border border-opacity-20`}
+    >
+      <div className="flex flex-col items-center">
+        <span
+          className={`text-xs font-medium uppercase tracking-wider ${colors.day}`}
+        >
+          {dayOfWeek}
+        </span>
+        <span className={`text-lg font-bold font-['Inter'] ${colors.date}`}>
+          {dayOfMonth}
+        </span>
+        <span className={`text-xs uppercase tracking-wider ${colors.day}`}>
+          {month}
+        </span>
+      </div>
+    </motion.div>
+  );
+};
+
 const TimetablePage = () => {
   const { isDark } = useTheme();
   const {
@@ -843,15 +890,25 @@ const TimetablePage = () => {
                   currentWeek.overallCompletionRate !== undefined && (
                     <>
                       <div
-                        className={`hidden sm:flex items-center gap-1.5 mr-3 ${
+                        className={`sm:flex items-center gap-1.5 mr-3 ${
                           isDark ? "text-gray-300" : "text-gray-600"
                         }`}
                       >
-                        <Clock className="w-3.5 h-3.5" />
-                        <p className="text-sm font-medium">
-                          {formatDate(currentWeek.weekStartDate)} -{" "}
-                          {formatDate(currentWeek.weekEndDate)}
-                        </p>
+                        <EnhancedDateDisplay
+                          dateString={currentWeek.weekStartDate}
+                          isDark={isDark}
+                        />
+                        <span
+                          className={`${
+                            isDark ? "text-gray-400" : "text-gray-600"
+                          }`}
+                        >
+                          -
+                        </span>
+                        <EnhancedDateDisplay
+                          dateString={currentWeek.weekEndDate}
+                          isDark={isDark}
+                        />
                       </div>
 
                       <div className="flex items-center gap-2 mr-1">
