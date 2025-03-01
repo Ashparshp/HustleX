@@ -1,4 +1,4 @@
-// server/controllers/skills.js
+// server/controllers/skills.js - Updated with reordering functionality
 const Skill = require("../models/Skills");
 const Category = require("../models/Category");
 
@@ -26,7 +26,8 @@ exports.getSkills = async (req, res) => {
       query.status = status;
     }
 
-    const skills = await Skill.find(query).sort({ category: 1, name: 1 });
+    // Sort by orderIndex first, then by name as fallback
+    const skills = await Skill.find(query).sort({ category: 1, orderIndex: 1, name: 1 });
 
     // Group skills by category for more organized response
     const groupedSkills = skills.reduce((acc, skill) => {
@@ -63,6 +64,7 @@ exports.addSkill = async (req, res) => {
       description,
       resources,
       priority,
+      orderIndex
     } = req.body;
 
     if (!name || !category) {
@@ -86,6 +88,14 @@ exports.addSkill = async (req, res) => {
       });
     }
 
+    // Find the highest order index for this category
+    const highestOrderSkill = await Skill.findOne({ 
+      user: req.user.id,
+      category 
+    }).sort({ orderIndex: -1 });
+    
+    const nextOrderIndex = highestOrderSkill ? (highestOrderSkill.orderIndex + 1) : 0;
+
     // Create the skill
     const skill = new Skill({
       user: req.user.id,
@@ -96,6 +106,7 @@ exports.addSkill = async (req, res) => {
       description,
       resources,
       priority,
+      orderIndex: orderIndex !== undefined ? orderIndex : nextOrderIndex
     });
 
     // Set start date if status is in-progress
@@ -141,7 +152,8 @@ exports.updateSkill = async (req, res) => {
     }
 
     // Check for duplicate if name and category are being updated
-    if (updates.name && updates.category) {
+    if (updates.name && updates.category && 
+        (updates.name !== skill.name || updates.category !== skill.category)) {
       const existingSkill = await Skill.findOne({
         user: req.user.id,
         name: updates.name.trim(),
@@ -217,7 +229,21 @@ exports.deleteSkill = async (req, res) => {
       });
     }
 
+    // Get the category and orderIndex of the skill to be deleted
+    const category = skill.category;
+    const orderIndex = skill.orderIndex;
+
     await skill.deleteOne();
+
+    // Update the orderIndex of the remaining skills in the same category
+    await Skill.updateMany(
+      { 
+        user: req.user.id, 
+        category, 
+        orderIndex: { $gt: orderIndex } 
+      },
+      { $inc: { orderIndex: -1 } }
+    );
 
     res.json({
       success: true,
@@ -320,5 +346,54 @@ exports.getSkillStats = async (req, res) => {
     });
   } catch (error) {
     handleError(res, error, "Error getting skill statistics");
+  }
+};
+
+// @desc    Reorder skills
+// @route   POST /api/skills/reorder
+// @access  Private
+exports.reorderSkills = async (req, res) => {
+  try {
+    const { skills } = req.body;
+    
+    if (!skills || !Array.isArray(skills) || skills.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Skills array is required for reordering"
+      });
+    }
+    
+    // Process each skill update as a separate operation
+    const updatePromises = skills.map(async (skillData) => {
+      const { id, orderIndex } = skillData;
+      
+      if (!id || typeof orderIndex !== 'number') {
+        throw new Error('Each skill must have id and orderIndex');
+      }
+      
+      // Find skill and verify ownership
+      const skill = await Skill.findOne({
+        _id: id,
+        user: req.user.id
+      });
+      
+      if (!skill) {
+        throw new Error(`Skill not found: ${id}`);
+      }
+      
+      // Update the orderIndex
+      skill.orderIndex = orderIndex;
+      return skill.save();
+    });
+    
+    // Execute all updates
+    await Promise.all(updatePromises);
+    
+    res.json({
+      success: true,
+      message: "Skills reordered successfully"
+    });
+  } catch (error) {
+    handleError(res, error, "Error reordering skills");
   }
 };

@@ -1,15 +1,17 @@
 // src/components/Skills/SkillsGrid.jsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, BookOpen, ChevronDown, ChevronUp, ListOrdered } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import SkillCard from "./SkillCard";
 import EditSkillModal from "./EditSkillModal";
+import ManageSkillsModal from "./ManageSkillsModal";
 
 const SkillsGrid = ({ skills, onAddSkill, categories }) => {
   const { isDark } = useTheme();
   const [editingSkill, setEditingSkill] = useState(null);
   const [expandedCategories, setExpandedCategories] = useState({});
+  const [managingCategory, setManagingCategory] = useState(null);
 
   const handleEditSkill = (skill) => {
     setEditingSkill(skill);
@@ -17,6 +19,17 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
 
   const handleCloseEditModal = () => {
     setEditingSkill(null);
+  };
+
+  const handleManageSkills = (category, categorySkills) => {
+    setManagingCategory({
+      name: category,
+      skills: categorySkills
+    });
+  };
+
+  const handleCloseManageModal = () => {
+    setManagingCategory(null);
   };
 
   const toggleCategory = (category) => {
@@ -176,6 +189,24 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
               </div>
 
               <div className="ml-auto flex items-center gap-2">
+                {/* Add Manage Button */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleManageSkills(category, categorySkills);
+                  }}
+                  className={`p-2 rounded-lg transition-colors shadow-sm ${
+                    isDark
+                      ? "bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                      : "bg-purple-100/50 hover:bg-purple-100/70 text-purple-600 border border-purple-300/50"
+                  }`}
+                  title={`Manage ${category} skills`}
+                >
+                  <ListOrdered size={16} />
+                </motion.button>
+                
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -229,19 +260,32 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
                       animate="visible"
                       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                     >
-                      {categorySkills.map((skill) => (
-                        <motion.div
-                          key={skill.id || skill._id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                        >
-                          <SkillCard
-                            skill={skill}
-                            onEdit={handleEditSkill}
-                            categories={categories}
-                          />
-                        </motion.div>
-                      ))}
+                      {/* Sort skill cards by orderIndex with more robust handling */}
+                      {[...categorySkills]
+                        .sort((a, b) => {
+                          // If both have orderIndex, sort by it
+                          if (a.orderIndex !== undefined && b.orderIndex !== undefined) {
+                            return a.orderIndex - b.orderIndex;
+                          }
+                          // If only one has orderIndex, prioritize the one with it
+                          if (a.orderIndex !== undefined) return -1;
+                          if (b.orderIndex !== undefined) return 1;
+                          // Default sort by name if no orderIndex
+                          return a.name.localeCompare(b.name);
+                        })
+                        .map((skill) => (
+                          <motion.div
+                            key={skill.id || skill._id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                          >
+                            <SkillCard
+                              skill={skill}
+                              onEdit={handleEditSkill}
+                              categories={categories}
+                            />
+                          </motion.div>
+                        ))}
                     </motion.div>
                   </div>
                 </motion.div>
@@ -277,6 +321,19 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
               />
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Manage Skills Modal */}
+      <AnimatePresence>
+        {managingCategory && (
+          <ManageSkillsModal
+            isOpen={true}
+            onClose={handleCloseManageModal}
+            category={managingCategory.name}
+            categorySkills={managingCategory.skills}
+            onEditSkill={handleEditSkill}
+          />
         )}
       </AnimatePresence>
     </div>

@@ -7,7 +7,8 @@ const {
   updateSkill,
   deleteSkill,
   getSkillCategories,
-  getSkillStats
+  getSkillStats,
+  reorderSkills
 } = require("../controllers/skills");
 const { protect } = require('../middleware/auth');
 
@@ -26,5 +27,6 @@ router.route('/:id')
 // Additional routes
 router.get('/categories', getSkillCategories);
 router.get('/stats', getSkillStats);
+router.post('/reorder', reorderSkills);
 
 module.exports = router;

@@ -49,6 +49,10 @@ const skillSchema = new mongoose.Schema(
       type: String,
       enum: ["high", "medium", "low"],
       default: "medium"
+    },
+    orderIndex: {
+      type: Number,
+      default: 0
     }
   },
   { timestamps: true }

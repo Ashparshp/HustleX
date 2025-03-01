@@ -151,6 +151,78 @@ const useSkills = () => {
     }
   }, [isAuthenticated]);
 
+  // Update multiple skills at once (for reordering)
+  const updateMultipleSkills = useCallback(
+    async (skillsData) => {
+      if (!isAuthenticated) return;
+
+      try {
+        // Use individual update calls instead of a batch endpoint
+        const updatePromises = skillsData.map(skill => 
+          updateSkill(skill.id || skill._id, skill)
+        );
+        
+        // Wait for all updates to complete
+        await Promise.all(updatePromises);
+        
+        // Refresh skills
+        await fetchSkills();
+        
+        toast.success("Skills updated successfully");
+        return { success: true };
+      } catch (err) {
+        console.error("Error updating multiple skills:", err);
+        toast.error(err.message || "Failed to update skills");
+        throw err;
+      }
+    },
+    [isAuthenticated, fetchSkills, updateSkill]
+  );
+
+  // Update skill ordering - use individual updates if reorder endpoint doesn't exist
+  const updateSkillOrder = useCallback(
+    async (category, orderedSkills) => {
+      if (!isAuthenticated) return;
+      
+      try {
+        // Try to use the reorder endpoint first
+        try {
+          // Create a skills array with only id and orderIndex
+          const skillsData = orderedSkills.map((skill, index) => ({
+            id: skill.id || skill._id,
+            orderIndex: index
+          }));
+          
+          // Call the reorder endpoint
+          await apiClient.post('/skills/reorder', { skills: skillsData });
+        } catch (err) {
+          // If the reorder endpoint fails, fall back to individual updates
+          console.log("Reorder endpoint failed, using individual updates instead");
+          
+          // Update each skill individually
+          for (let i = 0; i < orderedSkills.length; i++) {
+            const skill = orderedSkills[i];
+            await updateSkill(skill.id || skill._id, {
+              orderIndex: i,
+              name: skill.name,
+              category: skill.category
+            });
+          }
+        }
+        
+        // Refresh skills to get the updated order
+        await fetchSkills();
+        
+        toast.success("Skills reordered successfully");
+      } catch (err) {
+        console.error("Error updating skill order:", err);
+        toast.error(err.message || "Failed to update skill order");
+        throw err;
+      }
+    },
+    [isAuthenticated, fetchSkills, updateSkill, apiClient]
+  );
+
   // Load initial data
   useEffect(() => {
     if (isAuthenticated) {
@@ -166,9 +238,11 @@ const useSkills = () => {
     fetchSkills,
     addSkill,
     updateSkill,
+    updateMultipleSkills,
     deleteSkill,
     getSkillCategories,
     getSkillStats,
+    updateSkillOrder
   };
 };
 
