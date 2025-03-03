@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Menu,
@@ -29,6 +29,9 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const userMenuRef = useRef(null);
+  const moreMenuRef = useRef(null);
+
   // Handle scroll event to add shadow on scroll
   useEffect(() => {
     const handleScroll = () => {
@@ -45,12 +48,20 @@ const Navbar = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       // Close user menu when clicking outside
-      if (showUserMenu && !event.target.closest(".user-menu-container")) {
+      if (
+        showUserMenu &&
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target)
+      ) {
         setShowUserMenu(false);
       }
 
       // Close more menu when clicking outside
-      if (showMoreMenu && !event.target.closest(".more-menu-container")) {
+      if (
+        showMoreMenu &&
+        moreMenuRef.current &&
+        !moreMenuRef.current.contains(event.target)
+      ) {
         setShowMoreMenu(false);
       }
     };
@@ -61,16 +72,37 @@ const Navbar = () => {
     };
   }, [showUserMenu, showMoreMenu]);
 
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Close all menus on Escape
+      if (event.key === "Escape") {
+        setShowUserMenu(false);
+        setShowMoreMenu(false);
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   const closeMenu = () => {
     setIsOpen(false);
     setShowMoreMenu(false);
   };
 
   const handleLogout = async () => {
-    await logout();
-    navigate("/login");
-    setShowUserMenu(false);
-    setIsOpen(false);
+    try {
+      await logout();
+      navigate("/login");
+      setShowUserMenu(false);
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const isActive = (path) => {
@@ -122,43 +154,56 @@ const Navbar = () => {
 
   // Theme specific styling with added shadow on scroll
   const navbarClass = isDark
-    ? `bg-gray-900/90 text-white border-gray-800 backdrop-blur-sm ${
+    ? `bg-gray-900/95 text-white border-gray-800 backdrop-blur-md ${
         scrolled ? "shadow-lg shadow-black/20" : ""
       }`
-    : `bg-white/90 text-gray-900 border-gray-200 backdrop-blur-sm ${
+    : `bg-white/95 text-gray-900 border-gray-200 backdrop-blur-md ${
         scrolled ? "shadow-lg shadow-black/5" : ""
       }`;
 
-  const linkClass = (active) =>
-    isDark
-      ? `${
-          active
-            ? "text-indigo-400 bg-indigo-500/10 font-medium"
-            : "text-gray-300 hover:text-indigo-400 hover:bg-indigo-500/5"
-        } transition duration-200 rounded-md flex items-center gap-2`
-      : `${
-          active
-            ? "text-indigo-600 bg-indigo-50 font-medium"
-            : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/50"
-        } transition duration-200 rounded-md flex items-center gap-2`;
+  const generateLinkClass = (active) => {
+    const baseClasses =
+      "transition-all duration-300 rounded-md flex items-center gap-2";
+
+    if (isDark) {
+      return active
+        ? `${baseClasses} text-indigo-300 bg-indigo-500/15 font-medium`
+        : `${baseClasses} text-gray-300 hover:text-indigo-300 hover:bg-indigo-500/10`;
+    } else {
+      return active
+        ? `${baseClasses} text-indigo-600 bg-indigo-50 font-medium`
+        : `${baseClasses} text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/70`;
+    }
+  };
+
+  const buttonClass = isDark
+    ? "transition-colors duration-300 rounded-full hover:bg-gray-800/80 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-1 focus:ring-offset-gray-900"
+    : "transition-colors duration-300 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-1 focus:ring-offset-white";
+
+  const dropdownMenuClass = isDark
+    ? "absolute mt-2 py-2 rounded-lg shadow-lg border border-gray-700 bg-gray-900 z-50 transform origin-top-right transition-all duration-200 ease-out"
+    : "absolute mt-2 py-2 rounded-lg shadow-lg border border-gray-200 bg-white z-50 transform origin-top-right transition-all duration-200 ease-out";
 
   return (
     <nav
       className={`sticky top-0 z-50 border-b transition-all duration-300 ${navbarClass}`}
+      role="navigation"
+      aria-label="Main Navigation"
     >
-      <div className="px-4 sm:px-6 lg:px-8">
+      <div className="px-4 sm:px-6 lg:px-8 mx-auto">
         <div className="flex justify-between h-14 md:h-16">
           {/* Logo and brand */}
           <div className="flex items-center">
             <Link
               to={isAuthenticated ? "/working-hours" : "/login"}
-              className="flex-shrink-0 flex items-center"
+              className="flex-shrink-0 flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500/50 rounded-md"
+              aria-label="Hustle X Homepage"
             >
               {/* SVG Logo */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 300 80"
-                className="h-10 w-auto"
+                className="h-9 w-auto transition-transform duration-300 hover:scale-105"
               >
                 {/* Background shapes */}
                 <g opacity="0.2">
@@ -194,7 +239,7 @@ const Navbar = () => {
                     r="8"
                     fill="none"
                     stroke="#4f46e5"
-                    stroke-width="0.8"
+                    strokeWidth="0.8"
                     opacity="0.4"
                   />
                 </g>
@@ -203,9 +248,9 @@ const Navbar = () => {
                 <text
                   x="80"
                   y="52"
-                  font-family="Arial, sans-serif"
-                  font-weight="700"
-                  font-size="36"
+                  fontFamily="Arial, sans-serif"
+                  fontWeight="700"
+                  fontSize="36"
                   fill={isDark ? "#ffffff" : "#4f46e5"}
                 >
                   Hustle
@@ -216,9 +261,9 @@ const Navbar = () => {
                   <text
                     x="190"
                     y="52"
-                    font-family="Arial, sans-serif"
-                    font-weight="700"
-                    font-size="36"
+                    fontFamily="Arial, sans-serif"
+                    fontWeight="700"
+                    fontSize="36"
                     fill="#4338ca"
                   >
                     X
@@ -232,7 +277,7 @@ const Navbar = () => {
                   x2="215"
                   y2="58"
                   stroke="#818cf8"
-                  stroke-width="1"
+                  strokeWidth="1"
                   opacity="0.3"
                 />
               </svg>
@@ -248,10 +293,11 @@ const Navbar = () => {
                   <div key={link.path}>
                     <Link
                       to={link.path}
-                      className={`px-2 lg:px-3 py-2 ${linkClass(
+                      className={`px-2 lg:px-3 py-2 ${generateLinkClass(
                         isActive(link.path)
                       )}`}
                       title={link.text}
+                      aria-current={isActive(link.path) ? "page" : undefined}
                     >
                       <span className="md:mr-1">{link.icon}</span>
                       <span className="hidden md:inline-block">
@@ -266,15 +312,15 @@ const Navbar = () => {
               secondaryNavLinks.some(
                 (link) => link.authRequired === isAuthenticated
               ) && (
-                <div className="relative more-menu-container md:block lg:hidden">
+                <div className="relative md:block lg:hidden" ref={moreMenuRef}>
                   <button
                     onClick={() => setShowMoreMenu(!showMoreMenu)}
-                    className={`px-2 py-2 rounded-md ${
-                      isDark
-                        ? "text-gray-300 hover:text-indigo-400 hover:bg-indigo-500/5"
-                        : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/50"
-                    } transition duration-200 flex items-center gap-1`}
+                    className={`px-2 py-2 rounded-md ${generateLinkClass(
+                      false
+                    )}`}
                     aria-label="More navigation options"
+                    aria-expanded={showMoreMenu}
+                    aria-haspopup="true"
                     title="More"
                   >
                     <MoreHorizontal size={18} />
@@ -282,11 +328,10 @@ const Navbar = () => {
 
                   {showMoreMenu && (
                     <div
-                      className={`absolute right-0 mt-2 w-48 py-2 rounded-lg shadow-lg border ${
-                        isDark
-                          ? "bg-gray-900 border-gray-700"
-                          : "bg-white border-gray-200"
-                      } z-50`}
+                      className={`${dropdownMenuClass} right-0 w-48`}
+                      role="menu"
+                      aria-orientation="vertical"
+                      aria-labelledby="more-menu-button"
                     >
                       {secondaryNavLinks
                         .filter((link) => link.authRequired === isAuthenticated)
@@ -294,13 +339,17 @@ const Navbar = () => {
                           <Link
                             key={link.path}
                             to={link.path}
-                            className={`block px-4 py-2 ${linkClass(
+                            className={`block px-4 py-2 ${generateLinkClass(
                               isActive(link.path)
                             )}`}
                             onClick={closeMenu}
+                            role="menuitem"
+                            aria-current={
+                              isActive(link.path) ? "page" : undefined
+                            }
                           >
                             {link.icon}
-                            <span>{link.text}</span>
+                            <span className="ml-2">{link.text}</span>
                           </Link>
                         ))}
                     </div>
@@ -317,55 +366,63 @@ const Navbar = () => {
                     <div key={link.path}>
                       <Link
                         to={link.path}
-                        className={`px-3 py-2 ${linkClass(
+                        className={`px-3 py-2 ${generateLinkClass(
                           isActive(link.path)
                         )}`}
+                        aria-current={isActive(link.path) ? "page" : undefined}
                       >
                         {link.icon}
-                        <span>{link.text}</span>
+                        <span className="ml-1">{link.text}</span>
                       </Link>
                     </div>
                   ))}
             </div>
           </div>
 
-          {/* Right side - theme toggle, notifications & user menu */}
+          {/* Right side - theme toggle & user menu */}
           <div className="flex items-center space-x-1 md:space-x-2">
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className={`p-2 rounded-full ${
-                isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"
-              } transition duration-200`}
-              aria-label="Toggle theme"
+              className={`p-2 ${buttonClass}`}
+              aria-label={
+                isDark ? "Switch to light mode" : "Switch to dark mode"
+              }
+              title={isDark ? "Light mode" : "Dark mode"}
             >
               {isDark ? (
-                <Sun size={20} className="text-yellow-300" />
+                <Sun size={18} className="text-yellow-300" />
               ) : (
-                <Moon size={20} className="text-indigo-600" />
+                <Moon size={18} className="text-indigo-600" />
               )}
             </button>
 
             {isAuthenticated ? (
               /* User menu (desktop) */
-              <div className="hidden md:relative md:block user-menu-container">
+              <div className="hidden md:relative md:block" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className={`flex items-center gap-2 p-1.5 rounded-full ${
                     isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"
-                  } transition duration-200`}
+                  } transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-1 ${
+                    isDark
+                      ? "focus:ring-offset-gray-900"
+                      : "focus:ring-offset-white"
+                  }`}
                   aria-label="User menu"
+                  aria-expanded={showUserMenu}
+                  aria-haspopup="true"
                 >
                   <div
-                    className={`h-8 w-8 rounded-full grid place-items-center ${
+                    className={`h-8 w-8 rounded-full grid place-items-center transition-all duration-300 ${
                       isDark
-                        ? "bg-indigo-500/20 border border-indigo-500/30"
-                        : "bg-indigo-100 border border-indigo-200/50"
-                    } transition-colors duration-300`}
+                        ? "bg-indigo-500/20 border border-indigo-500/30 hover:bg-indigo-500/30"
+                        : "bg-indigo-100 border border-indigo-200/50 hover:bg-indigo-200"
+                    }`}
                   >
                     <User
                       size={16}
-                      className={isDark ? "text-indigo-400" : "text-indigo-600"}
+                      className={isDark ? "text-indigo-300" : "text-indigo-600"}
                     />
                   </div>
                   <div className="hidden lg:block text-left">
@@ -387,7 +444,7 @@ const Navbar = () => {
                   <div>
                     <ChevronDown
                       size={16}
-                      className={`transition-transform duration-200 ${
+                      className={`transition-transform duration-300 ${
                         showUserMenu ? "rotate-180" : ""
                       } ${isDark ? "text-gray-400" : "text-gray-500"}`}
                     />
@@ -396,11 +453,10 @@ const Navbar = () => {
 
                 {showUserMenu && (
                   <div
-                    className={`absolute right-0 mt-2 w-56 py-2 rounded-lg shadow-lg border ${
-                      isDark
-                        ? "bg-gray-900 border-gray-700"
-                        : "bg-white border-gray-200"
-                    } z-50`}
+                    className={`${dropdownMenuClass} right-0 w-56`}
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="user-menu-button"
                   >
                     <div
                       className={`px-4 py-2 mb-1 border-b ${
@@ -423,7 +479,7 @@ const Navbar = () => {
                       </p>
                     </div>
 
-                    <div>
+                    <div role="none">
                       <Link
                         to="/profile"
                         className={`block px-4 py-2 text-sm ${
@@ -432,6 +488,7 @@ const Navbar = () => {
                             : "hover:bg-gray-50 text-gray-700"
                         } transition-colors duration-200`}
                         onClick={() => setShowUserMenu(false)}
+                        role="menuitem"
                       >
                         <div className="flex items-center gap-2">
                           <User size={16} />
@@ -444,22 +501,22 @@ const Navbar = () => {
                       className={`mt-1 pt-1 border-t ${
                         isDark ? "border-gray-800" : "border-gray-100"
                       }`}
+                      role="none"
                     >
-                      <div>
-                        <button
-                          onClick={handleLogout}
-                          className={`block w-full text-left px-4 py-2 text-sm ${
-                            isDark
-                              ? "hover:bg-red-900/20 text-red-400"
-                              : "hover:bg-red-50 text-red-600"
-                          } transition-colors duration-200`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <LogOut size={16} />
-                            <span>Sign out</span>
-                          </div>
-                        </button>
-                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className={`block w-full text-left px-4 py-2 text-sm ${
+                          isDark
+                            ? "hover:bg-red-900/20 text-red-400"
+                            : "hover:bg-red-50 text-red-600"
+                        } transition-colors duration-200`}
+                        role="menuitem"
+                      >
+                        <div className="flex items-center gap-2">
+                          <LogOut size={16} />
+                          <span>Sign out</span>
+                        </div>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -470,11 +527,11 @@ const Navbar = () => {
                 <div>
                   <Link
                     to="/login"
-                    className={`px-3 py-1.5 md:py-2 rounded-md text-sm font-medium ${
+                    className={`px-3 py-1.5 md:py-2 rounded-md text-sm font-medium transition-all duration-300 ${
                       isDark
-                        ? "text-indigo-400 hover:bg-indigo-900/20 border border-indigo-500/30"
-                        : "text-indigo-600 hover:bg-indigo-50 border border-indigo-200"
-                    } transition duration-200`}
+                        ? "text-indigo-300 hover:bg-indigo-900/30 border border-indigo-500/30 hover:border-indigo-500/50"
+                        : "text-indigo-600 hover:bg-indigo-50 border border-indigo-200 hover:border-indigo-300"
+                    }`}
                   >
                     Sign in
                   </Link>
@@ -482,11 +539,11 @@ const Navbar = () => {
                 <div>
                   <Link
                     to="/register"
-                    className={`px-3 py-1.5 md:py-2 rounded-md text-sm font-medium ${
+                    className={`px-3 py-1.5 md:py-2 rounded-md text-sm font-medium transition-all duration-300 ${
                       isDark
                         ? "bg-indigo-600 hover:bg-indigo-500 text-white"
                         : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                    } transition duration-200`}
+                    } hover:scale-105 transform`}
                   >
                     Sign up
                   </Link>
@@ -502,8 +559,9 @@ const Navbar = () => {
                   isDark
                     ? "text-gray-400 hover:bg-gray-800"
                     : "text-gray-700 hover:bg-gray-100"
-                } focus:outline-none transition duration-200`}
+                } focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-300`}
                 aria-expanded={isOpen ? "true" : "false"}
+                aria-controls="mobile-menu"
                 aria-label="Toggle mobile menu"
               >
                 <span className="sr-only">Open main menu</span>
@@ -519,13 +577,20 @@ const Navbar = () => {
       </div>
 
       {/* Mobile menu */}
-      {isOpen && (
-        <div className={`md:hidden ${isDark ? "bg-gray-900" : "bg-white"}`}>
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+        }`}
+        id="mobile-menu"
+      >
+        <div className={`${isDark ? "bg-gray-900" : "bg-white"} p-3`}>
           {/* User info block for mobile (when authenticated) */}
           {isAuthenticated && (
             <div
-              className={`px-4 py-4 border-b ${
-                isDark ? "border-gray-800" : "border-gray-100"
+              className={`px-4 py-4 mb-2 rounded-lg ${
+                isDark
+                  ? "bg-gray-800/50 border border-gray-700"
+                  : "bg-gray-50 border border-gray-200"
               }`}
             >
               <div className="flex items-center gap-3">
@@ -538,7 +603,7 @@ const Navbar = () => {
                 >
                   <User
                     size={18}
-                    className={isDark ? "text-indigo-400" : "text-indigo-600"}
+                    className={isDark ? "text-indigo-300" : "text-indigo-600"}
                   />
                 </div>
                 <div>
@@ -561,26 +626,30 @@ const Navbar = () => {
             </div>
           )}
 
-          <div className="px-3 pt-2 pb-3 space-y-1 sm:px-4">
+          <div className="space-y-1 px-2">
             {isAuthenticated ? (
               <>
                 {/* Combine primary and secondary nav links for mobile */}
-                {[...primaryNavLinks, ...secondaryNavLinks]
-                  .filter((link) => link.authRequired === isAuthenticated)
-                  .map((link) => (
-                    <div key={link.path}>
+                <div className="grid grid-cols-2 gap-2 pt-1 pb-2">
+                  {[...primaryNavLinks, ...secondaryNavLinks]
+                    .filter((link) => link.authRequired === isAuthenticated)
+                    .map((link) => (
                       <Link
+                        key={link.path}
                         to={link.path}
-                        className={`block px-3 py-2 ${linkClass(
+                        className={`px-3 py-2.5 rounded-lg ${generateLinkClass(
                           isActive(link.path)
                         )}`}
                         onClick={closeMenu}
+                        aria-current={isActive(link.path) ? "page" : undefined}
                       >
-                        {link.icon}
-                        <span>{link.text}</span>
+                        <div className="flex items-center">
+                          <span className="mr-2">{link.icon}</span>
+                          <span>{link.text}</span>
+                        </div>
                       </Link>
-                    </div>
-                  ))}
+                    ))}
+                </div>
 
                 <div
                   className={`my-2 border-t ${
@@ -591,13 +660,16 @@ const Navbar = () => {
                 <div>
                   <Link
                     to="/profile"
-                    className={`block px-3 py-2 ${linkClass(
+                    className={`block px-3 py-2.5 rounded-lg ${generateLinkClass(
                       isActive("/profile")
                     )}`}
                     onClick={closeMenu}
+                    aria-current={isActive("/profile") ? "page" : undefined}
                   >
-                    <User size={16} />
-                    <span>Profile</span>
+                    <div className="flex items-center">
+                      <User size={16} className="mr-2" />
+                      <span>Profile</span>
+                    </div>
                   </Link>
                 </div>
 
@@ -607,13 +679,13 @@ const Navbar = () => {
                   }`}
                 ></div>
 
-                <div>
+                <div className="pt-1 pb-3">
                   <button
                     onClick={handleLogout}
-                    className={`flex items-center gap-2 w-full text-left px-3 py-2 rounded-md ${
+                    className={`flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-lg ${
                       isDark
-                        ? "text-red-400 hover:bg-red-900/20"
-                        : "text-red-600 hover:bg-red-50"
+                        ? "text-red-400 bg-red-900/10 hover:bg-red-900/20 border border-red-900/20"
+                        : "text-red-600 bg-red-50/50 hover:bg-red-50 border border-red-200/50"
                     } transition-colors duration-200`}
                   >
                     <LogOut size={16} />
@@ -623,12 +695,12 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <div className="py-2">
+                <div className="pt-2 pb-1">
                   <Link
                     to="/login"
-                    className={`flex items-center justify-center py-2 px-4 rounded-md font-medium ${
+                    className={`flex items-center justify-center py-2.5 px-4 rounded-lg font-medium ${
                       isDark
-                        ? "text-indigo-400 border border-indigo-500/30 hover:bg-indigo-900/20"
+                        ? "text-indigo-300 border border-indigo-500/30 hover:bg-indigo-900/20"
                         : "text-indigo-600 border border-indigo-200 hover:bg-indigo-50"
                     } transition-colors duration-200`}
                     onClick={closeMenu}
@@ -636,10 +708,10 @@ const Navbar = () => {
                     Sign in
                   </Link>
                 </div>
-                <div className="py-2">
+                <div className="pt-1 pb-3">
                   <Link
                     to="/register"
-                    className={`flex items-center justify-center py-2 px-4 rounded-md font-medium ${
+                    className={`flex items-center justify-center py-2.5 px-4 rounded-lg font-medium ${
                       isDark
                         ? "bg-indigo-600 hover:bg-indigo-500 text-white"
                         : "bg-indigo-600 hover:bg-indigo-700 text-white"
@@ -653,7 +725,7 @@ const Navbar = () => {
             )}
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };
