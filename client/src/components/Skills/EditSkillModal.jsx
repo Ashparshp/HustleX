@@ -300,7 +300,9 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
         >
           {/* Header with improved styling */}
           <div className="flex justify-between items-center mb-4 sm:mb-6 sticky top-0 z-10 backdrop-blur-md bg-opacity-90 pb-1 sm:pb-2 -mx-3 sm:-mx-5 px-3 sm:px-6 pt-1 sm:pt-2">
-            <h2 className={`text-xl sm:text-2xl font-bold ${headingClass} truncate`}>
+            <h2
+              className={`text-xl sm:text-2xl font-bold ${headingClass} truncate`}
+            >
               Edit Skill: {skill?.name}
             </h2>
             <motion.button
@@ -635,7 +637,9 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                     {isSubmitting ? (
                       <div className="flex items-center justify-center">
                         <LoadingSpinner size="sm" />
-                        <span className="ml-2 text-sm sm:text-base">Saving...</span>
+                        <span className="ml-2 text-sm sm:text-base">
+                          Saving...
+                        </span>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center">
@@ -645,7 +649,7 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                     )}
                   </motion.button>
                 </div>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.98 }}

@@ -573,33 +573,27 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
         })}
       </div>
 
-      {/* Edit Modal with improved backdrop */}
+      {/* Edit Modal with improved animation */}
       <AnimatePresence>
         {editingSkill && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.3 }}
             className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
           >
             <div
               className="fixed inset-0 bg-black/40 backdrop-blur-sm"
               onClick={handleCloseEditModal}
             ></div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative z-10 w-full max-w-xl"
-            >
+            <div className="relative z-10 w-full max-w-xl">
               <EditSkillModal
                 skill={editingSkill}
                 onClose={handleCloseEditModal}
                 categories={categories}
               />
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
