@@ -59,20 +59,27 @@ const ManageSkillsModal = ({
       const orderedSkills = [...categorySkills].map((skill, index) => ({
         ...skill,
         // Ensure orderIndex exists, using the existing one or creating a new one
-        orderIndex: typeof skill.orderIndex === 'number' ? skill.orderIndex : index
+        orderIndex:
+          typeof skill.orderIndex === "number" ? skill.orderIndex : index,
       }));
-      
+
       // Sort by orderIndex if available
       orderedSkills.sort((a, b) => {
-        if (typeof a.orderIndex === 'number' && typeof b.orderIndex === 'number') {
+        if (
+          typeof a.orderIndex === "number" &&
+          typeof b.orderIndex === "number"
+        ) {
           return a.orderIndex - b.orderIndex;
         }
-        if (typeof a.orderIndex === 'number') return -1;
-        if (typeof b.orderIndex === 'number') return 1;
+        if (typeof a.orderIndex === "number") return -1;
+        if (typeof b.orderIndex === "number") return 1;
         return 0;
       });
-      
-      console.log('Initial ordered skills:', orderedSkills.map(s => ({name: s.name, orderIndex: s.orderIndex})));
+
+      console.log(
+        "Initial ordered skills:",
+        orderedSkills.map((s) => ({ name: s.name, orderIndex: s.orderIndex }))
+      );
       setManagedSkills(orderedSkills);
     } else {
       setManagedSkills([]);
@@ -130,7 +137,10 @@ const ManageSkillsModal = ({
       skill.orderIndex = Number(idx);
     });
 
-    console.log('Updated order after move:', updatedSkills.map(s => ({name: s.name, orderIndex: s.orderIndex})));
+    console.log(
+      "Updated order after move:",
+      updatedSkills.map((s) => ({ name: s.name, orderIndex: s.orderIndex }))
+    );
     setManagedSkills(updatedSkills);
   };
 
@@ -156,17 +166,17 @@ const ManageSkillsModal = ({
     setIsDeleting(true);
     try {
       await deleteSkill(skillToDelete.id || skillToDelete._id);
-      
+
       // Remove from local state
       const updatedSkills = managedSkills.filter(
-        s => (s.id || s._id) !== (skillToDelete.id || skillToDelete._id)
+        (s) => (s.id || s._id) !== (skillToDelete.id || skillToDelete._id)
       );
-      
+
       // Update order indices
       updatedSkills.forEach((skill, idx) => {
         skill.orderIndex = idx;
       });
-      
+
       setManagedSkills(updatedSkills);
       setSkillToDelete(null);
     } catch (error) {
@@ -181,7 +191,7 @@ const ManageSkillsModal = ({
   const handleSave = async () => {
     setIsSubmitting(true);
     setError(null);
-    
+
     try {
       // Use the updateSkillOrder function
       await updateSkillOrder(category, managedSkills);
@@ -222,7 +232,11 @@ const ManageSkillsModal = ({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex justify-between items-center mb-6 sticky top-0 z-10 backdrop-blur-md bg-opacity-90 pb-2 -mx-6 px-6 pt-2">
-            <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+            <h2
+              className={`text-2xl font-bold ${
+                isDark ? "text-white" : "text-gray-900"
+              }`}
+            >
               Manage {category} Skills
             </h2>
             <motion.button
@@ -274,9 +288,15 @@ const ManageSkillsModal = ({
                     // Update order indices
                     const updatedSkills = newOrder.map((skill, idx) => ({
                       ...skill,
-                      orderIndex: Number(idx)
+                      orderIndex: Number(idx),
                     }));
-                    console.log('Reordered skills:', updatedSkills.map(s => ({name: s.name, orderIndex: s.orderIndex})));
+                    console.log(
+                      "Reordered skills:",
+                      updatedSkills.map((s) => ({
+                        name: s.name,
+                        orderIndex: s.orderIndex,
+                      }))
+                    );
                     setManagedSkills(updatedSkills);
                   }}
                   className="space-y-3"
@@ -332,7 +352,7 @@ const ManageSkillsModal = ({
                                     {skill.category}
                                   </span>
                                 </div>
-                                <div 
+                                <div
                                   className={`text-xs px-2 py-0.5 rounded-md ${
                                     isDark ? "bg-gray-700" : "bg-gray-100"
                                   } ${getStatusColor(skill.status)}`}
@@ -341,10 +361,14 @@ const ManageSkillsModal = ({
                                 </div>
                                 <div className="flex items-center">
                                   <Flag
-                                    className={`w-3.5 h-3.5 mr-1 ${getPriorityColor(skill.priority)}`}
+                                    className={`w-3.5 h-3.5 mr-1 ${getPriorityColor(
+                                      skill.priority
+                                    )}`}
                                   />
                                   <span
-                                    className={`text-xs ${getPriorityColor(skill.priority)}`}
+                                    className={`text-xs ${getPriorityColor(
+                                      skill.priority
+                                    )}`}
                                   >
                                     {skill.priority}
                                   </span>
