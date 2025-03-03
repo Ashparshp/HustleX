@@ -154,7 +154,7 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
 
   // Modal animation variants
   const modalVariants = {
-    hidden: { opacity: 0, y: 50, scale: 0.95 },
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
@@ -163,7 +163,7 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
     },
     exit: {
       opacity: 0,
-      y: 50,
+      y: 20,
       scale: 0.95,
       transition: { duration: 0.2, ease: "easeIn" },
     },
@@ -203,7 +203,7 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
     }
   };
 
-  // Styling classes based on theme
+  // Styling classes based on theme with reduced sizes for desktop
   const modalBgClass = isDark
     ? "bg-black bg-gradient-to-br from-indigo-900/20 to-blue-900/10"
     : "bg-white bg-gradient-to-br from-indigo-100/50 to-blue-100/30";
@@ -212,61 +212,63 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
   const primaryTextClass = isDark ? "text-indigo-400" : "text-indigo-600";
   const secondaryTextClass = isDark ? "text-gray-400" : "text-gray-600";
 
-  const inputClass = `w-full px-2 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg ${
+  // Reduced sizes for inputs and form elements on desktop
+  const inputClass = `w-full px-2 py-1.5 text-sm rounded-md ${
     isDark
       ? "bg-indigo-500/10 border-indigo-500/30 text-white placeholder-indigo-300/50 focus:border-indigo-400"
       : "bg-indigo-100/50 border-indigo-300/50 text-gray-900 placeholder-indigo-400/50 focus:border-indigo-500"
-  } border focus:outline-none focus:ring-2 focus:ring-opacity-30 ${
+  } border focus:outline-none focus:ring-1 focus:ring-opacity-30 ${
     isDark ? "focus:ring-indigo-500/30" : "focus:ring-indigo-500/40"
   } transition-all duration-200`;
 
-  const selectClass = `w-full px-2 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg appearance-none ${
+  const selectClass = `w-full px-2 py-1.5 text-sm rounded-md appearance-none ${
     isDark
       ? "bg-indigo-500/10 border-indigo-500/30 text-white focus:border-indigo-400"
       : "bg-indigo-100/50 border-indigo-300/50 text-gray-900 focus:border-indigo-500"
-  } border focus:outline-none focus:ring-2 focus:ring-opacity-30 ${
+  } border focus:outline-none focus:ring-1 focus:ring-opacity-30 ${
     isDark ? "focus:ring-indigo-500/30" : "focus:ring-indigo-500/40"
   } transition-all duration-200`;
 
-  const primaryButtonClass = `px-3 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base rounded-lg font-medium ${
+  // Reduced button sizes
+  const primaryButtonClass = `px-3 py-1.5 text-xs rounded-md font-medium ${
     isDark
       ? "bg-indigo-500/30 hover:bg-indigo-500/40 text-indigo-300 focus:ring-indigo-500/30"
       : "bg-indigo-100/70 hover:bg-indigo-200/70 text-indigo-600 focus:ring-indigo-400/30"
-  } focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-200 transform hover:scale-105 ${
+  } focus:outline-none focus:ring-1 focus:ring-opacity-50 transition-all duration-200 transform hover:scale-105 ${
     isSubmitting ? "opacity-70 cursor-not-allowed" : ""
   } backdrop-blur-sm border ${
     isDark ? "border-indigo-500/20" : "border-indigo-300/30"
   }`;
 
-  const secondaryButtonClass = `px-3 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base rounded-lg font-medium ${
+  const secondaryButtonClass = `px-3 py-1.5 text-xs rounded-md font-medium ${
     isDark
       ? "bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 focus:ring-gray-500/30"
       : "bg-gray-100/70 hover:bg-gray-200/70 text-gray-700 focus:ring-gray-400/30"
-  } focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-200 transform hover:scale-105 backdrop-blur-sm border ${
+  } focus:outline-none focus:ring-1 focus:ring-opacity-50 transition-all duration-200 transform hover:scale-105 backdrop-blur-sm border ${
     isDark ? "border-gray-700/30" : "border-gray-200/50"
   }`;
 
-  const dangerButtonClass = `px-3 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base rounded-lg font-medium ${
+  const dangerButtonClass = `px-3 py-1.5 text-xs rounded-md font-medium ${
     isDark
       ? "bg-red-500/30 hover:bg-red-500/40 text-red-300 focus:ring-red-500/30"
       : "bg-red-100/70 hover:bg-red-200/70 text-red-600 focus:ring-red-400/30"
-  } focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-200 transform hover:scale-105 backdrop-blur-sm border ${
+  } focus:outline-none focus:ring-1 focus:ring-opacity-50 transition-all duration-200 transform hover:scale-105 backdrop-blur-sm border ${
     isDark ? "border-red-500/20" : "border-red-300/30"
   }`;
 
-  const iconButtonClass = `p-2 rounded-lg transition-all duration-200 transform hover:scale-105 ${
+  const iconButtonClass = `p-1 rounded-md transition-all duration-200 transform hover:scale-105 ${
     isDark
       ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 focus:ring-indigo-500/30"
       : "bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600 focus:ring-indigo-400/30"
-  } focus:outline-none focus:ring-2 focus:ring-opacity-50 backdrop-blur-sm border ${
+  } focus:outline-none focus:ring-1 focus:ring-opacity-50 backdrop-blur-sm border ${
     isDark ? "border-indigo-500/20" : "border-indigo-300/30"
   }`;
 
-  const labelClass = `block mb-1 sm:mb-2 text-xs sm:text-sm font-medium ${
+  const labelClass = `block mb-1 text-xs font-medium ${
     isDark ? "text-indigo-400" : "text-indigo-600"
   }`;
 
-  const sliderClass = `w-full h-2 rounded-full appearance-none cursor-pointer ${
+  const sliderClass = `w-full h-1.5 rounded-full appearance-none cursor-pointer ${
     isDark
       ? "bg-indigo-500/20 accent-indigo-500"
       : "bg-indigo-200/50 accent-indigo-600"
@@ -284,7 +286,7 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
         onClick={onClose}
       />
 
-      {/* Modal with animation and improved styling */}
+      {/* Modal with animation and improved sizing for desktop */}
       <motion.div
         initial="hidden"
         animate="visible"
@@ -293,39 +295,37 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
         className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-auto"
       >
         <div
-          className={`w-full sm:max-w-lg lg:max-w-xl p-3 sm:p-5 rounded-xl shadow-2xl ${modalBgClass} backdrop-blur-sm border ${
+          className={`w-full max-w-3xl p-3 rounded-lg shadow-2xl ${modalBgClass} backdrop-blur-sm border ${
             isDark ? "border-indigo-500/20" : "border-indigo-300/20"
-          } max-h-[90vh] overflow-y-auto my-2 sm:my-4`}
+          } max-h-[90vh] overflow-y-auto my-2`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header with improved styling */}
-          <div className="flex justify-between items-center mb-4 sm:mb-6 sticky top-0 z-10 backdrop-blur-md bg-opacity-90 pb-1 sm:pb-2 -mx-3 sm:-mx-5 px-3 sm:px-6 pt-1 sm:pt-2">
-            <h2
-              className={`text-xl sm:text-2xl font-bold ${headingClass} truncate`}
-            >
+          {/* Header with reduced padding and font size */}
+          <div className="flex justify-between items-center mb-3 sticky top-0 z-10 backdrop-blur-md bg-opacity-90 pb-1 -mx-3 px-3 pt-1">
+            <h2 className={`text-lg font-bold ${headingClass} truncate`}>
               Edit Skill: {skill?.name}
             </h2>
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               onClick={onClose}
-              className={`p-2 rounded-full ${
+              className={`p-1 rounded-full ${
                 isDark
                   ? "hover:bg-gray-800/50 text-gray-400"
                   : "hover:bg-gray-100/70 text-gray-500"
               } transition-all duration-200`}
               aria-label="Close"
             >
-              <X size={18} className="sm:w-5 sm:h-5" />
+              <X size={16} />
             </motion.button>
           </div>
 
-          {/* Error message with improved styling */}
+          {/* Error message with reduced padding */}
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`mb-5 p-3 rounded-lg text-sm font-medium ${
+              className={`mb-3 p-2 rounded-md text-xs font-medium ${
                 isDark
                   ? "bg-red-900/20 text-red-400 border border-red-800/30"
                   : "bg-red-100/80 text-red-700 border border-red-200"
@@ -335,9 +335,9 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
             </motion.div>
           )}
 
-          {/* Form with improved spacing and styling */}
+          {/* Form with reduced spacing */}
           <form onSubmit={handleSubmit}>
-            <div className="space-y-3 sm:space-y-5">
+            <div className="space-y-2">
               {/* Skill Name */}
               <div>
                 <label htmlFor="name" className={labelClass}>
@@ -355,7 +355,7 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                 />
               </div>
 
-              {/* Category with improved styling */}
+              {/* Category with smaller sizing */}
               <div>
                 <label htmlFor="category" className={labelClass}>
                   Category*
@@ -374,13 +374,13 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                       whileTap={{ scale: 0.95 }}
                       type="button"
                       onClick={handleAddCategory}
-                      className={`p-2 rounded-lg ${
+                      className={`p-1 rounded-md ${
                         isDark
                           ? "bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30"
                           : "bg-green-100/70 hover:bg-green-200/70 text-green-600 border border-green-300/50"
                       } transition-all duration-200`}
                     >
-                      <Check size={18} className="sm:w-5 sm:h-5" />
+                      <Check size={16} />
                     </motion.button>
                   </div>
                 ) : (
@@ -418,7 +418,7 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                       </select>
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                         <svg
-                          className={`w-3 h-3 sm:w-4 sm:h-4 ${secondaryTextClass}`}
+                          className={`w-3 h-3 ${secondaryTextClass}`}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -440,14 +440,14 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                       className={iconButtonClass}
                       title="Add New Category"
                     >
-                      <Plus size={18} className="sm:w-5 sm:h-5" />
+                      <Plus size={16} />
                     </motion.button>
                   </div>
                 )}
               </div>
 
-              {/* Grid layout for form fields on larger screens */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-5">
+              {/* 3-column grid layout for form fields on desktop */}
+              <div className="grid grid-cols-3 gap-2">
                 {/* Status with color indicators */}
                 <div>
                   <label htmlFor="status" className={labelClass}>
@@ -469,7 +469,7 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                       <svg
-                        className={`w-3 h-3 sm:w-4 sm:h-4 ${secondaryTextClass}`}
+                        className={`w-3 h-3 ${secondaryTextClass}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -506,7 +506,7 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                       <svg
-                        className={`w-3 h-3 sm:w-4 sm:h-4 ${secondaryTextClass}`}
+                        className={`w-3 h-3 ${secondaryTextClass}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -521,46 +521,48 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                     </div>
                   </div>
                 </div>
+
+                {/* Progress with smaller slider */}
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label htmlFor="progress" className={labelClass}>
+                      Progress
+                    </label>
+                    <span
+                      className={`text-xs font-medium ${
+                        isDark ? "text-indigo-300" : "text-indigo-600"
+                      }`}
+                    >
+                      {formData.progress}%
+                    </span>
+                  </div>
+                  <input
+                    id="progress"
+                    name="progress"
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={formData.progress}
+                    onChange={handleChange}
+                    className={sliderClass}
+                  />
+                  <div className="w-full flex justify-between mt-1">
+                    <span className={`text-xs ${secondaryTextClass}`}>0%</span>
+                    <span className={`text-xs ${secondaryTextClass}`}>
+                      100%
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              {/* Progress with improved slider */}
-              <div>
-                <div className="flex justify-between items-center mb-1 sm:mb-2">
-                  <label htmlFor="progress" className={labelClass}>
-                    Progress
-                  </label>
-                  <span
-                    className={`text-xs sm:text-sm font-medium ${
-                      isDark ? "text-indigo-300" : "text-indigo-600"
-                    }`}
-                  >
-                    {formData.progress}%
-                  </span>
-                </div>
-                <input
-                  id="progress"
-                  name="progress"
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={formData.progress}
-                  onChange={handleChange}
-                  className={sliderClass}
-                />
-                <div className="w-full flex justify-between mt-1">
-                  <span className={`text-xs ${secondaryTextClass}`}>0%</span>
-                  <span className={`text-xs ${secondaryTextClass}`}>100%</span>
-                </div>
-              </div>
-
-              {/* Dates with improved styling */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+              {/* Dates with 2-column layout */}
+              <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label htmlFor="startDate" className={labelClass}>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
                       <Calendar
-                        size={14}
-                        className={`sm:w-4 sm:h-4 ${
+                        size={12}
+                        className={`${
                           isDark ? "text-indigo-300" : "text-indigo-500"
                         }`}
                       />
@@ -579,10 +581,10 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
 
                 <div>
                   <label htmlFor="completionDate" className={labelClass}>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
                       <Calendar
-                        size={14}
-                        className={`sm:w-4 sm:h-4 ${
+                        size={12}
+                        className={`${
                           isDark ? "text-indigo-300" : "text-indigo-500"
                         }`}
                       />
@@ -600,7 +602,7 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                 </div>
               </div>
 
-              {/* Description with improved styling */}
+              {/* Description with smaller height */}
               <div>
                 <label htmlFor="description" className={labelClass}>
                   Description
@@ -611,19 +613,32 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Brief description of the skill"
-                  className={`${inputClass} h-20 sm:h-24 resize-none`}
+                  className={`${inputClass} h-16 resize-none`}
                 />
               </div>
 
-              {/* Form Actions with improved buttons for mobile */}
-              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-4 sm:mt-6 sticky bottom-0 pb-2 pt-3 sm:pt-4 -mx-3 sm:-mx-5 px-3 sm:px-6 backdrop-blur-md bg-opacity-90">
-                <div className="flex space-x-3 sm:order-2">
+              {/* Form Actions with improved layout for desktop */}
+              <div className="flex justify-between gap-2 mt-3 sticky bottom-0 pb-2 pt-2 -mx-3 px-3 backdrop-blur-md bg-opacity-90">
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={handleDeleteClick}
+                  className={dangerButtonClass}
+                >
+                  <div className="flex items-center justify-center">
+                    <Trash2 size={14} className="mr-1" />
+                    <span className="text-xs">Delete</span>
+                  </div>
+                </motion.button>
+
+                <div className="flex space-x-2">
                   <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={onClose}
-                    className={`flex-1 sm:flex-none ${secondaryButtonClass}`}
+                    className={secondaryButtonClass}
                   >
                     Cancel
                   </motion.button>
@@ -631,37 +646,22 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                     whileHover={isSubmitting ? {} : { scale: 1.03 }}
                     whileTap={isSubmitting ? {} : { scale: 0.98 }}
                     type="submit"
-                    className={`flex-1 sm:flex-none ${primaryButtonClass}`}
+                    className={primaryButtonClass}
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
                       <div className="flex items-center justify-center">
-                        <LoadingSpinner size="sm" />
-                        <span className="ml-2 text-sm sm:text-base">
-                          Saving...
-                        </span>
+                        <LoadingSpinner size="xs" />
+                        <span className="ml-1 text-xs">Saving...</span>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center">
-                        <Save size={16} className="mr-1 sm:mr-2" />
-                        <span className="text-sm sm:text-base">Save</span>
+                        <Save size={14} className="mr-1" />
+                        <span className="text-xs">Save</span>
                       </div>
                     )}
                   </motion.button>
                 </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="button"
-                  onClick={handleDeleteClick}
-                  className={`sm:w-auto ${dangerButtonClass}`}
-                >
-                  <div className="flex items-center justify-center">
-                    <Trash2 size={16} className="mr-1 sm:mr-2" />
-                    <span className="text-sm sm:text-base">Delete</span>
-                  </div>
-                </motion.button>
               </div>
             </div>
           </form>
