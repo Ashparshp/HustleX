@@ -1,7 +1,13 @@
 // src/components/Skills/SkillsGrid.jsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, BookOpen, ChevronDown, ChevronUp, ListOrdered } from "lucide-react";
+import {
+  Plus,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  ListOrdered,
+} from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import SkillCard from "./SkillCard";
 import EditSkillModal from "./EditSkillModal";
@@ -20,15 +26,15 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
   const handleCloseEditModal = () => {
     setEditingSkill(null);
     // Call the callback function to refresh skills data
-    if (typeof onSkillChange === 'function') {
+    if (typeof onSkillChange === "function") {
       onSkillChange();
     }
   };
-  
+
   // Handler for when a skill is deleted
   const handleSkillDeleted = () => {
     // Call the callback function to refresh skills data
-    if (typeof onSkillChange === 'function') {
+    if (typeof onSkillChange === "function") {
       onSkillChange();
     }
   };
@@ -36,14 +42,14 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
   const handleManageSkills = (category, categorySkills) => {
     setManagingCategory({
       name: category,
-      skills: categorySkills
+      skills: categorySkills,
     });
   };
 
   const handleCloseManageModal = () => {
     setManagingCategory(null);
     // Call the callback function to refresh skills data
-    if (typeof onSkillChange === 'function') {
+    if (typeof onSkillChange === "function") {
       onSkillChange();
     }
   };
@@ -173,39 +179,76 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
               isExpanded
             )}`}
           >
+            {/* Category Header - Improved Version */}
             <div
-              className={`flex items-center p-4 cursor-pointer transition-colors ${
+              className={`group relative flex items-center p-5 rounded-t-lg cursor-pointer transition-all duration-200 ${
                 isDark
                   ? isExpanded
-                    ? "bg-indigo-500/10"
-                    : "bg-transparent"
+                    ? "bg-indigo-500/10 hover:bg-indigo-500/15"
+                    : "bg-transparent hover:bg-gray-900/40"
                   : isExpanded
-                  ? "bg-indigo-50"
-                  : "bg-transparent"
-              }`}
+                  ? "bg-indigo-50 hover:bg-indigo-100/70"
+                  : "bg-transparent hover:bg-gray-100/70"
+              } ${!isExpanded ? "rounded-b-lg" : ""}`}
               onClick={() => toggleCategory(category)}
+              role="button"
+              aria-expanded={isExpanded}
+              aria-controls={`category-content-${category
+                .replace(/\s+/g, "-")
+                .toLowerCase()}`}
             >
-              <motion.h2
-                className={`text-2xl font-bold ${
-                  isDark ? "text-white" : "text-gray-800"
-                }`}
-                layout
-              >
-                {category}
-              </motion.h2>
+              {/* Left side with category name and count */}
+              <div className="flex items-center flex-grow mr-4">
+                <div className="flex flex-col">
+                  <div className="flex items-center">
+                    {/* Category indicator dot */}
+                    <div
+                      className={`w-2.5 h-2.5 rounded-full mr-3 ${
+                        isDark ? "bg-indigo-500" : "bg-indigo-600"
+                      }`}
+                    ></div>
 
-              <div
-                className={`ml-3 px-2.5 py-0.5 text-xs font-medium rounded-full ${
-                  isDark
-                    ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
-                    : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
-                }`}
-              >
-                {categorySkills.length}
+                    {/* Category name with motion */}
+                    <motion.h2
+                      className={`text-xl font-bold transition-colors ${
+                        isDark ? "text-white" : "text-gray-800"
+                      } group-hover:${
+                        isDark ? "text-indigo-300" : "text-indigo-700"
+                      }`}
+                      layout
+                    >
+                      {category}
+                    </motion.h2>
+                  </div>
+
+                  {/* Category description - optional - add if you have category descriptions */}
+                  {/*
+      <p className={`text-xs mt-0.5 ml-5.5 ${
+        isDark ? "text-gray-400" : "text-gray-500"
+      }`}>
+        Category description here
+      </p>
+      */}
+                </div>
+
+                {/* Skills count badge */}
+                <div
+                  className={`ml-3 px-3 py-1 text-xs font-medium rounded-full transition-all ${
+                    isDark
+                      ? "bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 group-hover:bg-indigo-500/25"
+                      : "bg-indigo-100/80 text-indigo-700 border border-indigo-300/50 group-hover:bg-indigo-200/80"
+                  }`}
+                >
+                  <span className="font-semibold">{categorySkills.length}</span>
+                  <span className="ml-1">
+                    {categorySkills.length === 1 ? "skill" : "skills"}
+                  </span>
+                </div>
               </div>
 
-              <div className="ml-auto flex items-center gap-2">
-                {/* Add Manage Button */}
+              {/* Right side with action buttons */}
+              <div className="flex items-center gap-2.5">
+                {/* Manage Button */}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -213,16 +256,23 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                     e.stopPropagation();
                     handleManageSkills(category, categorySkills);
                   }}
-                  className={`p-2 rounded-lg transition-colors shadow-sm ${
+                  className={`p-2 rounded-lg transition-all duration-200 shadow-sm ${
                     isDark
-                      ? "bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30"
-                      : "bg-purple-100/50 hover:bg-purple-100/70 text-purple-600 border border-purple-300/50"
+                      ? "bg-purple-500/10 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30"
+                      : "bg-purple-100/70 hover:bg-purple-200/90 text-purple-600 border border-purple-300/50"
                   }`}
                   title={`Manage ${category} skills`}
+                  aria-label={`Manage ${category} skills`}
                 >
-                  <ListOrdered size={16} />
+                  <div className="flex items-center">
+                    <ListOrdered size={16} />
+                    <span className="ml-1.5 text-xs font-medium hidden sm:inline">
+                      Manage
+                    </span>
+                  </div>
                 </motion.button>
-                
+
+                {/* Add Skill Button */}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -230,30 +280,46 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                     e.stopPropagation();
                     onAddSkill();
                   }}
-                  className={`p-2 rounded-lg transition-colors shadow-sm ${
+                  className={`p-2 rounded-lg transition-all duration-200 shadow-sm ${
                     isDark
-                      ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
-                      : "bg-indigo-100/50 hover:bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
+                      ? "bg-indigo-500/10 hover:bg-indigo-500/30 text-indigo-400 border border-indigo-500/30"
+                      : "bg-indigo-100/70 hover:bg-indigo-200/90 text-indigo-600 border border-indigo-300/50"
                   }`}
                   title={`Add skill to ${category}`}
+                  aria-label={`Add skill to ${category}`}
                 >
-                  <Plus size={16} />
+                  <div className="flex items-center">
+                    <Plus size={16} />
+                    <span className="ml-1.5 text-xs font-medium hidden sm:inline">
+                      Add
+                    </span>
+                  </div>
                 </motion.button>
 
-                <div
-                  className={`p-1 rounded-full transition-colors ${
+                {/* Expand/Collapse Indicator with Animation */}
+                <motion.div
+                  initial={false}
+                  animate={{ rotate: isExpanded ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`p-2 rounded-lg transition-colors ${
                     isDark
-                      ? "text-gray-400 bg-transparent hover:bg-gray-800"
-                      : "text-gray-600 bg-transparent hover:bg-gray-100"
+                      ? "bg-gray-800/40 text-gray-400 hover:bg-gray-700/70 hover:text-gray-300"
+                      : "bg-gray-100/70 text-gray-600 hover:bg-gray-200/90 hover:text-gray-800"
                   }`}
+                  aria-hidden="true"
                 >
-                  {isExpanded ? (
-                    <ChevronUp size={20} />
-                  ) : (
-                    <ChevronDown size={20} />
-                  )}
-                </div>
+                  <ChevronDown size={18} />
+                </motion.div>
               </div>
+
+              {/* Visual indicator for expanded state */}
+              {isExpanded && (
+                <div
+                  className={`absolute bottom-0 left-0 right-0 h-0.5 ${
+                    isDark ? "bg-indigo-500/40" : "bg-indigo-500/30"
+                  }`}
+                ></div>
+              )}
             </div>
 
             <AnimatePresence>
@@ -280,7 +346,10 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                       {[...categorySkills]
                         .sort((a, b) => {
                           // If both have orderIndex, sort by it
-                          if (a.orderIndex !== undefined && b.orderIndex !== undefined) {
+                          if (
+                            a.orderIndex !== undefined &&
+                            b.orderIndex !== undefined
+                          ) {
                             return a.orderIndex - b.orderIndex;
                           }
                           // If only one has orderIndex, prioritize the one with it
