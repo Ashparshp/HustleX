@@ -477,7 +477,7 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                     {categorySkills.length > 0 ? (
                       <div
                         className={`p-6 ${
-                          isDark ? "bg-gray-900/40" : "bg-gray-50/70"
+                          isDark ? "bg-black" : "bg-gray-50/70"
                         }`}
                       >
                         <motion.div
