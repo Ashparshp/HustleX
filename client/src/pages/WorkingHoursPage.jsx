@@ -525,6 +525,32 @@ const WorkingHoursPage = () => {
           )}
         </div>
 
+        {/* A nice visual separator like a curly underline */}
+        <div className="space-y-6">
+          <div className="relative h-16 w-full overflow-hidden">
+            <svg
+              viewBox="0 0 1200 120"
+              preserveAspectRatio="none"
+              className="absolute w-full h-12"
+            >
+              <path
+                d="M0,0 C150,40 350,0 500,30 C650,60 700,0 900,20 C1050,40 1150,10 1200,30 L1200,120 L0,120 Z"
+                className={isDark ? "fill-gray-800" : "fill-indigo-100"}
+              />
+              <path
+                d="M0,30 C150,10 300,60 450,40 C600,20 750,60 900,40 C1050,20 1150,50 1200,30 L1200,120 L0,120 Z"
+                className={isDark ? "fill-gray-700" : "fill-indigo-200"}
+                opacity="0.5"
+              />
+              <path
+                d="M0,60 C150,90 350,50 500,70 C650,90 750,50 900,70 C1050,90 1150,60 1200,80 L1200,120 L0,120 Z"
+                className={isDark ? "fill-gray-600" : "fill-indigo-300"}
+                opacity="0.7"
+              />
+            </svg>
+          </div>
+        </div>
+
         {/* Chart Section - Moved before entries for better visual hierarchy */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
