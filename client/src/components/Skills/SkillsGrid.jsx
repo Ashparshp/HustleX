@@ -1,13 +1,7 @@
 // src/components/Skills/SkillsGrid.jsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Plus,
-  BookOpen,
-  ChevronDown,
-  ChevronUp,
-  ListOrdered,
-} from "lucide-react";
+import { Plus, BookOpen, ChevronDown, ChevronUp, ListOrdered } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import SkillCard from "./SkillCard";
 import EditSkillModal from "./EditSkillModal";
@@ -25,7 +19,16 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
 
   const handleCloseEditModal = () => {
     setEditingSkill(null);
-    if (typeof onSkillChange === "function") {
+    // Call the callback function to refresh skills data
+    if (typeof onSkillChange === 'function') {
+      onSkillChange();
+    }
+  };
+  
+  // Handler for when a skill is deleted
+  const handleSkillDeleted = () => {
+    // Call the callback function to refresh skills data
+    if (typeof onSkillChange === 'function') {
       onSkillChange();
     }
   };
@@ -33,13 +36,14 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
   const handleManageSkills = (category, categorySkills) => {
     setManagingCategory({
       name: category,
-      skills: categorySkills,
+      skills: categorySkills
     });
   };
 
   const handleCloseManageModal = () => {
     setManagingCategory(null);
-    if (typeof onSkillChange === "function") {
+    // Call the callback function to refresh skills data
+    if (typeof onSkillChange === 'function') {
       onSkillChange();
     }
   };
@@ -51,10 +55,12 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     }));
   };
 
+  // Check if any category is expanded - default to true if not set
   const isCategoryExpanded = (category) => {
-    return expandedCategories[category] !== false;
+    return expandedCategories[category] !== false; // Default to expanded (true)
   };
 
+  // Empty state when no skills are available
   if (!skills || Object.keys(skills).length === 0) {
     return (
       <motion.div
@@ -130,6 +136,7 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     );
   }
 
+  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -140,6 +147,7 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     },
   };
 
+  // Category card styling
   const getCategoryCardStyle = (isExpanded) => {
     const baseStyle = isDark
       ? "border-indigo-500/30 bg-gray-900/70"
@@ -150,6 +158,7 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     return `${baseStyle} ${expansionStyle}`;
   };
 
+  // Render skill cards by category
   return (
     <div className="space-y-6">
       {Object.entries(skills).map(([category, categorySkills]) => {
@@ -213,7 +222,7 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                 >
                   <ListOrdered size={16} />
                 </motion.button>
-
+                
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -270,14 +279,14 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                       {/* Sort skill cards by orderIndex with more robust handling */}
                       {[...categorySkills]
                         .sort((a, b) => {
-                          if (
-                            a.orderIndex !== undefined &&
-                            b.orderIndex !== undefined
-                          ) {
+                          // If both have orderIndex, sort by it
+                          if (a.orderIndex !== undefined && b.orderIndex !== undefined) {
                             return a.orderIndex - b.orderIndex;
                           }
+                          // If only one has orderIndex, prioritize the one with it
                           if (a.orderIndex !== undefined) return -1;
                           if (b.orderIndex !== undefined) return 1;
+                          // Default sort by name if no orderIndex
                           return a.name.localeCompare(b.name);
                         })
                         .map((skill) => (
@@ -290,6 +299,7 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                               skill={skill}
                               onEdit={handleEditSkill}
                               categories={categories}
+                              onSkillDeleted={handleSkillDeleted}
                             />
                           </motion.div>
                         ))}

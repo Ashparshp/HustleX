@@ -24,7 +24,7 @@ import { useTheme } from "../../context/ThemeContext";
 import useSkills from "../../hooks/useSkills";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 
-const SkillCard = ({ skill, onEdit, listView = false }) => {
+const SkillCard = ({ skill, onEdit, listView = false, onSkillDeleted }) => {
   const { isDark } = useTheme();
   const { deleteSkill } = useSkills();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -225,6 +225,12 @@ const SkillCard = ({ skill, onEdit, listView = false }) => {
     setIsDeleting(true);
     try {
       await deleteSkill(skill._id || skill.id);
+
+      // Call the onSkillDeleted callback if provided
+      if (typeof onSkillDeleted === "function") {
+        onSkillDeleted();
+      }
+
       setShowDeleteConfirm(false);
     } catch (error) {
       console.error("Error deleting skill:", error);
