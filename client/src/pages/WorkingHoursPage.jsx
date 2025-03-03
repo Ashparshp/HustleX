@@ -429,75 +429,8 @@ const WorkingHoursPage = () => {
           </motion.div>
         )}
 
-        {/* Chart Section - Moved before entries for better visual hierarchy */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`p-6 rounded-lg border shadow-md mb-8 ${
-            isDark
-              ? "bg-gray-900/70 border-indigo-500/30"
-              : "bg-white border-indigo-300/50"
-          }`}
-        >
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-            <h3
-              className={`text-xl font-semibold ${
-                isDark ? "text-white" : "text-gray-800"
-              }`}
-            >
-              Working Hours Visualization
-            </h3>
-            <div
-              className={`inline-flex rounded-lg p-1 ${
-                isDark
-                  ? "bg-gray-800/50 border border-gray-700/70"
-                  : "bg-gray-100/80 border border-gray-200/70"
-              }`}
-            >
-              {[
-                {
-                  key: "progress",
-                  icon: BarChart2,
-                  label: "Progress Chart",
-                },
-                {
-                  key: "category",
-                  icon: PieChart,
-                  label: "Category Distribution",
-                },
-              ].map((viz) => (
-                <motion.button
-                  key={viz.key}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => setActiveVisualization(viz.key)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                    activeVisualization === viz.key
-                      ? isDark
-                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
-                        : "bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
-                      : isDark
-                      ? "text-gray-400 hover:bg-gray-700/50"
-                      : "text-gray-600 hover:bg-gray-200/70"
-                  }`}
-                >
-                  <viz.icon className="w-5 h-5" />
-                  <span className="hidden md:inline">{viz.label}</span>
-                </motion.button>
-              ))}
-            </div>
-          </div>
-          <div className="h-96">
-            {activeVisualization === "progress" ? (
-              <ProgressChart data={workingHours} />
-            ) : (
-              <CategoryChart data={stats.categoryBreakdown} />
-            )}
-          </div>
-        </motion.div>
-
         {/* Working Hours Cards Section - Consistent section heading style */}
-        <div className="mt-8">
+        <div className="mb-16">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
             <div>
               <h2
@@ -591,6 +524,73 @@ const WorkingHoursPage = () => {
             </div>
           )}
         </div>
+
+        {/* Chart Section - Moved before entries for better visual hierarchy */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`p-6 rounded-lg border shadow-md mb-8 ${
+            isDark
+              ? "bg-gray-900/70 border-indigo-500/30"
+              : "bg-white border-indigo-300/50"
+          }`}
+        >
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+            <h3
+              className={`text-xl font-semibold ${
+                isDark ? "text-white" : "text-gray-800"
+              }`}
+            >
+              Working Hours Visualization
+            </h3>
+            <div
+              className={`inline-flex rounded-lg p-1 ${
+                isDark
+                  ? "bg-gray-800/50 border border-gray-700/70"
+                  : "bg-gray-100/80 border border-gray-200/70"
+              }`}
+            >
+              {[
+                {
+                  key: "progress",
+                  icon: BarChart2,
+                  label: "Progress Chart",
+                },
+                {
+                  key: "category",
+                  icon: PieChart,
+                  label: "Category Distribution",
+                },
+              ].map((viz) => (
+                <motion.button
+                  key={viz.key}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setActiveVisualization(viz.key)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                    activeVisualization === viz.key
+                      ? isDark
+                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                        : "bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
+                      : isDark
+                      ? "text-gray-400 hover:bg-gray-700/50"
+                      : "text-gray-600 hover:bg-gray-200/70"
+                  }`}
+                >
+                  <viz.icon className="w-5 h-5" />
+                  <span className="hidden md:inline">{viz.label}</span>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+          <div className="h-96">
+            {activeVisualization === "progress" ? (
+              <ProgressChart data={workingHours} />
+            ) : (
+              <CategoryChart data={stats.categoryBreakdown} />
+            )}
+          </div>
+        </motion.div>
       </div>
 
       {/* Modal Styles with improved backdrop blur */}
