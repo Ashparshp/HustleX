@@ -130,7 +130,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     );
   }
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -141,7 +140,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     },
   };
 
-  // Category card styling
   const getCategoryCardStyle = (isExpanded) => {
     const baseStyle = isDark
       ? "border-indigo-500/30 bg-gray-900/70"
@@ -152,7 +150,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     return `${baseStyle} ${expansionStyle}`;
   };
 
-  // Render skill cards by category
   return (
     <div className="space-y-6">
       {Object.entries(skills).map(([category, categorySkills]) => {
@@ -273,17 +270,14 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                       {/* Sort skill cards by orderIndex with more robust handling */}
                       {[...categorySkills]
                         .sort((a, b) => {
-                          // If both have orderIndex, sort by it
                           if (
                             a.orderIndex !== undefined &&
                             b.orderIndex !== undefined
                           ) {
                             return a.orderIndex - b.orderIndex;
                           }
-                          // If only one has orderIndex, prioritize the one with it
                           if (a.orderIndex !== undefined) return -1;
                           if (b.orderIndex !== undefined) return 1;
-                          // Default sort by name if no orderIndex
                           return a.name.localeCompare(b.name);
                         })
                         .map((skill) => (
