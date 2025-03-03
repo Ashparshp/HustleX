@@ -105,6 +105,10 @@ const SkillsPage = () => {
     await fetchSkills();
   };
 
+  const handleSkillChange = async () => {
+    await fetchSkills();
+  };
+
   const handleToggleStats = () => {
     setShowStats(!showStats);
   };
@@ -425,6 +429,7 @@ const SkillsPage = () => {
                   )
                 : []
             }
+            onSkillChange={handleSkillChange}
           />
         </motion.div>
       </div>

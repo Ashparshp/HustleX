@@ -1,13 +1,19 @@
 // src/components/Skills/SkillsGrid.jsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, BookOpen, ChevronDown, ChevronUp, ListOrdered } from "lucide-react";
+import {
+  Plus,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  ListOrdered,
+} from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import SkillCard from "./SkillCard";
 import EditSkillModal from "./EditSkillModal";
 import ManageSkillsModal from "./ManageSkillsModal";
 
-const SkillsGrid = ({ skills, onAddSkill, categories }) => {
+const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
   const { isDark } = useTheme();
   const [editingSkill, setEditingSkill] = useState(null);
   const [expandedCategories, setExpandedCategories] = useState({});
@@ -19,17 +25,23 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
 
   const handleCloseEditModal = () => {
     setEditingSkill(null);
+    if (typeof onSkillChange === "function") {
+      onSkillChange();
+    }
   };
 
   const handleManageSkills = (category, categorySkills) => {
     setManagingCategory({
       name: category,
-      skills: categorySkills
+      skills: categorySkills,
     });
   };
 
   const handleCloseManageModal = () => {
     setManagingCategory(null);
+    if (typeof onSkillChange === "function") {
+      onSkillChange();
+    }
   };
 
   const toggleCategory = (category) => {
@@ -39,12 +51,10 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
     }));
   };
 
-  // Check if any category is expanded - default to true if not set
   const isCategoryExpanded = (category) => {
-    return expandedCategories[category] !== false; // Default to expanded (true)
+    return expandedCategories[category] !== false;
   };
 
-  // Empty state when no skills are available
   if (!skills || Object.keys(skills).length === 0) {
     return (
       <motion.div
@@ -206,7 +216,7 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
                 >
                   <ListOrdered size={16} />
                 </motion.button>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -264,7 +274,10 @@ const SkillsGrid = ({ skills, onAddSkill, categories }) => {
                       {[...categorySkills]
                         .sort((a, b) => {
                           // If both have orderIndex, sort by it
-                          if (a.orderIndex !== undefined && b.orderIndex !== undefined) {
+                          if (
+                            a.orderIndex !== undefined &&
+                            b.orderIndex !== undefined
+                          ) {
                             return a.orderIndex - b.orderIndex;
                           }
                           // If only one has orderIndex, prioritize the one with it
