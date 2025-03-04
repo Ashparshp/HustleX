@@ -27,6 +27,7 @@ import FilterButton from "../components/common/FilterButton";
 const SchedulePage = () => {
   const { isDark } = useTheme();
   const addButtonRef = useRef(null);
+  const [categoriesFetched, setCategoriesFetched] = useState(false);
 
   // Use the updated hooks with authentication
   const {
@@ -107,13 +108,17 @@ const SchedulePage = () => {
   // When categories are updated, refresh the schedule categories list
   const handleCategoryChange = async () => {
     await refreshScheduleCategories();
+    setCategoriesFetched(true);
   };
 
+  // Fix for infinite loop - only fetch categories once when component mounts
   useEffect(() => {
-    if (scheduleCategories.length === 0) {
-      refreshScheduleCategories();
+    if (!categoriesFetched && scheduleCategories.length === 0) {
+      refreshScheduleCategories().then(() => {
+        setCategoriesFetched(true);
+      });
     }
-  }, [scheduleCategories, refreshScheduleCategories]);
+  }, [categoriesFetched]); // Only depend on categoriesFetched flag
 
   if (loading) return <LoadingScheduleSkeleton />;
 

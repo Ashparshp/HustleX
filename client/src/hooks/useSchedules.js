@@ -25,6 +25,7 @@ const useSchedules = () => {
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(defaultStats);
   const [categories, setCategories] = useState([]);
+  const [isFetchingCategories, setIsFetchingCategories] = useState(false);
 
   const { isAuthenticated } = useAuth();
 
@@ -285,17 +286,17 @@ const useSchedules = () => {
     [isAuthenticated, schedules]
   );
 
-  // Fixed fetchCategories function in useSchedules.js
-
-  // Fetch schedule categories
-  // Corrected fetchCategories function in useSchedules.js
-
-  // Fetch schedule categories
+  // Improved fetchCategories function with better error handling and state management
   const fetchCategories = useCallback(async () => {
     if (!isAuthenticated) return [];
 
+    // Prevent concurrent fetches
+    if (isFetchingCategories) return categories;
+
     try {
-      // Use the general categories endpoint with type=schedule instead
+      setIsFetchingCategories(true);
+
+      // Use the general categories endpoint with type=schedule
       const response = await apiClient.get("/categories?type=schedule");
 
       let extractedCategories = [];
@@ -340,8 +341,10 @@ const useSchedules = () => {
 
       setCategories(defaultCats);
       return defaultCats;
+    } finally {
+      setIsFetchingCategories(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, categories, isFetchingCategories]);
 
   // Stats calculation function
   const calculateStats = useCallback((scheduleData) => {
@@ -432,13 +435,13 @@ const useSchedules = () => {
     });
   }, []);
 
-  // Load initial data
+  // Load initial data - fetch only once when component mounts
   useEffect(() => {
     if (isAuthenticated) {
       fetchSchedules();
-      fetchCategories();
+      // Category fetching is now controlled by the component
     }
-  }, [isAuthenticated, fetchSchedules, fetchCategories]);
+  }, [isAuthenticated, fetchSchedules]);
 
   return {
     schedules,
