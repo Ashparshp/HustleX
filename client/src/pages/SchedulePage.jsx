@@ -44,6 +44,7 @@ const SchedulePage = () => {
     updateScheduleItem,
     deleteScheduleItem,
     fetchCategories: refreshScheduleCategories,
+    copyScheduleItem,
   } = useSchedules();
 
   // Category management
@@ -381,6 +382,7 @@ const SchedulePage = () => {
                         onDelete={deleteSchedule}
                         onUpdateItem={updateScheduleItem}
                         onDeleteItem={deleteScheduleItem}
+                        onCopyItem={copyScheduleItem}
                       />
                     ))}
                   </div>

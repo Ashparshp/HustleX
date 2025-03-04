@@ -13,8 +13,10 @@ import {
   X,
   CheckCircle,
   MoreVertical,
+  Copy,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
+import CopyItemModal from "./CopyItemModal";
 
 const ScheduleCard = ({
   schedule,
@@ -22,11 +24,14 @@ const ScheduleCard = ({
   onDelete,
   onUpdateItem,
   onDeleteItem,
+  onCopyItem, // Add new prop for copy functionality
 }) => {
   const { isDark } = useTheme();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showItems, setShowItems] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
+  const [copyModalOpen, setCopyModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const getStatusVariants = {
     Completed: {
@@ -90,6 +95,17 @@ const ScheduleCard = ({
     } catch (error) {
       console.error("Deletion error:", error);
     }
+  };
+
+  // Handle opening the copy modal for an item
+  const handleCopyItem = (item) => {
+    setSelectedItem(item);
+    setCopyModalOpen(true);
+  };
+
+  // Handle the copy action
+  const handleSubmitCopy = (item, targetDate) => {
+    onCopyItem(item, targetDate);
   };
 
   return (
@@ -531,18 +547,39 @@ const ScheduleCard = ({
                             </p>
                           )}
                         </div>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => onDeleteItem(schedule._id, item._id)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            isDark
-                              ? "hover:bg-red-500/20 text-red-400"
-                              : "hover:bg-red-50 text-red-600"
-                          }`}
-                        >
-                          <X className="w-4 h-4" />
-                        </motion.button>
+
+                        {/* Item Actions */}
+                        <div className="flex items-start">
+                          {/* Copy Button */}
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => handleCopyItem(item)}
+                            className={`p-2 rounded-lg transition-colors ${
+                              isDark
+                                ? "hover:bg-blue-500/20 text-blue-400"
+                                : "hover:bg-blue-50 text-blue-600"
+                            }`}
+                            title="Copy Item"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </motion.button>
+
+                          {/* Delete Button */}
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => onDeleteItem(schedule._id, item._id)}
+                            className={`p-2 rounded-lg transition-colors ${
+                              isDark
+                                ? "hover:bg-red-500/20 text-red-400"
+                                : "hover:bg-red-50 text-red-600"
+                            }`}
+                            title="Delete Item"
+                          >
+                            <X className="w-4 h-4" />
+                          </motion.button>
+                        </div>
                       </div>
                     </motion.div>
                   ))}
@@ -552,6 +589,14 @@ const ScheduleCard = ({
           </>
         )}
       </div>
+
+      {/* Copy Item Modal */}
+      <CopyItemModal
+        isOpen={copyModalOpen}
+        onClose={() => setCopyModalOpen(false)}
+        onSubmit={handleSubmitCopy}
+        item={selectedItem}
+      />
     </motion.div>
   );
 };
