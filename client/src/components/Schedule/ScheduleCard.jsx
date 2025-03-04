@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import CopyItemModal from "./CopyItemModal";
+import CopyScheduleModal from "./CopyScheduleModal";
 
 const ScheduleCard = ({
   schedule,
@@ -24,13 +25,15 @@ const ScheduleCard = ({
   onDelete,
   onUpdateItem,
   onDeleteItem,
-  onCopyItem, // Add new prop for copy functionality
+  onCopyItem,
+  onCopySchedule, // Add new prop for copy schedule functionality
 }) => {
   const { isDark } = useTheme();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showItems, setShowItems] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
-  const [copyModalOpen, setCopyModalOpen] = useState(false);
+  const [copyItemModalOpen, setCopyItemModalOpen] = useState(false);
+  const [copyScheduleModalOpen, setCopyScheduleModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
   const getStatusVariants = {
@@ -97,15 +100,20 @@ const ScheduleCard = ({
     }
   };
 
-  // Handle opening the copy modal for an item
+  // Handle opening the copy item modal
   const handleCopyItem = (item) => {
     setSelectedItem(item);
-    setCopyModalOpen(true);
+    setCopyItemModalOpen(true);
   };
 
-  // Handle the copy action
-  const handleSubmitCopy = (item, targetDate) => {
+  // Handle the copy item action
+  const handleSubmitCopyItem = (item, targetDate) => {
     onCopyItem(item, targetDate);
+  };
+
+  // Handle the copy schedule action
+  const handleSubmitCopySchedule = (schedule, targetDate) => {
+    onCopySchedule(schedule, targetDate);
   };
 
   return (
@@ -279,6 +287,29 @@ const ScheduleCard = ({
                           <Edit className="w-4 h-4 mr-2" />
                           Edit Schedule
                         </motion.button>
+
+                        {/* Add Copy Schedule button */}
+                        <motion.button
+                          whileHover={{
+                            backgroundColor: isDark
+                              ? "rgba(31, 41, 55, 0.5)"
+                              : "rgba(243, 244, 246, 0.5)",
+                          }}
+                          onClick={() => {
+                            setCopyScheduleModalOpen(true);
+                            setActiveMenu(null);
+                          }}
+                          className={`w-full flex items-center px-4 py-2 text-sm
+                            ${
+                              isDark
+                                ? "text-gray-300 hover:bg-gray-800"
+                                : "text-gray-700 hover:bg-gray-100"
+                            }`}
+                        >
+                          <Copy className="w-4 h-4 mr-2" />
+                          Copy Schedule
+                        </motion.button>
+
                         <motion.button
                           whileHover={{
                             backgroundColor: isDark
@@ -592,10 +623,18 @@ const ScheduleCard = ({
 
       {/* Copy Item Modal */}
       <CopyItemModal
-        isOpen={copyModalOpen}
-        onClose={() => setCopyModalOpen(false)}
-        onSubmit={handleSubmitCopy}
+        isOpen={copyItemModalOpen}
+        onClose={() => setCopyItemModalOpen(false)}
+        onSubmit={handleSubmitCopyItem}
         item={selectedItem}
+      />
+
+      {/* Copy Schedule Modal */}
+      <CopyScheduleModal
+        isOpen={copyScheduleModalOpen}
+        onClose={() => setCopyScheduleModalOpen(false)}
+        onSubmit={handleSubmitCopySchedule}
+        schedule={schedule}
       />
     </motion.div>
   );

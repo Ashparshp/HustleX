@@ -442,6 +442,75 @@ const useSchedules = () => {
     [isAuthenticated, schedules, calculateStats]
   );
 
+  const copySchedule = useCallback(
+    async (sourceSchedule, targetDate) => {
+      if (!isAuthenticated) return;
+
+      try {
+        setLoading(true);
+
+        // Format target date
+        const formattedDate = new Date(targetDate);
+        formattedDate.setHours(0, 0, 0, 0); // Reset time part
+
+        // Check if a schedule already exists for the target date
+        const existingSchedule = schedules.find(
+          (s) => new Date(s.date).toISOString().split("T")[0] === targetDate
+        );
+
+        // If exists, we'll need to delete it first (optional - could also merge instead)
+        if (existingSchedule) {
+          await apiClient.delete(`/schedules/${existingSchedule._id}`);
+
+          // Update local state to remove the existing schedule
+          setSchedules((prev) =>
+            prev.filter((s) => s._id !== existingSchedule._id)
+          );
+        }
+
+        // Create new schedule data from the source schedule
+        const newScheduleData = {
+          date: formattedDate.toISOString(),
+          dayType: formattedDate.getDay() % 6 === 0 ? "Weekend" : "Weekday",
+          status: "Planned", // Reset status to Planned for the new copy
+          items: sourceSchedule.items.map((item) => {
+            // Create a copy of each item without the _id field
+            const { _id, ...itemWithoutId } = item;
+
+            // Reset completed status for all items in the new schedule
+            return {
+              ...itemWithoutId,
+              completed: false,
+            };
+          }),
+        };
+
+        // Create the new schedule
+        const response = await apiClient.post("/schedules", newScheduleData);
+        const newSchedule = response.data || {};
+
+        // Update local state
+        setSchedules((prev) => [...prev, newSchedule]);
+
+        // Update stats
+        calculateStats([
+          ...schedules.filter((s) => s._id !== existingSchedule?._id),
+          newSchedule,
+        ]);
+
+        toast.success("Schedule copied successfully");
+        return newSchedule;
+      } catch (err) {
+        console.error("Copy Schedule Error:", err);
+        toast.error(err.message || "Failed to copy schedule");
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isAuthenticated, schedules, calculateStats]
+  );
+
   // Improved fetchCategories function with better error handling and state management
   const fetchCategories = useCallback(async () => {
     if (!isAuthenticated) return [];
@@ -525,6 +594,7 @@ const useSchedules = () => {
     deleteScheduleItem,
     fetchCategories,
     copyScheduleItem,
+    copySchedule,
   };
 };
 
