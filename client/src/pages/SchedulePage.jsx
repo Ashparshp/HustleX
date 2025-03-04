@@ -401,9 +401,10 @@ const SchedulePage = () => {
         onSubmit={editingSchedule ? handleEditSchedule : handleAddSchedule}
         initialData={editingSchedule}
         triggerRef={addButtonRef}
-        categories={
-          scheduleCategories.length > 0 ? scheduleCategories : defaultCategories
-        } // Fall back to default categories if none returned from API
+        categories={(scheduleCategories.length > 0
+          ? scheduleCategories
+          : defaultCategories
+        ).map((cat) => (typeof cat === "object" ? cat.name : cat))}
       />
 
       {/* Category Management modal */}
