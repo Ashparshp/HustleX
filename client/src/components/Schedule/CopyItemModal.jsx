@@ -1,13 +1,27 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { X, Calendar, Copy } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
+import { createPortal } from "react-dom";
 
 const CopyItemModal = ({ isOpen, onClose, onSubmit, item }) => {
   const { isDark } = useTheme();
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+
+  // Prevent scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -17,8 +31,21 @@ const CopyItemModal = ({ isOpen, onClose, onSubmit, item }) => {
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black bg-opacity-50">
+  // Stop propagation of all click events inside the modal
+  const handleModalClick = (e) => {
+    e.stopPropagation();
+  };
+
+  // Use portal to render at document body level
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
+      style={{
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        backdropFilter: "blur(2px)",
+      }}
+      onClick={onClose}
+    >
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -30,6 +57,7 @@ const CopyItemModal = ({ isOpen, onClose, onSubmit, item }) => {
               ? "bg-gray-900 border border-indigo-500/30"
               : "bg-white border border-indigo-300/50"
           }`}
+        onClick={handleModalClick}
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
@@ -161,7 +189,8 @@ const CopyItemModal = ({ isOpen, onClose, onSubmit, item }) => {
           </div>
         </form>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
