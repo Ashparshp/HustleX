@@ -10,7 +10,6 @@ const CopyItemModal = ({ isOpen, onClose, onSubmit, item }) => {
     new Date().toISOString().split("T")[0]
   );
 
-  // Prevent scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -31,12 +30,10 @@ const CopyItemModal = ({ isOpen, onClose, onSubmit, item }) => {
     onClose();
   };
 
-  // Stop propagation of all click events inside the modal
   const handleModalClick = (e) => {
     e.stopPropagation();
   };
 
-  // Use portal to render at document body level
   return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
@@ -59,7 +56,6 @@ const CopyItemModal = ({ isOpen, onClose, onSubmit, item }) => {
           }`}
         onClick={handleModalClick}
       >
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h3
             className={`text-xl font-bold flex items-center gap-2 ${
@@ -84,7 +80,6 @@ const CopyItemModal = ({ isOpen, onClose, onSubmit, item }) => {
           </motion.button>
         </div>
 
-        {/* Item Details Preview */}
         <div
           className={`mb-4 p-3 rounded-lg ${
             isDark ? "bg-gray-800/50" : "bg-gray-100"
@@ -114,7 +109,6 @@ const CopyItemModal = ({ isOpen, onClose, onSubmit, item }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Date Selector */}
           <div>
             <label
               htmlFor="copyDate"
@@ -146,7 +140,6 @@ const CopyItemModal = ({ isOpen, onClose, onSubmit, item }) => {
             </div>
           </div>
 
-          {/* Info text */}
           <div
             className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
           >
@@ -156,7 +149,6 @@ const CopyItemModal = ({ isOpen, onClose, onSubmit, item }) => {
             </p>
           </div>
 
-          {/* Action buttons */}
           <div className="flex justify-end space-x-3 pt-4">
             <motion.button
               type="button"
