@@ -6,9 +6,13 @@ import { createPortal } from "react-dom";
 
 const CopyScheduleModal = ({ isOpen, onClose, onSubmit, schedule }) => {
   const { isDark } = useTheme();
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const getYesterdayDate = () => {
+    const today = new Date();
+    today.setDate(today.getDate() - 1);
+    return today.toISOString().split("T")[0];
+  };
+
+  const [selectedDate, setSelectedDate] = useState(getYesterdayDate());
 
   // Prevent scrolling when modal is open
   useEffect(() => {
