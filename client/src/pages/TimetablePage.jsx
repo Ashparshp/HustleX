@@ -31,6 +31,9 @@ import TimetableError from "../components/Timetable/TimetableError";
 import ManageActivitiesModal from "../components/Timetable/ManageActivitiesModal";
 import DeleteTimetableModal from "../components/Timetable/DeleteTimetableModal";
 
+// Environment variables
+const API_URL = import.meta.env.VITE_API_URL;
+
 const EnhancedDateDisplay = ({ dateString, isDark }) => {
   const date = new Date(dateString);
 
@@ -123,6 +126,18 @@ const TimetablePage = () => {
 
   const stableRefreshRef = useRef(0);
 
+  // Helper function to get auth headers
+  const getAuthHeaders = useCallback(() => {
+    const token = localStorage.getItem("token");
+    return {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      Pragma: "no-cache",
+      Expires: "0",
+    };
+  }, []);
+
   useEffect(() => {
     if (!loading && (currentWeek || error)) {
       let isMounted = true;
@@ -187,6 +202,21 @@ const TimetablePage = () => {
     }
   }, [currentWeek]);
 
+  // Update activities when switching timetables
+  useEffect(() => {
+    if (currentTimetable) {
+      fetchCurrentTimetableActivities(currentTimetable.id)
+        .then((fetchedActivities) => {
+          if (fetchedActivities) {
+            setActivities(fetchedActivities);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to fetch activities for new timetable:", err);
+        });
+    }
+  }, [currentTimetable]);
+
   useEffect(() => {
     if (currentTimetable) {
       setTimetableCategories([]);
@@ -223,6 +253,28 @@ const TimetablePage = () => {
     return () => clearInterval(intervalId);
   }, [getTimetableCategories, activeModal]);
 
+  // New function to fetch activities directly from the server
+  const fetchCurrentTimetableActivities = async (timetableId) => {
+    if (!timetableId) return [];
+
+    try {
+      // Fetch the timetable data to get the most up-to-date activities
+      const response = await fetch(`${API_URL}/api/timetables/${timetableId}`, {
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch timetable data");
+      }
+
+      const data = await response.json();
+      return data.data?.defaultActivities || [];
+    } catch (error) {
+      console.error("Error fetching current timetable activities:", error);
+      return [];
+    }
+  };
+
   const forceUpdate = useCallback(() => {
     stableRefreshRef.current += 1;
     setRefreshKey(stableRefreshRef.current);
@@ -236,6 +288,12 @@ const TimetablePage = () => {
 
       if (localCurrentTimetable) {
         await fetchCurrentWeek(localCurrentTimetable.id);
+
+        // Also update the activities state with fresh data
+        const currentActivities = await fetchCurrentTimetableActivities(
+          localCurrentTimetable.id
+        );
+        setActivities(currentActivities);
       }
 
       forceUpdate();
@@ -297,18 +355,37 @@ const TimetablePage = () => {
     setActiveModal("categoryManagement");
   };
 
+  // Updated handleAddActivity with proper timetable ID handling
   const handleAddActivity = async (activityData) => {
     try {
       setIsSubmitting(true);
-
       closeAllModals();
 
-      const updatedActivities = [...activities, activityData];
-      await updateDefaultActivities(updatedActivities, { silent: true });
+      if (!localCurrentTimetable) {
+        throw new Error("No timetable selected");
+      }
+
+      // Fetch the current activities directly from the server to ensure accuracy
+      const currentActivities = await fetchCurrentTimetableActivities(
+        localCurrentTimetable.id
+      );
+
+      // Add the new activity to the current activities
+      const updatedActivities = [...currentActivities, activityData];
+
+      // Explicitly pass the timetable ID to ensure the right timetable is updated
+      await updateDefaultActivities(updatedActivities, {
+        silent: true,
+        id: localCurrentTimetable.id,
+      });
+
+      // Update the local activities state
+      setActivities(updatedActivities);
 
       toast.success("Added");
 
-      fetchCurrentWeek().catch((err) => {
+      // Refresh to show updated activities
+      fetchCurrentWeek(localCurrentTimetable.id).catch((err) => {
         console.error("Error refreshing week data:", err);
       });
     } catch (error) {
@@ -319,18 +396,27 @@ const TimetablePage = () => {
     }
   };
 
+  // Updated handleManageActivities with proper timetable ID handling
   const handleManageActivities = async (updatedActivities) => {
     try {
       setIsSubmitting(true);
-
       closeAllModals();
 
-      await updateDefaultActivities(updatedActivities, { silent: true });
-      setActivities(updatedActivities);
+      if (!localCurrentTimetable) {
+        throw new Error("No timetable selected");
+      }
 
+      // Explicitly pass the timetable ID to ensure the right timetable is updated
+      await updateDefaultActivities(updatedActivities, {
+        silent: true,
+        id: localCurrentTimetable.id,
+      });
+
+      setActivities(updatedActivities);
       toast.success("Updated");
 
-      fetchCurrentWeek().catch((err) => {
+      // Refresh data for the current timetable
+      fetchCurrentWeek(localCurrentTimetable.id).catch((err) => {
         console.error("Error refreshing week data:", err);
       });
     } catch (error) {
@@ -343,11 +429,25 @@ const TimetablePage = () => {
 
   const handleDeleteActivity = async (index) => {
     try {
-      const updatedActivities = [...activities];
+      if (!localCurrentTimetable) {
+        throw new Error("No timetable selected");
+      }
+
+      // Get fresh activities to ensure we're working with the most recent data
+      const currentActivities = await fetchCurrentTimetableActivities(
+        localCurrentTimetable.id
+      );
+
+      const updatedActivities = [...currentActivities];
       updatedActivities.splice(index, 1);
 
-      await updateDefaultActivities(updatedActivities, { silent: true });
-      await fetchCurrentWeek();
+      await updateDefaultActivities(updatedActivities, {
+        silent: true,
+        id: localCurrentTimetable.id,
+      });
+
+      await fetchCurrentWeek(localCurrentTimetable.id);
+      setActivities(updatedActivities);
 
       return updatedActivities;
     } catch (error) {
@@ -378,6 +478,12 @@ const TimetablePage = () => {
           fetchCurrentWeek(newTimetable.id).catch((err) => {
             console.error("Error loading new timetable week:", err);
           });
+
+          // Get activities for the new timetable
+          const timetableActivities = await fetchCurrentTimetableActivities(
+            newTimetable.id
+          );
+          setActivities(timetableActivities);
         }
       }
 
@@ -464,10 +570,17 @@ const TimetablePage = () => {
 
           await fetchCurrentWeek(newCurrentTimetable.id);
 
+          // Update activities for the new current timetable
+          const currentActivities = await fetchCurrentTimetableActivities(
+            newCurrentTimetable.id
+          );
+          setActivities(currentActivities);
+
           forceUpdate();
         } else {
           setLocalCurrentTimetable(null);
           setCurrentWeek(null);
+          setActivities([]);
         }
       } else {
         forceUpdate();
@@ -501,6 +614,10 @@ const TimetablePage = () => {
         }
 
         const weekData = await fetchCurrentWeek(id);
+
+        // Fetch and update activities for the selected timetable
+        const timetableActivities = await fetchCurrentTimetableActivities(id);
+        setActivities(timetableActivities);
 
         forceUpdate();
 
