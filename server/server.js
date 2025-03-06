@@ -26,6 +26,14 @@ app.use("/api/auth", limiter); // Apply rate limiting to auth routes
 // Prevent HTTP param pollution
 app.use(hpp());
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "API is running",
+    serverTime: new Date(),
+  });
+});
+
 // Configure CORS dynamically from environment variables
 const allowedOrigins = process.env.CLIENT_URLS
   ? process.env.CLIENT_URLS.split(",")
