@@ -1,4 +1,3 @@
-// server/models/Category.js
 const mongoose = require('mongoose');
 
 const categorySchema = new mongoose.Schema({
@@ -20,11 +19,11 @@ const categorySchema = new mongoose.Schema({
   },
   color: {
     type: String,
-    default: '#3498db' // Default blue color
+    default: '#3498db'
   },
   icon: {
     type: String,
-    default: 'circle' // Default icon name
+    default: 'circle'
   },
   description: {
     type: String,
@@ -34,7 +33,6 @@ const categorySchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Compound index to prevent duplicate categories of the same type for a user
 categorySchema.index({ user: 1, name: 1, type: 1 }, { unique: true });
 
 module.exports = mongoose.model('Category', categorySchema);

@@ -37,7 +37,7 @@ const contestSchema = new mongoose.Schema(
       default: null
     },
     duration: {
-      type: Number, // in minutes
+      type: Number,
       default: null
     },
     notes: {

@@ -1,4 +1,3 @@
-// server/models/User.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
@@ -27,9 +26,7 @@ const UserSchema = new mongoose.Schema(
       trim: true,
       validate: {
         validator: function (v) {
-          // Allow empty phone number (since it's optional)
           if (!v) return true;
-          // Simple validation - can be enhanced based on specific requirements
           return /^\d{10,15}$/.test(v);
         },
         message: (props) => `${props.value} is not a valid phone number!`,
@@ -39,7 +36,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please provide a password"],
       minlength: [6, "Password must be at least 6 characters"],
-      select: false, // Don't return password in queries by default
+      select: false,
     },
     isEmailVerified: {
       type: Boolean,

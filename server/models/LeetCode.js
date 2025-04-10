@@ -1,4 +1,3 @@
-// server/models/LeetCode.js
 const mongoose = require("mongoose");
 
 const leetCodeSchema = new mongoose.Schema(

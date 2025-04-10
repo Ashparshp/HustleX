@@ -1,4 +1,3 @@
-// server/models/WorkingHours.js
 const mongoose = require("mongoose");
 
 const workingHoursSchema = new mongoose.Schema(

@@ -1,4 +1,3 @@
-// server/models/Schedule.js
 const mongoose = require("mongoose");
 
 const scheduleItemSchema = new mongoose.Schema({

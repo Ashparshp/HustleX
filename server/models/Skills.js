@@ -1,4 +1,3 @@
-// server/models/Skills.js
 const mongoose = require("mongoose");
 
 const skillSchema = new mongoose.Schema(

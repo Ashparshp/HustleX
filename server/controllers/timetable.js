@@ -1,4 +1,3 @@
-// server/controllers/timetable.js (Previously activityTracker.js)
 const Timetable = require("../models/Timetable");
 const Category = require("../models/Category");
 
