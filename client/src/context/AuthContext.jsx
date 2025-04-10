@@ -1,8 +1,6 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 
-// Custom toast configuration
 const toastConfig = {
   success: {
     duration: 3000,
@@ -92,7 +90,6 @@ export const AuthProvider = ({ children }) => {
 
   const API_URL = import.meta.env.VITE_API_URL;
 
-  // Check if user is logged in on initial load
   useEffect(() => {
     const verifyToken = async () => {
       if (!token) {
