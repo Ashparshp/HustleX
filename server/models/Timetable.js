@@ -181,7 +181,7 @@ timetableSchema.methods.startNewWeek = async function () {
     this.currentWeek.activities.length
   );
 
-  return this; // Return this instead of this.save() to let the controller handle saving
+  return this;
 };
 
 // Compound index for user and timetable name uniqueness
