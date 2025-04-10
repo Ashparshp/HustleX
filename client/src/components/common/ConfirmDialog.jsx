@@ -1,4 +1,3 @@
-// src/components/common/ConfirmDialog.jsx
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 

@@ -1,4 +1,3 @@
-// src/components/Contests/ContestCard.jsx
 import { motion } from "framer-motion";
 import {
   Edit,

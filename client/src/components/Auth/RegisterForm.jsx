@@ -1,11 +1,9 @@
-// RegisterForm.jsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Eye,
   EyeOff,
-  UserPlus,
   Mail,
   Lock,
   User,

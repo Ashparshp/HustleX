@@ -227,7 +227,6 @@ const CategoryManagement = ({
     }
   };
 
-  // Base styling for form inputs
   const inputClass = `w-full px-3 py-2.5 rounded-lg border text-sm transition-all duration-200 ${
     isDark
       ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 placeholder-indigo-500/70"
@@ -238,7 +237,6 @@ const CategoryManagement = ({
     isDark ? "text-gray-300" : "text-gray-700"
   }`;
 
-  // Get icon for category type
   const getIconForCategoryType = () => {
     switch (type) {
       case "working-hours":

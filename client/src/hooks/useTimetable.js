@@ -12,7 +12,6 @@ const useTimetable = (timetableId = null) => {
   const weekCheckIntervalRef = useRef(null);
   const updateInProgress = useRef(false);
   const retryCount = useRef(0);
-  const maxRetries = 2; // Limit retries to prevent infinite loops
   const initialLoadComplete = useRef(false);
   const { token } = useAuth();
 
