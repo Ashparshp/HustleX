@@ -16,12 +16,10 @@ import { formatDisplayDate } from "../../utils/dateUtils";
 const ContestCard = ({ contest, onEdit, onDelete }) => {
   const { isDark } = useTheme();
 
-  // Format date for display
   const formatDate = (date) => {
     return formatDisplayDate(date);
   };
 
-  // Format time duration from minutes to hours and minutes
   const formatDuration = (minutes) => {
     if (!minutes) return "N/A";
 
@@ -33,7 +31,6 @@ const ContestCard = ({ contest, onEdit, onDelete }) => {
     return `${hours} hr ${mins} min`;
   };
 
-  // Get platform-specific color
   const getPlatformColor = (platform) => {
     const platformColors = {
       LeetCode: isDark
@@ -62,7 +59,6 @@ const ContestCard = ({ contest, onEdit, onDelete }) => {
     );
   };
 
-  // Calculate solved percentage
   const getSolvedPercentage = () => {
     if (!contest.solved || !contest.totalProblems) return null;
     return Math.round((contest.solved / contest.totalProblems) * 100);
