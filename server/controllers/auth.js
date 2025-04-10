@@ -1,4 +1,3 @@
-// server/controllers/auth.js
 const crypto = require("crypto");
 const User = require("../models/User");
 const { sendTokenResponse } = require("../utils/jwtUtils");
@@ -8,14 +7,10 @@ const {
 } = require("../utils/emailUtils");
 const { sendVerificationSMS } = require("../utils/smsUtils");
 
-// @desc    Register user
-// @route   POST /api/auth/register
-// @access  Public
 exports.register = async (req, res, next) => {
   try {
     const { name, email, phoneNumber, password } = req.body;
 
-    // Check if email already exists
     const emailExists = await User.findOne({ email });
     if (emailExists) {
       return res.status(400).json({
@@ -24,7 +19,6 @@ exports.register = async (req, res, next) => {
       });
     }
 
-    // Create user
     const user = await User.create({
       name,
       email,
@@ -32,20 +26,16 @@ exports.register = async (req, res, next) => {
       password,
     });
 
-    // Generate email verification token
     const verificationToken = user.getEmailVerificationToken();
     await user.save({ validateBeforeSave: false });
 
-    // Create verification URL
     const verificationUrl = `${req.protocol}://${req.get(
       "host"
     )}/api/auth/verify-email/${verificationToken}`;
 
-    // Send verification email
     try {
       await sendVerificationEmail(user, verificationUrl);
 
-      // Send verification SMS if phone provided
       if (phoneNumber) {
         const smsCode = user.getPhoneVerificationCode();
         await user.save({ validateBeforeSave: false });
@@ -56,7 +46,6 @@ exports.register = async (req, res, next) => {
     } catch (err) {
       console.error("Email sending error:", err);
 
-      // Reset verification tokens
       user.emailVerificationToken = undefined;
       user.emailVerificationExpire = undefined;
       user.phoneVerificationCode = undefined;
@@ -74,14 +63,10 @@ exports.register = async (req, res, next) => {
   }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Validate email & password
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -89,7 +74,6 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    // Check for user
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(401).json({
@@ -113,12 +97,8 @@ exports.login = async (req, res, next) => {
   }
 };
 
-// @desc    Verify email
-// @route   GET /api/auth/verify-email/:token
-// @access  Public
 exports.verifyEmail = async (req, res, next) => {
   try {
-    // Get hashed token
     const emailVerificationToken = crypto
       .createHash("sha256")
       .update(req.params.token)
@@ -130,7 +110,6 @@ exports.verifyEmail = async (req, res, next) => {
     });
 
     if (!user) {
-      // Send an error HTML page
       return res.status(400).send(`
         <!DOCTYPE html>
         <html lang="en">
@@ -324,9 +303,6 @@ exports.verifyEmail = async (req, res, next) => {
   }
 };
 
-// @desc    Verify phone number
-// @route   POST /api/auth/verify-phone
-// @access  Private
 exports.verifyPhone = async (req, res, next) => {
   try {
     const { verificationCode } = req.body;
@@ -347,7 +323,6 @@ exports.verifyPhone = async (req, res, next) => {
       });
     }
 
-    // Check if verification code is valid and not expired
     if (
       !user.phoneVerificationCode ||
       user.phoneVerificationCode !== verificationCode ||
@@ -359,7 +334,6 @@ exports.verifyPhone = async (req, res, next) => {
       });
     }
 
-    // Mark phone as verified
     user.isPhoneVerified = true;
     user.phoneVerificationCode = undefined;
     user.phoneVerificationExpire = undefined;
@@ -375,9 +349,6 @@ exports.verifyPhone = async (req, res, next) => {
   }
 };
 
-// @desc    Resend verification email
-// @route   POST /api/auth/resend-verification
-// @access  Private
 exports.resendVerification = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
@@ -396,11 +367,9 @@ exports.resendVerification = async (req, res, next) => {
       });
     }
 
-    // Generate new verification token
     const verificationToken = user.getEmailVerificationToken();
     await user.save({ validateBeforeSave: false });
 
-    // Create verification URL
     const verificationUrl = `${req.protocol}://${req.get(
       "host"
     )}/api/auth/verify-email/${verificationToken}`;
@@ -429,9 +398,6 @@ exports.resendVerification = async (req, res, next) => {
   }
 };
 
-// @desc    Resend phone verification
-// @route   POST /api/auth/resend-phone-verification
-// @access  Private
 exports.resendPhoneVerification = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
@@ -457,7 +423,6 @@ exports.resendPhoneVerification = async (req, res, next) => {
       });
     }
 
-    // Generate new verification code
     const verificationCode = user.getPhoneVerificationCode();
     await user.save({ validateBeforeSave: false });
 
@@ -485,9 +450,6 @@ exports.resendPhoneVerification = async (req, res, next) => {
   }
 };
 
-// @desc    Forgot password
-// @route   POST /api/auth/forgot-password
-// @access  Public
 exports.forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -508,11 +470,9 @@ exports.forgotPassword = async (req, res, next) => {
       });
     }
 
-    // Generate password reset token
     const resetToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: false });
 
-    // Create reset URL
     const URL = "https://www.hustlex.in";
     const resetUrl = `${URL}/reset-password/${resetToken}`;
 
@@ -540,12 +500,8 @@ exports.forgotPassword = async (req, res, next) => {
   }
 };
 
-// @desc    Reset password
-// @route   PUT /api/auth/reset-password/:token
-// @access  Public
 exports.resetPassword = async (req, res, next) => {
   try {
-    // Get hashed token
     const resetPasswordToken = crypto
       .createHash("sha256")
       .update(req.params.token)
@@ -563,7 +519,6 @@ exports.resetPassword = async (req, res, next) => {
       });
     }
 
-    // Set new password
     user.password = req.body.password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
@@ -576,9 +531,6 @@ exports.resetPassword = async (req, res, next) => {
   }
 };
 
-// @desc    Get current logged in user
-// @route   GET /api/auth/me
-// @access  Private
 exports.getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
@@ -592,23 +544,18 @@ exports.getMe = async (req, res, next) => {
   }
 };
 
-// @desc    Update user details
-// @route   PUT /api/auth/update-details
-// @access  Private
 exports.updateDetails = async (req, res, next) => {
   try {
     const fieldsToUpdate = {
       name: req.body.name,
     };
 
-    // Update phone number if provided and different
     if (req.body.phoneNumber !== undefined) {
       const user = await User.findById(req.user.id);
       if (user.phoneNumber !== req.body.phoneNumber) {
         fieldsToUpdate.phoneNumber = req.body.phoneNumber;
         fieldsToUpdate.isPhoneVerified = false;
 
-        // Generate verification code if new phone provided
         if (req.body.phoneNumber) {
           const updatedUser = await User.findById(req.user.id);
           const verificationCode = updatedUser.getPhoneVerificationCode();
@@ -637,9 +584,6 @@ exports.updateDetails = async (req, res, next) => {
   }
 };
 
-// @desc    Update password
-// @route   PUT /api/auth/update-password
-// @access  Private
 exports.updatePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -653,7 +597,6 @@ exports.updatePassword = async (req, res, next) => {
 
     const user = await User.findById(req.user.id).select("+password");
 
-    // Check current password
     const isMatch = await user.matchPassword(currentPassword);
     if (!isMatch) {
       return res.status(401).json({
@@ -671,9 +614,6 @@ exports.updatePassword = async (req, res, next) => {
   }
 };
 
-// @desc    Logout / clear cookie
-// @route   GET /api/auth/logout
-// @access  Private
 exports.logout = async (req, res, next) => {
   try {
     res.cookie("token", "none", {
