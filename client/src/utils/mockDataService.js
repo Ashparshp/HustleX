@@ -1,6 +1,3 @@
-// This file provides mock data and services to use when API endpoints are not working correctly
-
-// Mock schedule templates
 const mockTemplates = [
   {
     _id: "template1",
@@ -104,11 +101,10 @@ const mockTemplates = [
   },
 ];
 
-// Mock schedules
 const mockSchedules = [
   {
     _id: "schedule1",
-    date: new Date(2025, 1, 25), // February 25, 2025
+    date: new Date(2025, 1, 25),
     dayType: "Weekday",
     status: "Completed",
     items: [
@@ -151,7 +147,7 @@ const mockSchedules = [
   },
   {
     _id: "schedule2",
-    date: new Date(2025, 1, 26), // February 26, 2025 (today)
+    date: new Date(2025, 1, 26),
     dayType: "Weekday",
     status: "In Progress",
     items: [
@@ -409,7 +405,6 @@ class MockDataService {
   async createSchedule(data) {
     let items = [];
 
-    // If using a template, copy items from template
     if (data.templateId) {
       const template = this.templates.find((t) => t._id === data.templateId);
       if (template) {
