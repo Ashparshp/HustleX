@@ -1,22 +1,17 @@
 const Timetable = require("../models/Timetable");
 const Category = require("../models/Category");
 
-// Helper function for error handling
 const handleError = (res, error, message = "Server error") => {
   console.error(`Error: ${message}`, error);
   res.status(500).json({ success: false, message: error.message || message });
 };
 
-// Helper to set cache headers
 const setCacheHeaders = (res) => {
   res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
   res.set("Pragma", "no-cache");
   res.set("Expires", "0");
 };
 
-// @desc    Get all timetables for the user
-// @route   GET /api/timetables
-// @access  Private
 exports.getTimetables = async (req, res) => {
   try {
     setCacheHeaders(res);
@@ -42,9 +37,6 @@ exports.getTimetables = async (req, res) => {
   }
 };
 
-// @desc    Create a new timetable
-// @route   POST /api/timetables
-// @access  Private
 exports.createTimetable = async (req, res) => {
   try {
     setCacheHeaders(res);
@@ -58,7 +50,6 @@ exports.createTimetable = async (req, res) => {
       });
     }
 
-    // Check if timetable with this name already exists
     const existingTimetable = await Timetable.findOne({
       user: req.user.id,
       name: name.trim(),
@@ -71,10 +62,8 @@ exports.createTimetable = async (req, res) => {
       });
     }
 
-    // Prepare default activities
     let activities = defaultActivities || [];
 
-    // Create timetable
     const timetable = new Timetable({
       user: req.user.id,
       name: name.trim(),
@@ -83,13 +72,10 @@ exports.createTimetable = async (req, res) => {
       isActive: req.body.isActive !== undefined ? req.body.isActive : true,
     });
 
-    // Initialize the current week
     await timetable.startNewWeek();
 
-    // Save the timetable explicitly
     await timetable.save();
 
-    // If this timetable is set as active, deactivate others
     if (timetable.isActive) {
       await Timetable.updateMany(
         { user: req.user.id, _id: { $ne: timetable._id } },
@@ -97,7 +83,6 @@ exports.createTimetable = async (req, res) => {
       );
     }
 
-    // Log the created timetable for debugging
     console.log("Created new timetable:", {
       id: timetable._id,
       name: timetable.name,
@@ -114,9 +99,6 @@ exports.createTimetable = async (req, res) => {
   }
 };
 
-// @desc    Get a specific timetable
-// @route   GET /api/timetables/:id
-// @access  Private
 exports.getTimetable = async (req, res) => {
   try {
     setCacheHeaders(res);
@@ -142,16 +124,12 @@ exports.getTimetable = async (req, res) => {
   }
 };
 
-// @desc    Update a timetable
-// @route   PUT /api/timetables/:id
-// @access  Private
 exports.updateTimetable = async (req, res) => {
   try {
     setCacheHeaders(res);
 
     const { name, description, isActive } = req.body;
 
-    // Find timetable and verify ownership
     const timetable = await Timetable.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -164,7 +142,6 @@ exports.updateTimetable = async (req, res) => {
       });
     }
 
-    // Check for duplicate name
     if (name && name !== timetable.name) {
       const existingTimetable = await Timetable.findOne({
         user: req.user.id,
@@ -189,7 +166,6 @@ exports.updateTimetable = async (req, res) => {
     if (isActive !== undefined) {
       timetable.isActive = isActive;
 
-      // If setting this as active, make all others inactive
       if (isActive) {
         await Timetable.updateMany(
           { user: req.user.id, _id: { $ne: req.params.id } },
@@ -209,14 +185,10 @@ exports.updateTimetable = async (req, res) => {
   }
 };
 
-// @desc    Delete a timetable
-// @route   DELETE /api/timetables/:id
-// @access  Private
 exports.deleteTimetable = async (req, res) => {
   try {
     setCacheHeaders(res);
 
-    // Find timetable and verify ownership
     const timetable = await Timetable.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -229,7 +201,6 @@ exports.deleteTimetable = async (req, res) => {
       });
     }
 
-    // Prevent deleting the only timetable
     const count = await Timetable.countDocuments({ user: req.user.id });
 
     if (count <= 1) {
@@ -239,7 +210,6 @@ exports.deleteTimetable = async (req, res) => {
       });
     }
 
-    // If deleting the active timetable, set another one as active
     if (timetable.isActive) {
       const anotherTimetable = await Timetable.findOne({
         user: req.user.id,
@@ -263,27 +233,18 @@ exports.deleteTimetable = async (req, res) => {
   }
 };
 
-// @desc    Get current week for active timetable
-// @route   GET /api/timetables/current-week
-// @access  Private
-// @desc    Get current week for a specific timetable
-// @route   GET /api/timetables/:id/current-week
-// @access  Private
 exports.getCurrentWeek = async (req, res) => {
   try {
     setCacheHeaders(res);
 
-    // Find timetable by id (if provided) or get active timetable
     let timetable;
 
     if (req.params.id) {
-      // If an ID is provided in the URL, try to find that specific timetable
       timetable = await Timetable.findOne({
         _id: req.params.id,
         user: req.user.id,
       });
 
-      // If timetable not found, return proper error
       if (!timetable) {
         return res.status(404).json({
           success: false,
@@ -291,17 +252,14 @@ exports.getCurrentWeek = async (req, res) => {
         });
       }
     } else {
-      // Find active timetable
       timetable = await Timetable.findOne({
         user: req.user.id,
         isActive: true,
       });
 
-      // If no active timetable, use the first one
       if (!timetable) {
         timetable = await Timetable.findOne({ user: req.user.id });
 
-        // If still no timetable, create a default one
         if (!timetable) {
           timetable = new Timetable({
             user: req.user.id,
@@ -310,28 +268,18 @@ exports.getCurrentWeek = async (req, res) => {
               { name: "DS & Algo", time: "18:00-00:00", category: "Core" },
               { name: "MERN Stack", time: "00:00-05:00", category: "Frontend" },
               { name: "Go Backend", time: "10:00-12:00", category: "Backend" },
-              {
-                name: "Java & Spring",
-                time: "12:00-14:00",
-                category: "Backend",
-              },
-              {
-                name: "Mobile Development",
-                time: "14:00-17:00",
-                category: "Mobile",
-              },
+              { name: "Java & Spring", time: "12:00-14:00", category: "Backend" },
+              { name: "Mobile Development", time: "14:00-17:00", category: "Mobile" },
             ],
           });
         }
 
-        // Set as active
         timetable.isActive = true;
       }
     }
 
     const now = new Date();
 
-    // Check if week has ended or if there's no current week yet
     const needsNewWeek =
       !timetable.currentWeek ||
       now > new Date(timetable.currentWeek.weekEndDate);
@@ -340,10 +288,8 @@ exports.getCurrentWeek = async (req, res) => {
       console.log("Week has ended or no current week, starting new week");
       await timetable.startNewWeek();
 
-      // Save the timetable
       await timetable.save();
 
-      // Reload timetable to get fresh data
       timetable = await Timetable.findById(timetable._id);
     }
 
@@ -358,16 +304,12 @@ exports.getCurrentWeek = async (req, res) => {
   }
 };
 
-// @desc    Get history for a specific timetable
-// @route   GET /api/timetables/:id/history
-// @access  Private
 exports.getHistory = async (req, res) => {
   try {
     setCacheHeaders(res);
 
     const { page = 1, limit = 10 } = req.query;
 
-    // Find timetable and verify ownership
     const timetable = await Timetable.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -406,9 +348,6 @@ exports.getHistory = async (req, res) => {
   }
 };
 
-// @desc    Toggle activity status
-// @route   POST /api/timetables/:id/toggle
-// @access  Private
 exports.toggleActivityStatus = async (req, res) => {
   try {
     setCacheHeaders(res);
@@ -422,7 +361,6 @@ exports.toggleActivityStatus = async (req, res) => {
       });
     }
 
-    // Find timetable and verify ownership
     const timetable = await Timetable.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -435,7 +373,6 @@ exports.toggleActivityStatus = async (req, res) => {
       });
     }
 
-    // Find the activity
     const activity = timetable.currentWeek.activities.id(activityId);
 
     if (!activity) {
@@ -445,7 +382,6 @@ exports.toggleActivityStatus = async (req, res) => {
       });
     }
 
-    // Toggle status
     activity.dailyStatus[dayIndex] = !activity.dailyStatus[dayIndex];
     await timetable.save();
 
@@ -458,17 +394,12 @@ exports.toggleActivityStatus = async (req, res) => {
   }
 };
 
-// @desc    Update default activities
-// @route   PUT /api/timetables/:id/activities
-// @access  Private
 exports.updateDefaultActivities = async (req, res) => {
   try {
-    // Set cache headers
     res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
     res.set("Pragma", "no-cache");
     res.set("Expires", "0");
 
-    // Input validation
     if (!Array.isArray(req.body.activities)) {
       return res.status(400).json({
         success: false,
@@ -476,7 +407,6 @@ exports.updateDefaultActivities = async (req, res) => {
       });
     }
 
-    // Validate each activity
     for (const activity of req.body.activities) {
       if (!activity.name || !activity.time || !activity.category) {
         return res.status(400).json({
@@ -486,7 +416,6 @@ exports.updateDefaultActivities = async (req, res) => {
       }
     }
 
-    // Find timetable and verify ownership
     const timetable = await Timetable.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -499,17 +428,13 @@ exports.updateDefaultActivities = async (req, res) => {
       });
     }
 
-    // Update default activities
     timetable.defaultActivities = req.body.activities;
 
-    // If there's a current week, update its activities while preserving statuses
     if (timetable.currentWeek && timetable.currentWeek.activities) {
       const currentActivities = timetable.currentWeek.activities;
 
-      // Preserve status for matching activities, even if their order changes
       timetable.currentWeek.activities = req.body.activities.map(
         (newActivity) => {
-          // Find if this activity existed in the previous week
           const matchingPreviousActivity = currentActivities.find(
             (prevActivity) =>
               prevActivity.activity.name === newActivity.name &&
@@ -530,10 +455,8 @@ exports.updateDefaultActivities = async (req, res) => {
       );
     }
 
-    // Save changes
     await timetable.save();
 
-    // Return updated data
     res.json({
       success: true,
       data: {
@@ -551,14 +474,10 @@ exports.updateDefaultActivities = async (req, res) => {
   }
 };
 
-// @desc    Get timetable statistics
-// @route   GET /api/timetables/:id/stats
-// @access  Private
 exports.getStats = async (req, res) => {
   try {
     setCacheHeaders(res);
 
-    // Find timetable and verify ownership
     const timetable = await Timetable.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -584,7 +503,6 @@ exports.getStats = async (req, res) => {
       },
     };
 
-    // Calculate category breakdown for current week
     timetable.currentWeek.activities.forEach((activity) => {
       const category = activity.activity.category;
 
@@ -600,14 +518,12 @@ exports.getStats = async (req, res) => {
         activity.dailyStatus.filter((status) => status).length;
     });
 
-    // Calculate completion rates for each category
     Object.keys(stats.currentWeek.byCategory).forEach((category) => {
       const categoryStats = stats.currentWeek.byCategory[category];
       categoryStats.completionRate =
         (categoryStats.completed / categoryStats.total) * 100;
     });
 
-    // Calculate overall stats
     const allWeeks = [...timetable.history, timetable.currentWeek];
 
     if (allWeeks.length > 0) {
@@ -640,14 +556,10 @@ exports.getStats = async (req, res) => {
   }
 };
 
-// @desc    Force start a new week
-// @route   POST /api/timetables/:id/new-week
-// @access  Private
 exports.startNewWeek = async (req, res) => {
   try {
     setCacheHeaders(res);
 
-    // Find timetable and verify ownership
     const timetable = await Timetable.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -672,22 +584,14 @@ exports.startNewWeek = async (req, res) => {
   }
 };
 
-// This should be part of your timetable.js controller file
-
-// @desc    Get categories for timetables
-// @route   GET /api/timetables/categories
-// @access  Private
 exports.getCategories = async (req, res) => {
   try {
-    // Set cache headers
     res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
     res.set("Pragma", "no-cache");
     res.set("Expires", "0");
 
-    // Get all timetables for this user
     const timetables = await Timetable.find({ user: req.user.id });
 
-    // Extract all unique categories
     const categoriesSet = new Set();
 
     timetables.forEach((timetable) => {
@@ -703,8 +607,6 @@ exports.getCategories = async (req, res) => {
       }
     });
 
-    // Get user-defined categories
-    const Category = require("../models/Category");
     const userCategories = await Category.find({
       user: req.user.id,
       type: "timetable",
@@ -716,7 +618,6 @@ exports.getCategories = async (req, res) => {
       }
     });
 
-    // Convert to array
     const categories = Array.from(categoriesSet);
 
     res.json({
