@@ -99,7 +99,7 @@ const useWorkingHours = () => {
         // Refresh data
         await fetchWorkingHours();
 
-        toast.success("Working hours updated successfully");
+        toast.success("Updated");
         return response.data;
       } catch (err) {
         console.error("Error updating working hours:", err);
@@ -121,7 +121,7 @@ const useWorkingHours = () => {
         // Refresh data
         await fetchWorkingHours();
 
-        toast.success("Working hours deleted successfully");
+        toast.success("Deleted");
       } catch (err) {
         console.error("Error deleting working hours:", err);
         toast.error(err.message || "Failed to delete working hours");
