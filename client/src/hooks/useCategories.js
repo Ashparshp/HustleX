@@ -80,7 +80,7 @@ const useCategories = (type = "working-hours") => {
         // Refresh categories immediately
         await fetchCategories();
 
-        toast.success("Category added successfully");
+        toast.success("Added!");
         return response.data?.data || response.data;
       } catch (err) {
         console.error("Error adding category:", err);
@@ -102,7 +102,7 @@ const useCategories = (type = "working-hours") => {
         // Refresh categories immediately
         await fetchCategories();
 
-        toast.success("Category updated successfully");
+        toast.success("Updated!");
         return response.data?.data || response.data;
       } catch (err) {
         console.error("Error updating category:", err);
@@ -124,7 +124,7 @@ const useCategories = (type = "working-hours") => {
         // Refresh categories immediately
         await fetchCategories();
 
-        toast.success("Category deleted successfully");
+        toast.success("Deleted!");
       } catch (err) {
         console.error("Error deleting category:", err);
         toast.error(err.message || "Failed to delete category");

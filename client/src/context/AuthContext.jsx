@@ -305,7 +305,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       toast.dismiss(loadingToast);
-      showToast.success("Email verified successfully!");
+      showToast.success("Email verified!");
       return data;
     } catch (err) {
       setError(err.message);
@@ -350,7 +350,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       toast.dismiss(loadingToast);
-      showToast.success("Profile updated successfully!");
+      showToast.success("Profile updated!");
       return data;
     } catch (err) {
       setError(err.message);
@@ -390,7 +390,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       toast.dismiss(loadingToast);
-      showToast.success("Password updated successfully!");
+      showToast.success("Password updated!");
       return data;
     } catch (err) {
       setError(err.message);
@@ -436,7 +436,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       toast.dismiss(loadingToast);
-      showToast.success("Phone verified successfully!");
+      showToast.success("Phone verified!");
       return data;
     } catch (err) {
       setError(err.message);
