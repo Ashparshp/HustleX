@@ -1,4 +1,3 @@
-// src/hooks/useWorkingHours.js
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
@@ -69,7 +68,7 @@ const useWorkingHours = () => {
         // Refresh data
         await fetchWorkingHours();
 
-        toast.success("Working hours added successfully");
+        toast.success("Added");
         return response.data;
       } catch (err) {
         console.error("Error adding working hours:", err);
