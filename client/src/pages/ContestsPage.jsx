@@ -1,4 +1,3 @@
-// src/pages/ContestsPage.jsx
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -53,7 +52,6 @@ const ContestsPage = () => {
     fetchCategories,
   } = useCategories("goals");
 
-  // State hooks
   const [showForm, setShowForm] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -71,7 +69,6 @@ const ContestsPage = () => {
     participated: null,
   });
 
-  // Filter and sort contests
   const filteredContests = useMemo(() => {
     if (!contests.length) return [];
 
@@ -109,7 +106,6 @@ const ContestsPage = () => {
     });
   }, [contests, searchQuery, filters, sortOrder]);
 
-  // Handle form submission
   const handleFormSubmit = async (data) => {
     try {
       if (selectedContest) {
@@ -124,24 +120,20 @@ const ContestsPage = () => {
     }
   };
 
-  // Handle form cancel
   const handleFormCancel = () => {
     setShowForm(false);
     setSelectedContest(null);
   };
 
-  // Handle edit button click
   const handleEdit = (contest) => {
     setSelectedContest(contest);
     setShowForm(true);
   };
 
-  // Handle delete button click
   const handleDelete = (contest) => {
     setContestToDelete(contest);
   };
 
-  // Confirm delete
   const confirmDelete = async () => {
     if (!contestToDelete) return;
 
@@ -153,7 +145,6 @@ const ContestsPage = () => {
     }
   };
 
-  // Handle filter apply
   const handleFilterApply = (filterData) => {
     setFilters(filterData);
     setShowFilters(false);
@@ -165,7 +156,6 @@ const ContestsPage = () => {
     );
   };
 
-  // Clear filters
   const clearFilters = () => {
     setFilters({
       startDate: null,
@@ -177,12 +167,10 @@ const ContestsPage = () => {
     fetchContests();
   };
 
-  // When categories are updated, refresh platforms
   const handleCategoryChange = async () => {
     await fetchPlatforms();
   };
 
-  // Handle participation stats
   const getParticipationStats = () => {
     if (!stats || !stats.total) return { rate: 0, participated: 0, total: 0 };
 
@@ -193,7 +181,6 @@ const ContestsPage = () => {
     return { rate, participated, total };
   };
 
-  // Loading state component
   if (loading) {
     return <ContestsLoadingSkeleton />;
   }
@@ -206,7 +193,6 @@ const ContestsPage = () => {
         isDark ? "bg-black" : "bg-white"
       }`}
     >
-      {/* Background gradients */}
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
           isDark
@@ -223,7 +209,6 @@ const ContestsPage = () => {
       />
 
       <div className="mx-auto px-4 relative z-10">
-        {/* Header and Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-6 md:mb-8">
           <motion.h2
             initial={{ opacity: 0, y: -20 }}
@@ -248,7 +233,6 @@ const ContestsPage = () => {
             transition={{ duration: 0.5 }}
             className="flex flex-wrap gap-2 md:gap-3 items-center"
           >
-            {/* Search Input */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search
@@ -270,7 +254,6 @@ const ContestsPage = () => {
               />
             </div>
 
-            {/* Filters Button */}
             <FilterButton
               active={showFilters}
               onClick={() => setShowFilters(!showFilters)}
@@ -289,7 +272,6 @@ const ContestsPage = () => {
               <span className="text-xs md:text-sm">Filters</span>
             </FilterButton>
 
-            {/* Stats Button */}
             <FilterButton
               active={showStats}
               onClick={() => setShowStats(true)}
@@ -308,7 +290,6 @@ const ContestsPage = () => {
               <span className="text-xs md:text-sm">Stats</span>
             </FilterButton>
 
-            {/* Platforms Button */}
             <FilterButton
               active={showCategoryManagement}
               onClick={() => setShowCategoryManagement(true)}
@@ -327,7 +308,6 @@ const ContestsPage = () => {
               <span className="text-xs md:text-sm">Platforms</span>
             </FilterButton>
 
-            {/* Add Contest Button */}
             <FilterButton
               type="add"
               onClick={() => {
@@ -359,7 +339,6 @@ const ContestsPage = () => {
               </span>
             </button>
 
-            {/* Refresh Button */}
             <button
               onClick={() => fetchContests()}
               className={`p-2 rounded-lg transition-colors shadow-sm ${
@@ -374,7 +353,6 @@ const ContestsPage = () => {
           </motion.div>
         </div>
 
-        {/* Show active filters if any */}
         {(filters.startDate ||
           filters.endDate ||
           filters.platform ||
@@ -444,7 +422,6 @@ const ContestsPage = () => {
           </div>
         )}
 
-        {/* Error message */}
         {error && (
           <div
             className={`p-3 md:p-4 mb-4 md:mb-6 rounded-lg text-xs md:text-sm ${
@@ -465,7 +442,6 @@ const ContestsPage = () => {
           </div>
         )}
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
           <StatsCard
             title="Total Contests"
@@ -497,7 +473,6 @@ const ContestsPage = () => {
           )}
         </div>
 
-        {/* Contests Cards Section */}
         <div className="mt-4 md:mt-8">
           <div className="flex items-center justify-between mb-4 md:mb-8">
             <h2
@@ -515,7 +490,6 @@ const ContestsPage = () => {
               />
             </h2>
 
-            {/* Sort Controls */}
             <div className="flex items-center gap-1 md:gap-2">
               <ArrowUpDown
                 className={`w-3 h-3 md:w-4 md:h-4 ${
@@ -579,7 +553,6 @@ const ContestsPage = () => {
           )}
         </div>
 
-        {/* Form Modal */}
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div
@@ -614,7 +587,6 @@ const ContestsPage = () => {
           </div>
         )}
 
-        {/* Stats Modal */}
         {showStats && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div
@@ -640,7 +612,6 @@ const ContestsPage = () => {
           </div>
         )}
 
-        {/* Visualization Modal */}
         <VisualizeModal
           isOpen={showVisualization}
           onClose={() => setShowVisualization(false)}
@@ -648,7 +619,6 @@ const ContestsPage = () => {
           stats={stats}
         />
 
-        {/* Filters Modal */}
         {showFilters && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div
@@ -679,7 +649,6 @@ const ContestsPage = () => {
           </div>
         )}
 
-        {/* Platform Management Modal */}
         {showCategoryManagement && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div
@@ -726,7 +695,6 @@ const ContestsPage = () => {
           </div>
         )}
 
-        {/* Confirm Delete Dialog */}
         <ConfirmDialog
           isOpen={contestToDelete !== null}
           onClose={() => setContestToDelete(null)}
@@ -741,7 +709,6 @@ const ContestsPage = () => {
   );
 };
 
-// Loading Skeleton Component (unchanged)
 const ContestsLoadingSkeleton = () => {
   const { isDark } = useTheme();
 
@@ -751,7 +718,6 @@ const ContestsLoadingSkeleton = () => {
         isDark ? "bg-black" : "bg-white"
       }`}
     >
-      {/* Background Gradients */}
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
           isDark
@@ -768,7 +734,6 @@ const ContestsLoadingSkeleton = () => {
       />
 
       <div className="px-4 relative z-10">
-        {/* Header Skeleton */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-6 md:mb-8">
           <div
             className={`h-6 md:h-8 w-48 md:w-64 rounded-lg ${
@@ -789,7 +754,6 @@ const ContestsLoadingSkeleton = () => {
           </div>
         </div>
 
-        {/* Stats Grid Skeleton */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
           {[...Array(4)].map((_, i) => (
             <div
@@ -823,7 +787,6 @@ const ContestsLoadingSkeleton = () => {
           ))}
         </div>
 
-        {/* Chart Skeleton */}
         <div
           className={`p-3 md:p-6 rounded-lg border mb-4 md:mb-8 ${
             isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
@@ -848,7 +811,6 @@ const ContestsLoadingSkeleton = () => {
           ></div>
         </div>
 
-        {/* Entries Section Skeleton */}
         <div className="mt-4 md:mt-8">
           <div
             className={`h-6 md:h-8 w-32 md:w-48 rounded mb-4 md:mb-8 ${
