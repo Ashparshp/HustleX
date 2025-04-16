@@ -109,7 +109,6 @@ const Navbar = () => {
     return location.pathname === path;
   };
 
-  // Navigation links with icons - split into primary and secondary for responsive design
   const primaryNavLinks = [
     {
       text: "Working Hours",
@@ -152,7 +151,7 @@ const Navbar = () => {
     },
   ];
 
-  // Theme specific styling with added shadow on scroll
+ 
   const navbarClass = isDark
     ? `bg-gray-900/95 text-white border-gray-800 backdrop-blur-md ${
         scrolled ? "shadow-lg shadow-black/20" : ""

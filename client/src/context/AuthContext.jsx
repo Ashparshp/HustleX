@@ -52,7 +52,6 @@ const toastConfig = {
   },
 };
 
-// Enhanced toast functions
 const showToast = {
   success: (message) => toast.success(message, toastConfig.success),
   error: (message) => toast.error(message, toastConfig.error),
@@ -121,7 +120,6 @@ export const AuthProvider = ({ children }) => {
     verifyToken();
   }, [API_URL, token]);
 
-  // Register new user
   const register = async (userData) => {
     setLoading(true);
     setError(null);
@@ -157,7 +155,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Login user
   const login = async (credentials) => {
     setLoading(true);
     setError(null);
@@ -191,7 +188,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout user
   const logout = async () => {
     try {
       if (token) {
@@ -213,7 +209,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Forgot password
   const forgotPassword = async (email) => {
     setLoading(true);
     setError(null);
@@ -247,7 +242,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Reset password
   const resetPassword = async (token, password) => {
     setLoading(true);
     setError(null);
@@ -284,7 +278,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Verify email
   const verifyEmail = async (token) => {
     setLoading(true);
     setError(null);
@@ -317,7 +310,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Update user profile
   const updateProfile = async (userData) => {
     if (!token) {
       showToast.error("You must be logged in");
@@ -362,7 +354,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Change password
   const changePassword = async (passwordData) => {
     if (!token) {
       showToast.error("You must be logged in");
@@ -402,7 +393,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Verify phone
   const verifyPhone = async (verificationCode) => {
     if (!token) {
       showToast.error("You must be logged in");
@@ -429,7 +419,6 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || "Failed to verify phone");
       }
 
-      // Update user with verified phone
       setCurrentUser({
         ...currentUser,
         isPhoneVerified: true,
@@ -448,7 +437,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Resend email verification
   const resendEmailVerification = async () => {
     if (!token) {
       showToast.error("You must be logged in");
@@ -486,7 +474,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Resend phone verification
   const resendPhoneVerification = async () => {
     if (!token) {
       showToast.error("You must be logged in");

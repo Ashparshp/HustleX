@@ -20,7 +20,6 @@ const useWorkingHours = () => {
 
   const { isAuthenticated } = useAuth();
 
-  // Fetch working hours with optional filters
   const fetchWorkingHours = useCallback(
     async (startDate, endDate, category) => {
       if (!isAuthenticated) return;
@@ -51,13 +50,11 @@ const useWorkingHours = () => {
     [isAuthenticated]
   );
 
-  // Add new working hours
   const addWorkingHours = useCallback(
     async (data) => {
       if (!isAuthenticated) return;
 
       try {
-        // Ensure date is in ISO format
         const formattedData = {
           ...data,
           date: new Date(data.date).toISOString(),
@@ -65,7 +62,6 @@ const useWorkingHours = () => {
 
         const response = await apiClient.post("/working-hours", formattedData);
 
-        // Refresh data
         await fetchWorkingHours();
 
         toast.success("Added");
@@ -79,13 +75,11 @@ const useWorkingHours = () => {
     [isAuthenticated, fetchWorkingHours]
   );
 
-  // Update existing working hours
   const updateWorkingHours = useCallback(
     async (id, data) => {
       if (!isAuthenticated) return;
 
       try {
-        // Ensure date is in ISO format if present
         const formattedData = { ...data };
         if (formattedData.date) {
           formattedData.date = new Date(formattedData.date).toISOString();
@@ -96,7 +90,6 @@ const useWorkingHours = () => {
           formattedData
         );
 
-        // Refresh data
         await fetchWorkingHours();
 
         toast.success("Updated");
@@ -110,7 +103,6 @@ const useWorkingHours = () => {
     [isAuthenticated, fetchWorkingHours]
   );
 
-  // Delete working hours
   const deleteWorkingHours = useCallback(
     async (id) => {
       if (!isAuthenticated) return;
@@ -118,7 +110,6 @@ const useWorkingHours = () => {
       try {
         await apiClient.delete(`/working-hours/${id}`);
 
-        // Refresh data
         await fetchWorkingHours();
 
         toast.success("Deleted");
@@ -131,7 +122,6 @@ const useWorkingHours = () => {
     [isAuthenticated, fetchWorkingHours]
   );
 
-  // Get statistics
   const getStats = useCallback(
     async (startDate, endDate) => {
       if (!isAuthenticated) return;
@@ -155,7 +145,6 @@ const useWorkingHours = () => {
     [isAuthenticated]
   );
 
-  // Fetch categories
   const fetchCategories = useCallback(async () => {
     if (!isAuthenticated) return;
 
@@ -170,7 +159,6 @@ const useWorkingHours = () => {
     }
   }, [isAuthenticated]);
 
-  // Load initial data
   useEffect(() => {
     if (isAuthenticated) {
       fetchWorkingHours();

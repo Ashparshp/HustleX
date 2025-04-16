@@ -1,4 +1,3 @@
-// src/hooks/useCategories.js
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
@@ -12,13 +11,11 @@ const useCategories = (type = "working-hours") => {
 
   const { isAuthenticated } = useAuth();
 
-  // Fetch categories for a specific type
   const fetchCategories = useCallback(async () => {
     if (!isAuthenticated) return;
 
     try {
       setLoading(true);
-      // Add timestamp to prevent caching
       const timestamp = new Date().getTime();
       const response = await apiClient.get(
         `/categories?type=${type}&t=${timestamp}`
@@ -42,12 +39,10 @@ const useCategories = (type = "working-hours") => {
     }
   }, [isAuthenticated, type]);
 
-  // Fetch default categories
   const fetchDefaultCategories = useCallback(async () => {
     if (!isAuthenticated) return;
 
     try {
-      // Add timestamp to prevent caching
       const timestamp = new Date().getTime();
       const response = await apiClient.get(
         `/categories/defaults/${type}?t=${timestamp}`
@@ -66,18 +61,15 @@ const useCategories = (type = "working-hours") => {
     }
   }, [isAuthenticated, type]);
 
-  // Add a new category
   const addCategory = useCallback(
     async (categoryData) => {
       if (!isAuthenticated) return;
 
       try {
-        // Make sure type is included
         const data = { ...categoryData, type };
 
         const response = await apiClient.post("/categories", data);
 
-        // Refresh categories immediately
         await fetchCategories();
 
         toast.success("Added!");
@@ -91,7 +83,6 @@ const useCategories = (type = "working-hours") => {
     [isAuthenticated, type, fetchCategories]
   );
 
-  // Update a category
   const updateCategory = useCallback(
     async (id, categoryData) => {
       if (!isAuthenticated) return;
@@ -99,7 +90,6 @@ const useCategories = (type = "working-hours") => {
       try {
         const response = await apiClient.put(`/categories/${id}`, categoryData);
 
-        // Refresh categories immediately
         await fetchCategories();
 
         toast.success("Updated!");
@@ -113,7 +103,6 @@ const useCategories = (type = "working-hours") => {
     [isAuthenticated, fetchCategories]
   );
 
-  // Delete a category
   const deleteCategory = useCallback(
     async (id) => {
       if (!isAuthenticated) return;
@@ -121,7 +110,6 @@ const useCategories = (type = "working-hours") => {
       try {
         await apiClient.delete(`/categories/${id}`);
 
-        // Refresh categories immediately
         await fetchCategories();
 
         toast.success("Deleted!");
@@ -134,7 +122,6 @@ const useCategories = (type = "working-hours") => {
     [isAuthenticated, fetchCategories]
   );
 
-  // Load initial data
   useEffect(() => {
     if (isAuthenticated) {
       fetchCategories();

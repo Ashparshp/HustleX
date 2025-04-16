@@ -1,4 +1,4 @@
-// src/components/Contests/ContestStats.jsx
+ 
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -47,11 +47,11 @@ const ContestStats = ({ stats }) => {
   const platforms = stats.platforms || {};
   const recentTrend = stats.recent_trend || [];
 
-  // Calculate participation rate
+  
   const participationRate =
     stats.total > 0 ? Math.round((stats.participated / stats.total) * 100) : 0;
 
-  // Get platform color
+  
   const getPlatformColor = (platform) => {
     const platformColors = {
       LeetCode: isDark
@@ -80,7 +80,7 @@ const ContestStats = ({ stats }) => {
     );
   };
 
-  // Get color based on performance
+  
   const getPerformanceColor = (value, thresholds) => {
     const { high, medium } = thresholds;
     if (value >= high) {
@@ -104,9 +104,9 @@ const ContestStats = ({ stats }) => {
 
   return (
     <div className="space-y-4">
-      {/* Summary cards */}
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {/* Participation Stats */}
+        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -205,7 +205,6 @@ const ContestStats = ({ stats }) => {
           </div>
         </motion.div>
 
-        {/* Ranking Stats - With improved visibility */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -298,7 +297,7 @@ const ContestStats = ({ stats }) => {
           </div>
         </motion.div>
 
-        {/* Platform Stats */}
+        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -384,7 +383,7 @@ const ContestStats = ({ stats }) => {
         </motion.div>
       </div>
 
-      {/* Recent Performance & Trends */}
+      
       {recentTrend && recentTrend.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}

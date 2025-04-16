@@ -1,4 +1,3 @@
-// src/components/Contests/ContestsHeatmap.jsx
 import { useState, useEffect } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
@@ -23,17 +22,13 @@ const ContestsHeatmap = ({ data = [] }) => {
     "Dec",
   ];
 
-  // Get contest data for the current month
   const getMonthlyData = () => {
     const monthData = {};
-
-    // Initialize the data structure with all days of the month
     const daysInMonth = new Date(year, selectedMonth + 1, 0).getDate();
     for (let i = 1; i <= daysInMonth; i++) {
       monthData[i] = { count: 0, participated: 0 };
     }
 
-    // Fill with contest data
     data.forEach((contest) => {
       const contestDate = new Date(contest.date);
       if (
@@ -53,7 +48,6 @@ const ContestsHeatmap = ({ data = [] }) => {
     return monthData;
   };
 
-  // Get monthly contest count summary
   const getAnnualSummary = () => {
     const summary = Array(12).fill(0);
 
@@ -68,7 +62,6 @@ const ContestsHeatmap = ({ data = [] }) => {
     return summary;
   };
 
-  // Get cell color based on contest data - now theme aware
   const getCellColor = (count, participated) => {
     if (count === 0) {
       return isDark ? "bg-gray-800" : "bg-gray-200";
@@ -85,37 +78,30 @@ const ContestsHeatmap = ({ data = [] }) => {
     }
   };
 
-  // Get text color based on theme and cell type
   const getCellTextColor = (count) => {
     if (count === 0) return isDark ? "text-gray-200" : "text-gray-800";
     return isDark ? "text-white" : "text-gray-800";
   };
 
-  // Generate calendar for current month
   const generateCalendar = () => {
     const monthData = getMonthlyData();
     const firstDay = new Date(year, selectedMonth, 1).getDay();
     const daysInMonth = new Date(year, selectedMonth + 1, 0).getDate();
 
-    // Create array for calendar weeks
     const weeks = [];
     let days = [];
 
-    // Add empty cells for days before the 1st of the month
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
 
-    // Add days of the month
     for (let i = 1; i <= daysInMonth; i++) {
       days.push({
         day: i,
         data: monthData[i],
       });
 
-      // Start a new week
       if ((firstDay + i) % 7 === 0 || i === daysInMonth) {
-        // Fill the rest of the last week with empty cells
         while (days.length % 7 !== 0) {
           days.push(null);
         }
@@ -184,7 +170,6 @@ const ContestsHeatmap = ({ data = [] }) => {
     );
   };
 
-  // Generate year overview chart - now theme aware
   const generateYearOverview = () => {
     const annualData = getAnnualSummary();
     const maxCount = Math.max(...annualData, 1);
@@ -246,7 +231,6 @@ const ContestsHeatmap = ({ data = [] }) => {
     );
   };
 
-  // Navigation handlers
   const prevMonth = () => {
     if (selectedMonth === 0) {
       setYear(year - 1);

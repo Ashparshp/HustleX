@@ -7,14 +7,12 @@ const LoadingSpinner = ({
   showText = true,
   fullPage = true,
 }) => {
-  // Size variants
   const sizeMap = {
     small: { spinner: "h-6 w-6", container: "h-6 w-6", text: "text-sm" },
     medium: { spinner: "h-10 w-10", container: "h-10 w-10", text: "text-base" },
     large: { spinner: "h-16 w-16", container: "h-16 w-16", text: "text-lg" },
   };
 
-  // Color variants
   const colorMap = {
     indigo: "border-indigo-500 text-indigo-700",
     blue: "border-blue-500 text-blue-700",
@@ -25,7 +23,6 @@ const LoadingSpinner = ({
     teal: "border-teal-500 text-teal-700",
   };
 
-  // Animation variants
   const containerVariants = {
     initial: { opacity: 0, scale: 0.8 },
     animate: {

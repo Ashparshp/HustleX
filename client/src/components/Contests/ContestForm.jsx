@@ -1,4 +1,3 @@
-// src/components/Contests/ContestForm.jsx
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -32,11 +31,9 @@ const ContestForm = ({ initialData, onSubmit, onCancel, platforms = [] }) => {
 
   const [validationErrors, setValidationErrors] = useState({});
 
-  // Populate form with initial data if editing
   useEffect(() => {
     if (initialData) {
       const data = { ...initialData };
-      // Format date for input field
       if (data.date) {
         const dateObj = new Date(data.date);
         data.date = dateObj.toISOString().split("T")[0];
@@ -45,7 +42,6 @@ const ContestForm = ({ initialData, onSubmit, onCancel, platforms = [] }) => {
     }
   }, [initialData]);
 
-  // Validate form
   const validateContest = () => {
     const errors = {};
     if (!formData.platform) errors.platform = "Platform is required";
@@ -54,15 +50,12 @@ const ContestForm = ({ initialData, onSubmit, onCancel, platforms = [] }) => {
     return errors;
   };
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
-
-    // Clear validation error when user starts typing/selecting
     if (validationErrors[name]) {
       const newErrors = { ...validationErrors };
       delete newErrors[name];
@@ -70,18 +63,13 @@ const ContestForm = ({ initialData, onSubmit, onCancel, platforms = [] }) => {
     }
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Validate form
     const errors = validateContest();
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-
-    // Prepare data for submission
     const submissionData = {
       ...formData,
       rank: formData.rank ? parseInt(formData.rank) : null,

@@ -1,4 +1,3 @@
-// src/hooks/useContests.js
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
@@ -13,7 +12,6 @@ const useContests = () => {
 
   const { isAuthenticated } = useAuth();
 
-  // Fetch contests with optional filters
   const fetchContests = useCallback(
     async (startDate, endDate, platform, participated) => {
       if (!isAuthenticated) return;
@@ -47,7 +45,6 @@ const useContests = () => {
     [isAuthenticated]
   );
 
-  // Fetch available platforms
   const fetchPlatforms = useCallback(async () => {
     if (!isAuthenticated) return;
 
@@ -61,11 +58,9 @@ const useContests = () => {
       }
     } catch (err) {
       console.error("Error fetching platforms:", err);
-      // Don't show toast for this error as it's not critical
     }
   }, [isAuthenticated]);
 
-  // Fetch contest stats
   const fetchStats = useCallback(
     async (startDate, endDate) => {
       if (!isAuthenticated) return;
@@ -92,7 +87,6 @@ const useContests = () => {
     [isAuthenticated]
   );
 
-  // Add a new contest
   const addContest = useCallback(
     async (data) => {
       if (!isAuthenticated) return;
@@ -101,7 +95,7 @@ const useContests = () => {
         const response = await apiClient.post("/contests", data);
 
         if (response.success) {
-          await fetchContests(); // Refresh contests after adding
+          await fetchContests();
           toast.success("Contest added successfully");
           return response.data;
         } else {
@@ -116,7 +110,6 @@ const useContests = () => {
     [isAuthenticated, fetchContests]
   );
 
-  // Update a contest
   const updateContest = useCallback(
     async (id, data) => {
       if (!isAuthenticated) return;
@@ -125,7 +118,7 @@ const useContests = () => {
         const response = await apiClient.put(`/contests/${id}`, data);
 
         if (response.success) {
-          await fetchContests(); // Refresh contests after updating
+          await fetchContests();
           toast.success("Contest updated successfully");
           return response.data;
         } else {
@@ -140,7 +133,6 @@ const useContests = () => {
     [isAuthenticated, fetchContests]
   );
 
-  // Delete a contest
   const deleteContest = useCallback(
     async (id) => {
       if (!isAuthenticated) return;
@@ -149,7 +141,7 @@ const useContests = () => {
         const response = await apiClient.delete(`/contests/${id}`);
 
         if (response.success) {
-          await fetchContests(); // Refresh contests after deleting
+          await fetchContests();
           toast.success("Contest deleted successfully");
           return true;
         } else {
@@ -164,7 +156,6 @@ const useContests = () => {
     [isAuthenticated, fetchContests]
   );
 
-  // Load initial data when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       fetchContests();
