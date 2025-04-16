@@ -1,4 +1,3 @@
-// src/hooks/useLeetCode.js
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
@@ -12,7 +11,6 @@ const useLeetCode = () => {
 
   const { isAuthenticated } = useAuth();
 
-  // Get the latest LeetCode stats
   const getLeetCodeStats = useCallback(async () => {
     if (!isAuthenticated) return;
 
@@ -39,7 +37,6 @@ const useLeetCode = () => {
     }
   }, [isAuthenticated]);
 
-  // Get LeetCode stats history
   const getLeetCodeHistory = useCallback(
     async (limit = 10) => {
       if (!isAuthenticated) return;
@@ -73,7 +70,6 @@ const useLeetCode = () => {
     [isAuthenticated]
   );
 
-  // Update LeetCode stats
   const updateLeetCodeStats = useCallback(
     async (data) => {
       if (!isAuthenticated) return;
@@ -86,7 +82,6 @@ const useLeetCode = () => {
 
         if (response.success) {
           setStats(response.data || null);
-          // Also refresh history after updating stats
           getLeetCodeHistory();
           toast.success("LeetCode stats updated successfully");
           return response.data;
@@ -109,7 +104,6 @@ const useLeetCode = () => {
     [isAuthenticated, getLeetCodeHistory]
   );
 
-  // Delete a specific stats entry (from history)
   const deleteLeetCodeStatsEntry = useCallback(
     async (id) => {
       if (!isAuthenticated) return;
@@ -121,7 +115,6 @@ const useLeetCode = () => {
         const response = await apiClient.delete(`/leetcode/stats/${id}`);
 
         if (response.success) {
-          // Refresh history and current stats
           getLeetCodeHistory();
           getLeetCodeStats();
           toast.success("LeetCode stats entry deleted successfully");
@@ -145,7 +138,6 @@ const useLeetCode = () => {
     [isAuthenticated, getLeetCodeHistory, getLeetCodeStats]
   );
 
-  // Load initial data when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       getLeetCodeStats();

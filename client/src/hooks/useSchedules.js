@@ -1,4 +1,3 @@
-// src/hooks/useSchedules.js
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
@@ -29,14 +28,12 @@ const useSchedules = () => {
 
   const { isAuthenticated } = useAuth();
 
-  // Stats calculation function - defined before it's used in other functions
   const calculateStats = useCallback((scheduleData) => {
     if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
       setStats(defaultStats);
       return;
     }
 
-    // Calculate number of items due today
     const today = new Date().toISOString().split("T")[0];
     const todaySchedules = scheduleData.filter(
       (s) => s.date && new Date(s.date).toISOString().split("T")[0] === today
@@ -46,7 +43,6 @@ const useSchedules = () => {
       0
     );
 
-    // Calculate completion rate across all schedules
     const totalItems = scheduleData.reduce(
       (acc, s) => acc + (s.items ? s.items.length : 0),
       0
@@ -59,7 +55,6 @@ const useSchedules = () => {
     const completionRate =
       totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
-    // Calculate total hours for all schedules
     const totalHours = scheduleData.reduce((acc, schedule) => {
       if (!schedule.items) return acc;
 
@@ -75,7 +70,6 @@ const useSchedules = () => {
       );
     }, 0);
 
-    // Count high priority tasks
     const highPriorityTasks = scheduleData.reduce(
       (acc, s) =>
         acc +
@@ -85,7 +79,6 @@ const useSchedules = () => {
       0
     );
 
-    // Create category distribution
     const categories = {};
     scheduleData.forEach((schedule) => {
       if (!schedule.items) return;
@@ -97,28 +90,25 @@ const useSchedules = () => {
       });
     });
 
-    // Find top category
     const topCategory =
       Object.entries(categories).sort((a, b) => b[1] - a[1])[0]?.[0] || "";
 
-    // Set the calculated stats
     setStats({
       todayItems,
       completionRate,
       totalHours,
       highPriorityTasks,
-      weeklyTrend: 0, // Calculate based on requirements
-      completionTrend: 0, // Calculate based on requirements
-      hoursChange: 0, // Calculate based on requirements
-      priorityChange: 0, // Calculate based on requirements
+      weeklyTrend: 0,
+      completionTrend: 0,
+      hoursChange: 0,
+      priorityChange: 0,
       totalTasks: totalItems,
-      currentStreak: 0, // Calculate based on requirements
+      currentStreak: 0,
       topCategory,
       categoryCount: Object.keys(categories).length,
     });
   }, []);
 
-  // Fetch schedules with optional date range
   const fetchSchedules = useCallback(
     async (startDate = null, endDate = null, status = null) => {
       if (!isAuthenticated) return;
@@ -152,13 +142,11 @@ const useSchedules = () => {
     [isAuthenticated, calculateStats]
   );
 
-  // Create a new schedule
   const createSchedule = useCallback(
     async (scheduleData) => {
       if (!isAuthenticated) return;
 
       try {
-        // Validate required fields
         if (!scheduleData.date) {
           throw new Error("Date is required");
         }
@@ -167,7 +155,6 @@ const useSchedules = () => {
           throw new Error("At least one schedule item is required");
         }
 
-        // Ensure date is in correct format
         const formattedData = {
           ...scheduleData,
           date: new Date(scheduleData.date).toISOString(),
@@ -176,7 +163,6 @@ const useSchedules = () => {
         const response = await apiClient.post("/schedules", formattedData);
         const newSchedule = response.data || {};
 
-        // Update local state
         setSchedules((prev) => [...prev, newSchedule]);
         calculateStats([...schedules, newSchedule]);
 
@@ -191,7 +177,6 @@ const useSchedules = () => {
     [isAuthenticated, schedules, calculateStats]
   );
 
-  // Update an existing schedule
   const updateSchedule = useCallback(
     async (id, updates) => {
       if (!isAuthenticated) return;
@@ -201,7 +186,6 @@ const useSchedules = () => {
           throw new Error("Schedule ID is required");
         }
 
-        // Ensure date is in correct format if present
         if (updates.date) {
           updates.date = new Date(updates.date).toISOString();
         }
@@ -209,7 +193,6 @@ const useSchedules = () => {
         const response = await apiClient.put(`/schedules/${id}`, updates);
         const updatedSchedule = response.data || {};
 
-        // Update local state
         setSchedules((prev) =>
           prev.map((schedule) =>
             schedule._id === id ? updatedSchedule : schedule
@@ -232,7 +215,6 @@ const useSchedules = () => {
     [isAuthenticated, schedules, calculateStats]
   );
 
-  // Delete a schedule
   const deleteSchedule = useCallback(
     async (id) => {
       if (!isAuthenticated) return;
@@ -244,7 +226,6 @@ const useSchedules = () => {
 
         await apiClient.delete(`/schedules/${id}`);
 
-        // Update local state
         const updatedSchedules = schedules.filter(
           (schedule) => schedule._id !== id
         );
@@ -261,7 +242,6 @@ const useSchedules = () => {
     [isAuthenticated, schedules, calculateStats]
   );
 
-  // Add a new item to a specific schedule
   const addScheduleItem = useCallback(
     async (scheduleId, itemData) => {
       if (!isAuthenticated) return;
@@ -277,7 +257,6 @@ const useSchedules = () => {
         );
         const updatedSchedule = response.data || {};
 
-        // Update local state
         setSchedules((prev) =>
           prev.map((schedule) =>
             schedule._id === scheduleId ? updatedSchedule : schedule
@@ -300,7 +279,6 @@ const useSchedules = () => {
     [isAuthenticated, schedules, calculateStats]
   );
 
-  // Update a specific item in a schedule
   const updateScheduleItem = useCallback(
     async (scheduleId, itemId, updates) => {
       if (!isAuthenticated) return;
@@ -316,7 +294,6 @@ const useSchedules = () => {
         );
         const updatedSchedule = response.data || {};
 
-        // Update local state
         setSchedules((prev) =>
           prev.map((schedule) =>
             schedule._id === scheduleId ? updatedSchedule : schedule
@@ -338,7 +315,6 @@ const useSchedules = () => {
     [isAuthenticated, schedules, calculateStats]
   );
 
-  // Delete a specific item from a schedule
   const deleteScheduleItem = useCallback(
     async (scheduleId, itemId) => {
       if (!isAuthenticated) return;
@@ -353,7 +329,6 @@ const useSchedules = () => {
         );
         const updatedSchedule = response.data || {};
 
-        // Update local state
         setSchedules((prev) =>
           prev.map((schedule) =>
             schedule._id === scheduleId ? updatedSchedule : schedule
@@ -375,23 +350,19 @@ const useSchedules = () => {
     [isAuthenticated, schedules, calculateStats]
   );
 
-  // Copy a specific item to another date
   const copyScheduleItem = useCallback(
     async (item, targetDate) => {
       if (!isAuthenticated) return;
 
       try {
         setLoading(true);
-        // Format target date
         const formattedDate = new Date(targetDate);
-        formattedDate.setHours(0, 0, 0, 0); // Reset time part
+        formattedDate.setHours(0, 0, 0, 0);
 
-        // Check if schedule for target date exists
         let targetSchedule = schedules.find(
           (s) => new Date(s.date).toISOString().split("T")[0] === targetDate
         );
 
-        // If no schedule exists for target date, create one
         if (!targetSchedule) {
           const dayType =
             formattedDate.getDay() % 6 === 0 ? "Weekend" : "Weekday";
@@ -405,21 +376,17 @@ const useSchedules = () => {
           const response = await apiClient.post("/schedules", newScheduleData);
           targetSchedule = response.data || {};
 
-          // Update local schedules state
           setSchedules((prev) => [...prev, targetSchedule]);
         }
 
-        // Deep clone the item to copy, removing the _id
         const itemCopy = { ...item };
-        delete itemCopy._id; // Remove the original ID so a new one will be generated
+        delete itemCopy._id;
 
-        // Add the copied item to the target schedule
         const updatedSchedule = await apiClient.post(
           `/schedules/${targetSchedule._id}/items`,
           itemCopy
         );
 
-        // Update local state
         setSchedules((prev) =>
           prev.map((schedule) =>
             schedule._id === targetSchedule._id
@@ -449,35 +416,28 @@ const useSchedules = () => {
       try {
         setLoading(true);
 
-        // Format target date
         const formattedDate = new Date(targetDate);
-        formattedDate.setHours(0, 0, 0, 0); // Reset time part
+        formattedDate.setHours(0, 0, 0, 0);
 
-        // Check if a schedule already exists for the target date
         const existingSchedule = schedules.find(
           (s) => new Date(s.date).toISOString().split("T")[0] === targetDate
         );
 
-        // If exists, we'll need to delete it first (optional - could also merge instead)
         if (existingSchedule) {
           await apiClient.delete(`/schedules/${existingSchedule._id}`);
 
-          // Update local state to remove the existing schedule
           setSchedules((prev) =>
             prev.filter((s) => s._id !== existingSchedule._id)
           );
         }
 
-        // Create new schedule data from the source schedule
         const newScheduleData = {
           date: formattedDate.toISOString(),
           dayType: formattedDate.getDay() % 6 === 0 ? "Weekend" : "Weekday",
-          status: "Planned", // Reset status to Planned for the new copy
+          status: "Planned",
           items: sourceSchedule.items.map((item) => {
-            // Create a copy of each item without the _id field
             const { _id, ...itemWithoutId } = item;
 
-            // Reset completed status for all items in the new schedule
             return {
               ...itemWithoutId,
               completed: false,
@@ -485,14 +445,11 @@ const useSchedules = () => {
           }),
         };
 
-        // Create the new schedule
         const response = await apiClient.post("/schedules", newScheduleData);
         const newSchedule = response.data || {};
 
-        // Update local state
         setSchedules((prev) => [...prev, newSchedule]);
 
-        // Update stats
         calculateStats([
           ...schedules.filter((s) => s._id !== existingSchedule?._id),
           newSchedule,
@@ -511,22 +468,18 @@ const useSchedules = () => {
     [isAuthenticated, schedules, calculateStats]
   );
 
-  // Improved fetchCategories function with better error handling and state management
   const fetchCategories = useCallback(async () => {
     if (!isAuthenticated) return [];
 
-    // Prevent concurrent fetches
     if (isFetchingCategories) return categories;
 
     try {
       setIsFetchingCategories(true);
 
-      // Use the general categories endpoint with type=schedule
       const response = await apiClient.get("/categories?type=schedule");
 
       let extractedCategories = [];
 
-      // Handle different response structures
       if (response && Array.isArray(response)) {
         extractedCategories = response.map((cat) => cat.name);
       } else if (response && response.data && Array.isArray(response.data)) {
@@ -538,7 +491,6 @@ const useSchedules = () => {
       ) {
         extractedCategories = response.categories;
       } else {
-        // Fallback to default categories
         extractedCategories = [
           "DSA",
           "System Design",
@@ -554,7 +506,6 @@ const useSchedules = () => {
     } catch (err) {
       console.error("Error fetching schedule categories:", err);
 
-      // Fallback to default categories if there's an error
       const defaultCats = [
         "DSA",
         "System Design",
@@ -571,11 +522,9 @@ const useSchedules = () => {
     }
   }, [isAuthenticated, categories, isFetchingCategories]);
 
-  // Load initial data - fetch only once when component mounts
   useEffect(() => {
     if (isAuthenticated) {
       fetchSchedules();
-      // Category fetching is now controlled by the component
     }
   }, [isAuthenticated, fetchSchedules]);
 

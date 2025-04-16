@@ -1,4 +1,3 @@
-// src/hooks/useSkills.js
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
@@ -12,7 +11,6 @@ const useSkills = () => {
 
   const { isAuthenticated } = useAuth();
 
-  // Fetch all skills
   const fetchSkills = useCallback(
     async (category, status) => {
       if (!isAuthenticated) return;
@@ -28,7 +26,6 @@ const useSkills = () => {
         if (response.groupedSkills) {
           setSkills(response.groupedSkills);
         } else {
-          // Group skills by category if not already grouped
           const groupedData = (response.data || []).reduce((acc, skill) => {
             if (!acc[skill.category]) {
               acc[skill.category] = [];
@@ -39,7 +36,6 @@ const useSkills = () => {
           setSkills(groupedData);
         }
 
-        // Set stats if available
         if (response.stats) {
           setStats(response.stats);
         }
@@ -58,7 +54,6 @@ const useSkills = () => {
     [isAuthenticated]
   );
 
-  // Add a new skill
   const addSkill = useCallback(
     async (skillData) => {
       if (!isAuthenticated) return;
@@ -66,7 +61,6 @@ const useSkills = () => {
       try {
         const response = await apiClient.post("/skills", skillData);
 
-        // Refresh skills
         await fetchSkills();
 
         toast.success("Skill added successfully");
@@ -80,7 +74,6 @@ const useSkills = () => {
     [isAuthenticated, fetchSkills]
   );
 
-  // Update a skill
   const updateSkill = useCallback(
     async (id, updateData) => {
       if (!isAuthenticated) return;
@@ -88,7 +81,6 @@ const useSkills = () => {
       try {
         const response = await apiClient.put(`/skills/${id}`, updateData);
 
-        // Refresh skills
         await fetchSkills();
 
         toast.success("Skill updated successfully");
@@ -102,7 +94,6 @@ const useSkills = () => {
     [isAuthenticated, fetchSkills]
   );
 
-  // Delete a skill
   const deleteSkill = useCallback(
     async (id) => {
       if (!isAuthenticated) return;
@@ -110,7 +101,6 @@ const useSkills = () => {
       try {
         await apiClient.delete(`/skills/${id}`);
 
-        // Refresh skills
         await fetchSkills();
 
         toast.success("Skill deleted successfully");
@@ -123,7 +113,6 @@ const useSkills = () => {
     [isAuthenticated, fetchSkills]
   );
 
-  // Get skills categories
   const getSkillCategories = useCallback(async () => {
     if (!isAuthenticated) return [];
 
@@ -136,7 +125,6 @@ const useSkills = () => {
     }
   }, [isAuthenticated]);
 
-  // Get skill statistics
   const getSkillStats = useCallback(async () => {
     if (!isAuthenticated) return null;
 
@@ -151,21 +139,17 @@ const useSkills = () => {
     }
   }, [isAuthenticated]);
 
-  // Update multiple skills at once (for reordering)
   const updateMultipleSkills = useCallback(
     async (skillsData) => {
       if (!isAuthenticated) return;
 
       try {
-        // Use individual update calls instead of a batch endpoint
         const updatePromises = skillsData.map(skill => 
           updateSkill(skill.id || skill._id, skill)
         );
         
-        // Wait for all updates to complete
         await Promise.all(updatePromises);
         
-        // Refresh skills
         await fetchSkills();
         
         toast.success("Skills updated successfully");
@@ -179,27 +163,21 @@ const useSkills = () => {
     [isAuthenticated, fetchSkills, updateSkill]
   );
 
-  // Update skill ordering - use individual updates if reorder endpoint doesn't exist
   const updateSkillOrder = useCallback(
     async (category, orderedSkills) => {
       if (!isAuthenticated) return;
       
       try {
-        // Try to use the reorder endpoint first
         try {
-          // Create a skills array with only id and orderIndex
           const skillsData = orderedSkills.map((skill, index) => ({
             id: skill.id || skill._id,
             orderIndex: index
           }));
           
-          // Call the reorder endpoint
           await apiClient.post('/skills/reorder', { skills: skillsData });
         } catch (err) {
-          // If the reorder endpoint fails, fall back to individual updates
           console.log("Reorder endpoint failed, using individual updates instead");
           
-          // Update each skill individually
           for (let i = 0; i < orderedSkills.length; i++) {
             const skill = orderedSkills[i];
             await updateSkill(skill.id || skill._id, {
@@ -210,7 +188,6 @@ const useSkills = () => {
           }
         }
         
-        // Refresh skills to get the updated order
         await fetchSkills();
         
         toast.success("Skills reordered successfully");
@@ -223,7 +200,6 @@ const useSkills = () => {
     [isAuthenticated, fetchSkills, updateSkill, apiClient]
   );
 
-  // Load initial data
   useEffect(() => {
     if (isAuthenticated) {
       fetchSkills();

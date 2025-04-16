@@ -1,4 +1,3 @@
-// src/hooks/useGoals.js
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
@@ -13,7 +12,6 @@ const useGoals = () => {
 
   const { isAuthenticated } = useAuth();
 
-  // Fetch goals (previously contests) with optional filters
   const fetchGoals = useCallback(
     async (platform, participated, startDate, endDate, sort = "-date") => {
       if (!isAuthenticated) return;
@@ -45,7 +43,6 @@ const useGoals = () => {
     [isAuthenticated]
   );
 
-  // Add a new goal
   const addGoal = useCallback(
     async (data) => {
       if (!isAuthenticated) return;
@@ -53,7 +50,6 @@ const useGoals = () => {
       try {
         const response = await apiClient.post("/contests", data);
 
-        // Refresh data
         await fetchGoals();
 
         toast.success("Goal added successfully");
@@ -67,7 +63,6 @@ const useGoals = () => {
     [isAuthenticated, fetchGoals]
   );
 
-  // Update an existing goal
   const updateGoal = useCallback(
     async (id, data) => {
       if (!isAuthenticated) return;
@@ -75,7 +70,6 @@ const useGoals = () => {
       try {
         const response = await apiClient.put(`/contests/${id}`, data);
 
-        // Refresh data
         await fetchGoals();
 
         toast.success("Goal updated successfully");
@@ -89,7 +83,6 @@ const useGoals = () => {
     [isAuthenticated, fetchGoals]
   );
 
-  // Delete a goal
   const deleteGoal = useCallback(
     async (id) => {
       if (!isAuthenticated) return;
@@ -97,7 +90,6 @@ const useGoals = () => {
       try {
         await apiClient.delete(`/contests/${id}`);
 
-        // Refresh data
         await fetchGoals();
 
         toast.success("Goal deleted successfully");
@@ -110,7 +102,6 @@ const useGoals = () => {
     [isAuthenticated, fetchGoals]
   );
 
-  // Get goal statistics
   const getGoalStats = useCallback(
     async (startDate, endDate) => {
       if (!isAuthenticated) return;
@@ -133,7 +124,6 @@ const useGoals = () => {
     [isAuthenticated]
   );
 
-  // Get available platforms
   const getPlatforms = useCallback(async () => {
     if (!isAuthenticated) return;
 
@@ -147,7 +137,6 @@ const useGoals = () => {
     }
   }, [isAuthenticated]);
 
-  // Load initial data
   useEffect(() => {
     if (isAuthenticated) {
       fetchGoals();
