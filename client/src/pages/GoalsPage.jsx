@@ -1,4 +1,3 @@
-// src/pages/GoalsPage.jsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
@@ -58,7 +57,6 @@ const GoalsPage = () => {
     participated: "",
   });
 
-  // Handle form submission
   const handleFormSubmit = async (data) => {
     try {
       if (editingItem) {
@@ -73,13 +71,11 @@ const GoalsPage = () => {
     }
   };
 
-  // Handle edit button click
   const handleEdit = (item) => {
     setEditingItem(item);
     setShowForm(true);
   };
 
-  // Handle delete button click
   const handleDelete = async (id) => {
     try {
       await deleteGoal(id);
@@ -88,7 +84,6 @@ const GoalsPage = () => {
     }
   };
 
-  // Handle filter apply
   const handleFilterApply = (filterData) => {
     setFilters(filterData);
     setShowFilters(false);
@@ -100,12 +95,10 @@ const GoalsPage = () => {
     );
   };
 
-  // When categories are updated, refresh platforms list
   const handleCategoryChange = async () => {
     await getPlatforms();
   };
 
-  // Format date for display
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString(undefined, {
       year: "numeric",
@@ -195,7 +188,6 @@ const GoalsPage = () => {
         </div>
       </div>
 
-      {/* Show active filters if any */}
       {(filters.startDate ||
         filters.endDate ||
         filters.platform ||
@@ -250,14 +242,12 @@ const GoalsPage = () => {
         </div>
       )}
 
-      {/* Loading indicator */}
       {loading && (
         <div className="flex justify-center my-12">
           <LoadingSpinner size="lg" text="Loading goals data..." />
         </div>
       )}
 
-      {/* Error message */}
       {error && !loading && (
         <div
           className={`p-4 mb-6 rounded-lg ${
@@ -278,7 +268,6 @@ const GoalsPage = () => {
         </div>
       )}
 
-      {/* Goals data */}
       {!loading && !error && (
         <GoalList
           goals={goals}
@@ -288,7 +277,6 @@ const GoalsPage = () => {
         />
       )}
 
-      {/* Form modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div
@@ -325,7 +313,6 @@ const GoalsPage = () => {
         </div>
       )}
 
-      {/* Stats modal */}
       {showStats && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div
@@ -351,7 +338,6 @@ const GoalsPage = () => {
         </div>
       )}
 
-      {/* Filters modal */}
       {showFilters && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div
@@ -380,7 +366,6 @@ const GoalsPage = () => {
         </div>
       )}
 
-      {/* Category Management modal (for platforms) */}
       {showCategoryManagement && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div
