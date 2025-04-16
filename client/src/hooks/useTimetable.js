@@ -1,4 +1,3 @@
-// hooks/useTimetable.js - Fixed Version
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
@@ -27,7 +26,6 @@ const useTimetable = (timetableId = null) => {
     };
   }, [token]);
 
-  // Check if we need to transition to a new week
   const checkWeekTransition = useCallback(() => {
     if (!currentWeek?.weekEndDate) return false;
 
@@ -36,13 +34,10 @@ const useTimetable = (timetableId = null) => {
     return now > weekEndDate;
   }, [currentWeek?.weekEndDate]);
 
-  // Fetch all timetables for the user
   const fetchTimetables = useCallback(async () => {
     if (!token) return;
 
     try {
-      // Don't set loading to true here if we already have timetables
-      // This prevents UI flashing when refreshing timetables
       if (timetables.length === 0) {
         setLoading(true);
       }
@@ -64,9 +59,7 @@ const useTimetable = (timetableId = null) => {
 
       setTimetables(data.data);
 
-      // Only set current timetable if none is set or if explicitly requested
       if (!currentTimetable || timetableId) {
-        // Find the specified timetable by ID or fall back to the active one or first one
         let selectedTimetable = null;
 
         if (timetableId) {
@@ -74,7 +67,6 @@ const useTimetable = (timetableId = null) => {
         }
 
         if (!selectedTimetable) {
-          // Find active timetable or use the first one
           selectedTimetable =
             data.data.find((t) => t.isActive) ||
             (data.data.length > 0 ? data.data[0] : null);
@@ -104,7 +96,6 @@ const useTimetable = (timetableId = null) => {
     timetables.length,
   ]);
 
-  // Create a new timetable
   const createTimetable = useCallback(
     async (timetableData) => {
       if (!token) return;
@@ -126,7 +117,6 @@ const useTimetable = (timetableId = null) => {
           throw new Error(data.message || "Failed to create timetable");
         }
 
-        // Always return the created timetable data
         return data.data;
       } catch (err) {
         console.error("Error creating timetable:", err);
@@ -137,7 +127,6 @@ const useTimetable = (timetableId = null) => {
     [API_URL, getAuthHeaders, token]
   );
 
-  // Update a timetable
   const updateTimetable = useCallback(
     async (id, timetableData) => {
       if (!token) return;
@@ -159,7 +148,6 @@ const useTimetable = (timetableId = null) => {
           throw new Error(data.message || "Failed to update timetable");
         }
 
-        // Only show toast for timetable switching, remove it for regular updates
         if (timetableData.isActive !== undefined && timetableData.isActive) {
           toast.success("Switched!");
         }
@@ -175,7 +163,6 @@ const useTimetable = (timetableId = null) => {
     [API_URL, fetchTimetables, getAuthHeaders, token]
   );
 
-  // Delete a timetable
   const deleteTimetable = useCallback(
     async (id, options = {}) => {
       const { silent = false } = options;
@@ -198,7 +185,6 @@ const useTimetable = (timetableId = null) => {
           throw new Error(data.message || "Failed to delete timetable");
         }
 
-        // Only show toast if not silent
         if (!silent) {
           toast.success("Timetable deleted successfully");
         }
@@ -208,7 +194,6 @@ const useTimetable = (timetableId = null) => {
       } catch (err) {
         console.error("Error deleting timetable:", err);
 
-        // Only show error toast if not silent
         if (!silent) {
           toast.error(err.message || "Failed to delete timetable");
         }
@@ -219,7 +204,6 @@ const useTimetable = (timetableId = null) => {
     [API_URL, fetchTimetables, getAuthHeaders, token]
   );
 
-  // Fetch the current week for a specific timetable
   const fetchCurrentWeek = useCallback(
     async (id = null) => {
       if (updateInProgress.current || !token) {
@@ -229,8 +213,6 @@ const useTimetable = (timetableId = null) => {
       try {
         updateInProgress.current = true;
 
-        // Don't set loading to true if it's a refresh of existing data
-        // This prevents UI flashing when refreshing current week
         if (!currentWeek) {
           setLoading(true);
         }
@@ -265,13 +247,12 @@ const useTimetable = (timetableId = null) => {
 
         setCurrentWeek(data.data);
         setError(null);
-        retryCount.current = 0; // Reset retry count on success
+        retryCount.current = 0;
         return data.data;
       } catch (err) {
         console.error("Error fetching current week:", err);
         setError(err.message);
 
-        // Only show toast if this is a user-initiated action, not an auto-retry
         if (retryCount.current === 0) {
           toast.error("Failed to fetch current week data");
         }
@@ -285,7 +266,6 @@ const useTimetable = (timetableId = null) => {
     [API_URL, currentTimetable, getAuthHeaders, token, currentWeek]
   );
 
-  // Toggle activity status for a day
   const toggleActivityStatus = useCallback(
     async (activityId, dayIndex) => {
       if (updateInProgress.current || !token || !currentTimetable) {
@@ -296,7 +276,6 @@ const useTimetable = (timetableId = null) => {
       updateInProgress.current = true;
 
       try {
-        // Optimistic update
         setCurrentWeek((prevWeek) => {
           if (!prevWeek) return prevWeek;
           return {
@@ -338,7 +317,6 @@ const useTimetable = (timetableId = null) => {
         setError(null);
         return data.data;
       } catch (err) {
-        // Rollback on error
         setCurrentWeek(previousWeek);
         setError(err.message);
         toast.error("Failed to update activity status");
@@ -350,7 +328,6 @@ const useTimetable = (timetableId = null) => {
     [API_URL, currentTimetable, currentWeek, getAuthHeaders, token]
   );
 
-  // Fetch history for a timetable
   const fetchHistory = useCallback(
     async (page = 1, id = null) => {
       if (!token) return;
@@ -391,7 +368,6 @@ const useTimetable = (timetableId = null) => {
     [API_URL, currentTimetable, getAuthHeaders, token]
   );
 
-  // Get statistics for a timetable
   const getStats = useCallback(
     async (id = null) => {
       if (updateInProgress.current || !token) {
@@ -440,12 +416,10 @@ const useTimetable = (timetableId = null) => {
     [API_URL, currentTimetable, getAuthHeaders, token]
   );
 
-  // Get timetable categories
   const getCategories = useCallback(async () => {
     if (!token) return [];
 
     try {
-      // Add timestamp to prevent caching
       const timestamp = new Date().getTime();
       const response = await fetch(
         `${API_URL}/api/timetables/categories?t=${timestamp}`,
@@ -464,7 +438,6 @@ const useTimetable = (timetableId = null) => {
         throw new Error(data.message || "Failed to fetch categories");
       }
 
-      // Make sure we return an array even if the API returns null or undefined
       return Array.isArray(data.categories) ? data.categories : [];
     } catch (err) {
       console.error("Error fetching categories:", err);
@@ -505,7 +478,6 @@ const useTimetable = (timetableId = null) => {
           throw new Error(data.message || "Failed to update activities");
         }
 
-        // Only show toast if not silent
         if (!silent) {
           toast.success("Activities updated successfully");
         }
@@ -514,7 +486,6 @@ const useTimetable = (timetableId = null) => {
       } catch (err) {
         console.error("Error updating activities:", err);
 
-        // Only show error toast if not silent
         if (!silent) {
           toast.error(err.message || "Failed to update activities");
         }
@@ -525,7 +496,6 @@ const useTimetable = (timetableId = null) => {
     [API_URL, currentTimetable, getAuthHeaders, token]
   );
 
-  // Force start a new week
   const startNewWeek = useCallback(
     async (id = null) => {
       if (!token) return;
@@ -568,7 +538,6 @@ const useTimetable = (timetableId = null) => {
     [API_URL, currentTimetable, getAuthHeaders, token]
   );
 
-  // Check for week transition and update if needed
   useEffect(() => {
     const checkAndUpdateWeek = async () => {
       if (checkWeekTransition() && currentTimetable) {
@@ -581,12 +550,10 @@ const useTimetable = (timetableId = null) => {
       }
     };
 
-    // Check immediately
     if (token && currentTimetable) {
       checkAndUpdateWeek();
     }
 
-    // Set up periodic check (every minute)
     weekCheckIntervalRef.current = setInterval(checkAndUpdateWeek, 60000);
 
     return () => {
@@ -596,20 +563,16 @@ const useTimetable = (timetableId = null) => {
     };
   }, [checkWeekTransition, currentTimetable, fetchCurrentWeek, token]);
 
-  // Initial data load - FIXED to prevent infinite loops and reduce flickering
   useEffect(() => {
     const loadInitialData = async () => {
       if (!token || initialLoadComplete.current) return;
 
       try {
         setLoading(true);
-        // Mark as completed immediately to prevent repeated calls
         initialLoadComplete.current = true;
 
-        // First fetch timetables
         const timetablesData = await fetchTimetables();
 
-        // Then, if we have a current timetable, fetch its current week
         if (currentTimetable || (timetablesData && timetablesData.length > 0)) {
           try {
             const timetableToUse =
@@ -627,17 +590,13 @@ const useTimetable = (timetableId = null) => {
       } catch (err) {
         console.error("Failed to load initial data:", err);
       } finally {
-        // Set loading to false at the end
         setLoading(false);
       }
     };
 
     loadInitialData();
-
-    // Only run when token changes or component mounts/unmounts
   }, [token, fetchTimetables, fetchCurrentWeek, currentTimetable]);
 
-  // Effect to fetch current week when timetable changes - added condition to prevent redundant fetches
   useEffect(() => {
     if (
       token &&

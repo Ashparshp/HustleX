@@ -31,7 +31,6 @@ import TimetableError from "../components/Timetable/TimetableError";
 import ManageActivitiesModal from "../components/Timetable/ManageActivitiesModal";
 import DeleteTimetableModal from "../components/Timetable/DeleteTimetableModal";
 
-// Environment variables
 const API_URL = import.meta.env.VITE_API_URL;
 
 const EnhancedDateDisplay = ({ dateString, isDark }) => {
@@ -355,7 +354,6 @@ const TimetablePage = () => {
     setActiveModal("categoryManagement");
   };
 
-  // Updated handleAddActivity with proper timetable ID handling
   const handleAddActivity = async (activityData) => {
     try {
       setIsSubmitting(true);
@@ -365,26 +363,21 @@ const TimetablePage = () => {
         throw new Error("No timetable selected");
       }
 
-      // Fetch the current activities directly from the server to ensure accuracy
       const currentActivities = await fetchCurrentTimetableActivities(
         localCurrentTimetable.id
       );
 
-      // Add the new activity to the current activities
       const updatedActivities = [...currentActivities, activityData];
 
-      // Explicitly pass the timetable ID to ensure the right timetable is updated
       await updateDefaultActivities(updatedActivities, {
         silent: true,
         id: localCurrentTimetable.id,
       });
 
-      // Update the local activities state
       setActivities(updatedActivities);
 
       toast.success("Added");
 
-      // Refresh to show updated activities
       fetchCurrentWeek(localCurrentTimetable.id).catch((err) => {
         console.error("Error refreshing week data:", err);
       });
@@ -396,7 +389,6 @@ const TimetablePage = () => {
     }
   };
 
-  // Updated handleManageActivities with proper timetable ID handling
   const handleManageActivities = async (updatedActivities) => {
     try {
       setIsSubmitting(true);
@@ -406,7 +398,6 @@ const TimetablePage = () => {
         throw new Error("No timetable selected");
       }
 
-      // Explicitly pass the timetable ID to ensure the right timetable is updated
       await updateDefaultActivities(updatedActivities, {
         silent: true,
         id: localCurrentTimetable.id,
@@ -415,7 +406,6 @@ const TimetablePage = () => {
       setActivities(updatedActivities);
       toast.success("Updated");
 
-      // Refresh data for the current timetable
       fetchCurrentWeek(localCurrentTimetable.id).catch((err) => {
         console.error("Error refreshing week data:", err);
       });
@@ -433,7 +423,6 @@ const TimetablePage = () => {
         throw new Error("No timetable selected");
       }
 
-      // Get fresh activities to ensure we're working with the most recent data
       const currentActivities = await fetchCurrentTimetableActivities(
         localCurrentTimetable.id
       );
@@ -479,7 +468,6 @@ const TimetablePage = () => {
             console.error("Error loading new timetable week:", err);
           });
 
-          // Get activities for the new timetable
           const timetableActivities = await fetchCurrentTimetableActivities(
             newTimetable.id
           );
@@ -570,7 +558,6 @@ const TimetablePage = () => {
 
           await fetchCurrentWeek(newCurrentTimetable.id);
 
-          // Update activities for the new current timetable
           const currentActivities = await fetchCurrentTimetableActivities(
             newCurrentTimetable.id
           );
@@ -615,7 +602,6 @@ const TimetablePage = () => {
 
         const weekData = await fetchCurrentWeek(id);
 
-        // Fetch and update activities for the selected timetable
         const timetableActivities = await fetchCurrentTimetableActivities(id);
         setActivities(timetableActivities);
 

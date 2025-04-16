@@ -1,4 +1,3 @@
-// src/hooks/useTimeTracking.js
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
@@ -19,19 +18,16 @@ const useTimeTracking = (
   const intervalRef = useRef(null);
   const { isAuthenticated } = useAuth();
 
-  // Start time tracking
   const startTracking = useCallback(() => {
     if (isTracking) return;
 
     setIsTracking(true);
     setStartTime(new Date());
 
-    // Start interval to update time spent
     intervalRef.current = setInterval(() => {
       setTimeSpent((prev) => prev + 1);
     }, 1000);
 
-    // Log tracking start if authenticated
     if (isAuthenticated) {
       try {
         apiClient
@@ -47,14 +43,12 @@ const useTimeTracking = (
     }
   }, [isTracking, isAuthenticated, categoryId, taskName]);
 
-  // Stop time tracking
   const stopTracking = useCallback(() => {
     if (!isTracking) return 0;
 
     const endTime = new Date();
     const duration = startTime ? (endTime - startTime) / (1000 * 60 * 60) : 0;
 
-    // Clear interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -62,7 +56,6 @@ const useTimeTracking = (
 
     setIsTracking(false);
 
-    // Log tracking stop if authenticated
     if (isAuthenticated && startTime) {
       try {
         apiClient
@@ -79,7 +72,6 @@ const useTimeTracking = (
       }
     }
 
-    // Add to tracked sessions
     if (startTime) {
       setTrackedSessions((prev) => [
         ...prev,
@@ -97,9 +89,7 @@ const useTimeTracking = (
     return duration;
   }, [isTracking, startTime, isAuthenticated, categoryId, taskName]);
 
-  // Reset tracking
   const resetTracking = useCallback(() => {
-    // Stop if currently tracking
     if (isTracking) {
       stopTracking();
     }
@@ -107,14 +97,12 @@ const useTimeTracking = (
     setTimeSpent(0);
     setStartTime(null);
 
-    // Clear interval just in case
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
   }, [isTracking, stopTracking]);
 
-  // Format time as HH:MM:SS
   const formatTime = useCallback((seconds) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -124,7 +112,6 @@ const useTimeTracking = (
       .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
   }, []);
 
-  // Save tracked session to the server
   const saveSession = useCallback(
     async (sessionData) => {
       if (!isAuthenticated) return;
@@ -151,7 +138,6 @@ const useTimeTracking = (
     [isAuthenticated]
   );
 
-  // Fetch tracking sessions
   const fetchSessions = useCallback(
     async (filters = {}) => {
       if (!isAuthenticated) return [];
@@ -176,7 +162,6 @@ const useTimeTracking = (
     [isAuthenticated]
   );
 
-  // Delete a tracked session
   const deleteSession = useCallback(
     async (sessionId) => {
       if (!isAuthenticated) return;
@@ -186,7 +171,6 @@ const useTimeTracking = (
 
         await apiClient.delete(`/time-tracking/sessions/${sessionId}`);
 
-        // Update local state
         setTrackedSessions((prev) =>
           prev.filter((session) => session.id !== sessionId)
         );
@@ -204,7 +188,6 @@ const useTimeTracking = (
     [isAuthenticated]
   );
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (intervalRef.current) {
@@ -213,7 +196,6 @@ const useTimeTracking = (
     };
   }, []);
 
-  // Load sessions on authentication change
   useEffect(() => {
     if (isAuthenticated) {
       fetchSessions().catch(console.error);
