@@ -1,4 +1,3 @@
-// src/components/Skills/EditSkillModal.jsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Save, Calendar, Trash2, Plus, Check } from "lucide-react";
@@ -50,19 +49,16 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
     }
   }, [skill]);
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === "progress") {
-      // Ensure progress is between 0 and 100
       const progress = Math.min(100, Math.max(0, parseInt(value) || 0));
       setFormData({ ...formData, progress });
     } else {
       setFormData({ ...formData, [name]: value });
     }
 
-    // If status changes to completed, set progress to 100
     if (name === "status" && value === "completed") {
       setFormData((prev) => ({
         ...prev,
@@ -72,7 +68,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
       }));
     }
 
-    // If status changes to in-progress, set start date if not set
     if (name === "status" && value === "in-progress" && !formData.startDate) {
       setFormData((prev) => ({
         ...prev,
@@ -81,13 +76,11 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (isSubmitting) return;
 
-    // Validation
     if (!formData.name.trim()) {
       setError("Skill name is required");
       return;
@@ -111,12 +104,10 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
     }
   };
 
-  // Handle delete button click
   const handleDeleteClick = () => {
     setShowDeleteConfirm(true);
   };
 
-  // Handle delete confirmation
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
@@ -130,12 +121,10 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
     }
   };
 
-  // Handle cancel delete
   const handleCancelDelete = () => {
     setShowDeleteConfirm(false);
   };
 
-  // Handle adding a new category
   const handleAddCategory = async () => {
     if (!newCategory.trim()) {
       setError("Category name is required");
@@ -152,7 +141,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
     }
   };
 
-  // Modal animation variants
   const modalVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
     visible: {
@@ -175,7 +163,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
     exit: { opacity: 0, transition: { duration: 0.2 } },
   };
 
-  // Get priority color
   const getPriorityColor = (priority) => {
     switch (priority) {
       case "high":
@@ -189,7 +176,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
     }
   };
 
-  // Get status color
   const getStatusColor = (status) => {
     switch (status) {
       case "completed":
@@ -203,7 +189,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
     }
   };
 
-  // Styling classes based on theme with reduced sizes for desktop
   const modalBgClass = isDark
     ? "bg-black bg-gradient-to-br from-indigo-900/20 to-blue-900/10"
     : "bg-white bg-gradient-to-br from-indigo-100/50 to-blue-100/30";
@@ -212,7 +197,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
   const primaryTextClass = isDark ? "text-indigo-400" : "text-indigo-600";
   const secondaryTextClass = isDark ? "text-gray-400" : "text-gray-600";
 
-  // Reduced sizes for inputs and form elements on desktop
   const inputClass = `w-full px-2 py-1.5 text-sm rounded-md ${
     isDark
       ? "bg-indigo-500/10 border-indigo-500/30 text-white placeholder-indigo-300/50 focus:border-indigo-400"
@@ -229,7 +213,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
     isDark ? "focus:ring-indigo-500/30" : "focus:ring-indigo-500/40"
   } transition-all duration-200`;
 
-  // Reduced button sizes
   const primaryButtonClass = `px-3 py-1.5 text-xs rounded-md font-medium ${
     isDark
       ? "bg-indigo-500/30 hover:bg-indigo-500/40 text-indigo-300 focus:ring-indigo-500/30"
@@ -276,7 +259,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
 
   return (
     <>
-      {/* Overlay with improved blur */}
       <motion.div
         initial="hidden"
         animate="visible"
@@ -286,7 +268,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
         onClick={onClose}
       />
 
-      {/* Modal with animation and improved sizing for desktop */}
       <motion.div
         initial="hidden"
         animate="visible"
@@ -300,7 +281,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
           } max-h-[90vh] overflow-y-auto my-2`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header with reduced padding and font size */}
           <div className="flex justify-between items-center mb-3 sticky top-0 z-10 backdrop-blur-md bg-opacity-90 pb-1 -mx-3 px-3 pt-1">
             <h2 className={`text-lg font-bold ${headingClass} truncate`}>
               Edit Skill: {skill?.name}
@@ -320,7 +300,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
             </motion.button>
           </div>
 
-          {/* Error message with reduced padding */}
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -335,10 +314,8 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
             </motion.div>
           )}
 
-          {/* Form with reduced spacing */}
           <form onSubmit={handleSubmit}>
             <div className="space-y-2">
-              {/* Skill Name */}
               <div>
                 <label htmlFor="name" className={labelClass}>
                   Skill Name*
@@ -355,7 +332,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                 />
               </div>
 
-              {/* Category with smaller sizing */}
               <div>
                 <label htmlFor="category" className={labelClass}>
                   Category*
@@ -446,9 +422,7 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                 )}
               </div>
 
-              {/* 3-column grid layout for form fields on desktop */}
               <div className="grid grid-cols-3 gap-2">
-                {/* Status with color indicators */}
                 <div>
                   <label htmlFor="status" className={labelClass}>
                     Status
@@ -485,7 +459,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                   </div>
                 </div>
 
-                {/* Priority with color indicators */}
                 <div>
                   <label htmlFor="priority" className={labelClass}>
                     Priority
@@ -522,7 +495,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                   </div>
                 </div>
 
-                {/* Progress with smaller slider */}
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <label htmlFor="progress" className={labelClass}>
@@ -555,7 +527,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                 </div>
               </div>
 
-              {/* Dates with 2-column layout */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label htmlFor="startDate" className={labelClass}>
@@ -602,7 +573,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                 </div>
               </div>
 
-              {/* Description with smaller height */}
               <div>
                 <label htmlFor="description" className={labelClass}>
                   Description
@@ -617,7 +587,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
                 />
               </div>
 
-              {/* Form Actions with improved layout for desktop */}
               <div className="flex justify-between gap-2 mt-3 sticky bottom-0 pb-2 pt-2 -mx-3 px-3 backdrop-blur-md bg-opacity-90">
                 <motion.button
                   whileHover={{ scale: 1.03 }}
@@ -668,7 +637,6 @@ const EditSkillModal = ({ skill, onClose, categories = [] }) => {
         </div>
       </motion.div>
 
-      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <ConfirmDeleteModal
           title="Delete Skill"
