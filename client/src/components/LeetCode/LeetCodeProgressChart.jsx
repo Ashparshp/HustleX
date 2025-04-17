@@ -1,4 +1,3 @@
-// src/components/LeetCode/LeetCodeProgressChart.jsx
 import {
   LineChart,
   Line,
@@ -16,16 +15,13 @@ import { AlertCircle } from "lucide-react";
 const LeetCodeProgressChart = ({ data = [] }) => {
   const { isDark } = useTheme();
 
-  // Process data for the chart
   const processChartData = () => {
     if (!data || data.length === 0) return [];
 
-    // Sort data by date
     const sortedData = [...data].sort(
       (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
     );
 
-    // Format data for the chart
     return sortedData.map((entry) => {
       const date = new Date(entry.createdAt);
       return {
@@ -42,7 +38,6 @@ const LeetCodeProgressChart = ({ data = [] }) => {
 
   const chartData = processChartData();
 
-  // Handle empty data
   if (chartData.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
@@ -57,7 +52,6 @@ const LeetCodeProgressChart = ({ data = [] }) => {
     );
   }
 
-  // Custom tooltip component
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload || !payload.length) return null;
 

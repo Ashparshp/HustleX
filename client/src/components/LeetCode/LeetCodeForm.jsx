@@ -1,4 +1,3 @@
-// src/components/LeetCode/LeetCodeForm.jsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
@@ -38,10 +37,8 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Initialize form with any existing data
   useEffect(() => {
     if (initialData) {
-      // Convert null values to empty strings for controlled inputs
       const preparedData = {
         ...initialData,
         ranking: initialData.ranking || "",
@@ -51,13 +48,11 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
 
       setFormData(preparedData);
 
-      // Convert solvedCategories to array for editing
       if (initialData.solvedCategories) {
         const categoriesArray = Object.entries(
           initialData.solvedCategories
         ).map(([name, count]) => ({ name, count }));
 
-        // Ensure at least one category input
         if (categoriesArray.length === 0) {
           categoriesArray.push({ name: "", count: "" });
         }
@@ -67,7 +62,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
     }
   }, [initialData]);
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -75,7 +69,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
       [name]: value,
     }));
 
-    // Clear validation error when user starts typing
     if (validationErrors[name]) {
       const newErrors = { ...validationErrors };
       delete newErrors[name];
@@ -83,12 +76,10 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
     }
   };
 
-  // Handle numeric changes (ensure they're numbers)
   const handleNumericChange = (e) => {
     const { name, value } = e.target;
     let numValue = value === "" ? 0 : parseInt(value, 10);
 
-    // Prevent negative values
     if (numValue < 0) numValue = 0;
 
     setFormData((prev) => ({
@@ -96,7 +87,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
       [name]: numValue,
     }));
 
-    // Clear validation error when user starts typing
     if (validationErrors[name]) {
       const newErrors = { ...validationErrors };
       delete newErrors[name];
@@ -104,42 +94,35 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
     }
   };
 
-  // Handle category changes
   const handleCategoryChange = (index, field, value) => {
     const updatedCategories = [...categories];
     updatedCategories[index][field] = value;
     setCategories(updatedCategories);
   };
 
-  // Add a new category input
   const addCategory = () => {
     setCategories([...categories, { name: "", count: "" }]);
   };
 
-  // Remove a category input
   const removeCategory = (index) => {
     if (categories.length === 1) return;
     const updatedCategories = categories.filter((_, i) => i !== index);
     setCategories(updatedCategories);
   };
 
-  // Validate the form
   const validateForm = () => {
     const errors = {};
 
-    // Ensure total problems are consistent
     const calculatedTotal =
       formData.easySolved + formData.mediumSolved + formData.hardSolved;
     if (calculatedTotal !== formData.totalSolved) {
       errors.totalSolved = `Total solved (${formData.totalSolved}) doesn't match sum of categories (${calculatedTotal})`;
     }
 
-    // Validate easy problems
     if (formData.easySolved > formData.totalEasy && formData.totalEasy > 0) {
       errors.easySolved = `Can't solve more easy problems than available (${formData.totalEasy})`;
     }
 
-    // Validate medium problems
     if (
       formData.mediumSolved > formData.totalMedium &&
       formData.totalMedium > 0
@@ -147,7 +130,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
       errors.mediumSolved = `Can't solve more medium problems than available (${formData.totalMedium})`;
     }
 
-    // Validate hard problems
     if (formData.hardSolved > formData.totalHard && formData.totalHard > 0) {
       errors.hardSolved = `Can't solve more hard problems than available (${formData.totalHard})`;
     }
@@ -155,20 +137,17 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
     return errors;
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (isSubmitting) return;
 
-    // Validate form
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
 
-    // Convert categories array to object
     const solvedCategories = {};
     categories.forEach(({ name, count }) => {
       if (name && count) {
@@ -176,7 +155,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
       }
     });
 
-    // Prepare data for submission
     const submissionData = {
       ...formData,
       solvedCategories,
@@ -219,7 +197,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
 
           <div className="max-h-[calc(100vh-180px)] overflow-y-auto pr-2">
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Username and Ranking */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
                   <label
@@ -287,7 +264,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
                 </div>
               </div>
 
-              {/* Total Problems */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label
@@ -333,7 +309,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
                 </div>
               </div>
 
-              {/* Problem Difficulties - Easy, Medium, Hard */}
               <div className="bg-gradient-to-r from-green-500/10 to-yellow-500/10 via-red-500/10 p-4 rounded-lg border border-orange-500/20">
                 <h3
                   className={`text-sm font-medium mb-3 ${
@@ -344,7 +319,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Easy Problems */}
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <label
@@ -418,7 +392,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
                     </div>
                   </div>
 
-                  {/* Medium Problems */}
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <label
@@ -492,7 +465,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
                     </div>
                   </div>
 
-                  {/* Hard Problems */}
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <label
@@ -568,7 +540,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
                 </div>
               </div>
 
-              {/* Streak */}
               <div>
                 <label
                   htmlFor="completionStreak"
@@ -601,7 +572,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
                 </div>
               </div>
 
-              {/* Problem Categories */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label
@@ -683,7 +653,6 @@ const LeetCodeForm = ({ initialData, onSubmit, onCancel }) => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex justify-end space-x-3 mt-6 pt-2 border-t border-gray-200 dark:border-gray-700">
                 <button
                   type="button"
