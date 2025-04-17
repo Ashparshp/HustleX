@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { X, Plus, Check } from "lucide-react";
+import { X, Check } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import useSkills from "../../hooks/useSkills";
 import useCategories from "../../hooks/useCategories";

@@ -1,4 +1,3 @@
-// src/components/Timetable/TimetableStats.jsx
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -21,10 +20,8 @@ import { useTheme } from "../../context/ThemeContext";
 
 const TimetableStats = ({ stats, onClose }) => {
   const { isDark } = useTheme();
-  // Toggle between pie chart and list view for better mobile interaction
   const [activeView, setActiveView] = useState("pie");
 
-  // Enhanced color palette with semantic meanings and accessibility
   const COLOR_PALETTE = [
     {
       fill: isDark ? "#10B981" : "#059669",
@@ -53,7 +50,6 @@ const TimetableStats = ({ stats, onClose }) => {
     },
   ];
 
-  // Transform category data with additional information
   const categoryData = stats?.currentWeek?.byCategory
     ? Object.entries(stats.currentWeek.byCategory).map(
         ([name, data], index) => ({
@@ -65,7 +61,6 @@ const TimetableStats = ({ stats, onClose }) => {
       )
     : [];
 
-  // Custom tooltip for detailed information on hover
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;

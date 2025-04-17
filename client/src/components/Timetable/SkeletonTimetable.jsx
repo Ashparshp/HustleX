@@ -1,4 +1,3 @@
-// src/components/Timetable/SkeletonTimetable.jsx
 import React from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, Calendar, Clock } from "lucide-react";
@@ -8,7 +7,6 @@ const SkeletonTimetable = () => {
   const { isDark } = useTheme();
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  // Shimmer effect animation for skeleton elements
   const shimmer = {
     hidden: { x: "-100%" },
     visible: {

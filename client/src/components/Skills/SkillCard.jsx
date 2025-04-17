@@ -12,12 +12,9 @@ import {
   ChevronRight,
   ExternalLink,
   CheckCircle,
-  ArrowRight,
   ChevronDown,
   ChevronUp,
   Target,
-  Eye,
-  ThumbsUp,
   AlertCircle,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";

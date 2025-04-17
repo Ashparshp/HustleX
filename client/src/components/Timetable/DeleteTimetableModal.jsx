@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, Shield, Lock } from "lucide-react";
+import { AlertTriangle, Lock } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 
 const DeleteTimetableModal = ({

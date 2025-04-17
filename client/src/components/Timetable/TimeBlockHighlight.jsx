@@ -1,4 +1,3 @@
-// src/components/Timetable/TimeBlockHighlight.jsx
 import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Clock, CheckCircle, XCircle } from "lucide-react";

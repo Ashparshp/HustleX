@@ -1,4 +1,3 @@
-// src/components/Timetable/TimetableError.jsx
 import React from "react";
 import { motion } from "framer-motion";
 import { AlertTriangle, RefreshCcw } from "lucide-react";
@@ -12,7 +11,6 @@ const TimetableError = ({
 }) => {
   const { isDark } = useTheme();
 
-  // Enhanced color palette with more nuanced theme-aware colors
   const colors = {
     light: {
       bg: "bg-red-50/80 border-red-100/50",

@@ -1,9 +1,7 @@
-// src/components/Timetable/TimetableTable.jsx - Optimized version
 import React, { useState, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, CheckCircle, XCircle, Undo } from "lucide-react";
 
-// Minimal Toast Component
 const Toast = ({ toast, isDark, onClose, onUndo }) => {
   if (!toast) return null;
 
@@ -65,7 +63,6 @@ const Toast = ({ toast, isDark, onClose, onUndo }) => {
   );
 };
 
-// Toast Manager Hook
 const useToast = () => {
   const [toast, setToast] = useState(null);
 
@@ -73,15 +70,12 @@ const useToast = () => {
     const id = Date.now();
     const newToast = { id, message, type, undoAction };
 
-    // Replace existing toast immediately
     setToast(newToast);
 
-    // Automatically remove toast after 4 seconds (reduced from 5)
     const timeoutId = setTimeout(() => {
       setToast(null);
     }, 4000);
 
-    // Return a method to clear the toast early if needed
     return () => {
       clearTimeout(timeoutId);
       setToast(null);
@@ -102,7 +96,6 @@ const useToast = () => {
   return { toast, addToast, removeToast, undoLastAction };
 };
 
-// The base TimetableTable component (then memoized below)
 const TimetableTableBase = ({
   currentWeek,
   isDark,
@@ -113,7 +106,6 @@ const TimetableTableBase = ({
   const { toast, addToast, removeToast, undoLastAction } = useToast();
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  // Memoized variants to prevent unnecessary re-renders
   const containerVariants = React.useMemo(
     () => ({
       hidden: { opacity: 0 },
@@ -170,25 +162,17 @@ const TimetableTableBase = ({
     }),
     []
   );
-
-  // Enhanced toggle activity status with undo functionality
   const handleToggleActivityStatus = useCallback(
     (activityId, dayIndex) => {
-      // Find the current activity
       const activity = currentWeek.activities.find((a) => a._id === activityId);
-
-      // Get the current status for this day
       const currentStatus = activity.dailyStatus[dayIndex];
-
-      // Prepare undo action
+      
       const undoAction = () => {
         toggleActivityStatus(activityId, dayIndex);
       };
-
-      // Call toggle with the OPPOSITE of current status
+      
       toggleActivityStatus(activityId, dayIndex);
-
-      // Add toast with the NEW status and undo option
+      
       addToast(
         `${activity.activity.name} marked as ${
           !currentStatus ? "completed" : "not completed"
@@ -200,7 +184,6 @@ const TimetableTableBase = ({
     [currentWeek, toggleActivityStatus, addToast, days]
   );
 
-  // Keyboard accessibility for status toggle
   const handleKeyboardToggle = useCallback(
     (e, activityId, dayIndex) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -211,12 +194,10 @@ const TimetableTableBase = ({
     [handleToggleActivityStatus]
   );
 
-  // Use key that won't change unless the week itself changes
   const tableKey = currentWeek?.weekStartDate || "timetable";
 
   return (
     <div className="relative overflow-x-auto">
-      {/* Toast Container with Undo Functionality */}
       <AnimatePresence>
         {toast && (
           <Toast
