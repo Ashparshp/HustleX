@@ -183,7 +183,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     );
   }
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -194,7 +193,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     },
   };
 
-  // Category card styling
   const getCategoryCardStyle = (isExpanded) => {
     const baseStyle = isDark
       ? "border-indigo-500/30 bg-gray-900/70"
@@ -205,25 +203,20 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     return `${baseStyle} ${expansionStyle}`;
   };
 
-  // Count total skills
   const totalSkills = Object.values(skills).reduce(
     (total, categorySkills) => total + categorySkills.length,
     0
   );
 
-  // Count expanded categories
   const expandedCount =
     Object.values(expandedCategories).filter(Boolean).length;
   const totalCategories = Object.keys(skills).length;
 
-  // Check if all categories are expanded/collapsed
   const allExpanded = expandedCount === totalCategories;
   const allCollapsed = expandedCount === 0;
 
-  // Render skill cards by category
   return (
     <div className="space-y-2">
-      {/* Header with summary and expand/collapse controls */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -298,7 +291,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
         </div>
       </motion.div>
 
-      {/* Skills by Category */}
       <div className="space-y-6">
         {Object.entries(skills).map(([category, categorySkills], index) => {
           const isExpanded = isCategoryExpanded(category);
@@ -314,7 +306,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                 isExpanded
               )} hover:border-opacity-80`}
             >
-              {/* Category Header - Improved Version */}
               <div
                 className={`group relative flex items-center p-5 rounded-t-lg cursor-pointer transition-all duration-200 ${
                   isDark
@@ -332,16 +323,13 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                   .replace(/\s+/g, "-")
                   .toLowerCase()}`}
               >
-                {/* Left side with category name and count */}
                 <div className="flex items-center flex-grow mr-4">
                   <div className="flex flex-col">
                     <div className="flex items-center">
-                      {/* Category indicator dot */}
                       <div
                         className={`w-2.5 h-2.5 rounded-full mr-3 ${categoryColor}`}
                       ></div>
 
-                      {/* Category name with motion */}
                       <motion.h2
                         className={`text-xl font-bold transition-colors ${
                           isDark ? "text-white" : "text-gray-800"
@@ -355,7 +343,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                     </div>
                   </div>
 
-                  {/* Skills count badge */}
                   <div
                     className={`ml-3 px-3 py-1 text-xs font-medium rounded-full transition-all ${
                       isDark
@@ -372,9 +359,7 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                   </div>
                 </div>
 
-                {/* Right side with action buttons */}
                 <div className="flex items-center gap-2.5">
-                  {/* Manage Button */}
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -398,7 +383,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                     </div>
                   </motion.button>
 
-                  {/* Add Skill Button */}
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -422,7 +406,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                     </div>
                   </motion.button>
 
-                  {/* Expand/Collapse Indicator with Animation */}
                   <motion.div
                     initial={false}
                     animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -438,7 +421,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                   </motion.div>
                 </div>
 
-                {/* Visual indicator for expanded state */}
                 {isExpanded && (
                   <div
                     className={`absolute bottom-0 left-0 right-0 h-0.5 ${
@@ -448,7 +430,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                 )}
               </div>
 
-              {/* Category Content with Animated Expansion */}
               <AnimatePresence>
                 {isExpanded && (
                   <motion.div
@@ -473,20 +454,16 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                           animate="visible"
                           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                         >
-                          {/* Sort skill cards by orderIndex with more robust handling */}
                           {[...categorySkills]
                             .sort((a, b) => {
-                              // If both have orderIndex, sort by it
                               if (
                                 a.orderIndex !== undefined &&
                                 b.orderIndex !== undefined
                               ) {
                                 return a.orderIndex - b.orderIndex;
                               }
-                              // If only one has orderIndex, prioritize the one with it
                               if (a.orderIndex !== undefined) return -1;
                               if (b.orderIndex !== undefined) return 1;
-                              // Default sort by name if no orderIndex
                               return a.name.localeCompare(b.name);
                             })
                             .map((skill) => (
@@ -560,7 +537,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
         })}
       </div>
 
-      {/* Edit Modal with improved animation */}
       <AnimatePresence>
         {editingSkill && (
           <motion.div
@@ -585,7 +561,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
         )}
       </AnimatePresence>
 
-      {/* Manage Skills Modal */}
       <AnimatePresence>
         {managingCategory && (
           <ManageSkillsModal
