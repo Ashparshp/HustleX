@@ -1,4 +1,3 @@
-// src/components/Skills/SkillStats.jsx
 import React from "react";
 import { motion } from "framer-motion";
 import {
@@ -18,7 +17,6 @@ const SkillStats = ({ stats }) => {
 
   if (!stats) return null;
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -35,7 +33,6 @@ const SkillStats = ({ stats }) => {
     visible: { opacity: 1, y: 0 },
   };
 
-  // Stat cards
   const StatCard = ({ title, value, description, icon: Icon, color }) => {
     return (
       <motion.div
@@ -79,7 +76,6 @@ const SkillStats = ({ stats }) => {
     );
   };
 
-  // Category item
   const CategoryItem = ({ category, count, total }) => {
     const percentage = ((count / total) * 100).toFixed(1);
     const color = getCategoryProgressColor(category, isDark);
@@ -474,7 +470,6 @@ const SkillStats = ({ stats }) => {
   );
 };
 
-// Helper function for category progress color
 const getCategoryProgressColor = (category, isDark) => {
   const colorMap = {
     "MERN Stack": isDark ? "bg-blue-500" : "bg-blue-600",
@@ -488,7 +483,6 @@ const getCategoryProgressColor = (category, isDark) => {
   return colorMap[category] || (isDark ? "bg-indigo-500" : "bg-indigo-600");
 };
 
-// Helper function for category background color
 const getCategoryBackgroundColor = (category, isDark) => {
   const colorMap = {
     "MERN Stack": isDark ? "bg-blue-500" : "bg-blue-100",
@@ -502,7 +496,6 @@ const getCategoryBackgroundColor = (category, isDark) => {
   return colorMap[category] || (isDark ? "bg-indigo-500" : "bg-indigo-100");
 };
 
-// Helper function for category text color
 const getCategoryTextColor = (category, isDark) => {
   const colorMap = {
     "MERN Stack": isDark ? "text-blue-400" : "text-blue-700",

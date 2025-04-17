@@ -1,4 +1,3 @@
-// src/components/Skills/ManageSkillsModal.jsx - Fixed version
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
@@ -17,9 +16,8 @@ import { useTheme } from "../../context/ThemeContext";
 import useSkills from "../../hooks/useSkills";
 import LoadingSpinner from "../UI/LoadingSpinner";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
-import EditSkillModal from "./EditSkillModal"; // Import EditSkillModal
+import EditSkillModal from "./EditSkillModal";
 
-// Custom DragHandle component
 const DragHandle = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -50,15 +48,12 @@ const ManageSkillsModal = ({
   const [localIsSubmitting, setLocalIsSubmitting] = useState(false);
   const [skillToDelete, setSkillToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [editingSkill, setEditingSkill] = useState(null); // New state for editing skill
+  const [editingSkill, setEditingSkill] = useState(null);
 
-  // Sync skills with local state
   useEffect(() => {
     if (categorySkills && categorySkills.length > 0) {
-      // Create a copy of the skills array with order index
       const orderedSkills = [...categorySkills].map((skill, index) => ({
         ...skill,
-        // Ensure orderIndex exists, using the existing one or creating a new one
         orderIndex:
           typeof skill.orderIndex === "number" ? skill.orderIndex : index,
       }));

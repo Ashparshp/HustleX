@@ -1,4 +1,3 @@
-// src/components/Skills/SkillsGrid.jsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -26,15 +25,12 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
 
   const handleCloseEditModal = () => {
     setEditingSkill(null);
-    // Call the callback function to refresh skills data
     if (typeof onSkillChange === "function") {
       onSkillChange();
     }
   };
 
-  // Handler for when a skill is deleted
   const handleSkillDeleted = () => {
-    // Call the callback function to refresh skills data
     if (typeof onSkillChange === "function") {
       onSkillChange();
     }
@@ -49,7 +45,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
 
   const handleCloseManageModal = () => {
     setManagingCategory(null);
-    // Call the callback function to refresh skills data
     if (typeof onSkillChange === "function") {
       onSkillChange();
     }
@@ -62,7 +57,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     }));
   };
 
-  // Expand all categories
   const expandAllCategories = () => {
     const allExpanded = {};
     Object.keys(skills).forEach((category) => {
@@ -71,7 +65,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     setExpandedCategories(allExpanded);
   };
 
-  // Collapse all categories
   const collapseAllCategories = () => {
     const allCollapsed = {};
     Object.keys(skills).forEach((category) => {
@@ -80,14 +73,10 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     setExpandedCategories(allCollapsed);
   };
 
-  // Check if any category is expanded - default to true if not set
   const isCategoryExpanded = (category) => {
-    return expandedCategories[category] !== false; // Default to expanded (true)
+    return expandedCategories[category] !== false;
   };
-
-  // Get category color based on name for consistency
   const getCategoryColor = (category) => {
-    // Simple hash function to generate consistent colors
     const hash = Array.from(category).reduce(
       (hash, char) => char.charCodeAt(0) + ((hash << 5) - hash),
       0
@@ -107,7 +96,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
     return colors[Math.abs(hash) % colors.length];
   };
 
-  // Empty state when no skills are available
   if (!skills || Object.keys(skills).length === 0) {
     return (
       <motion.div
@@ -115,7 +103,6 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
         animate={{ opacity: 1, y: 0 }}
         className="relative w-full max-w-2xl mx-auto"
       >
-        {/* Enhanced empty state with subtle gradient and animation */}
         <div
           className="absolute inset-0 bg-gradient-to-r from-indigo-500/30 via-purple-500/20 to-blue-500/30 rounded-xl blur-xl opacity-25 
           group-hover:opacity-35 transition-all duration-300"
