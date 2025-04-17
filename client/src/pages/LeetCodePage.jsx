@@ -1,4 +1,3 @@
-// src/pages/LeetCodePage.jsx
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -17,7 +16,6 @@ import {
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import useLeetCode from "../hooks/useLeetCode";
-// import LeetCodeStats from "../components/LeetCode/LeetCodeStats";
 import LeetCodeForm from "../components/LeetCode/LeetCodeForm";
 import LeetCodeProgressChart from "../components/LeetCode/LeetCodeProgressChart";
 import LeetCodeDifficultyChart from "../components/LeetCode/LeetCodeDifficultyChart";
@@ -35,19 +33,16 @@ const LeetCodePage = () => {
     getLeetCodeHistory,
   } = useLeetCode();
 
-  // State hooks
   const [showForm, setShowForm] = useState(false);
   const [activeVisualization, setActiveVisualization] = useState("progress");
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  // Set last updated time from stats
   useEffect(() => {
     if (stats?.lastUpdated) {
       setLastUpdated(new Date(stats.lastUpdated));
     }
   }, [stats]);
 
-  // Format date for display
   const formatLastUpdated = () => {
     if (!lastUpdated) return "Never";
 
@@ -76,7 +71,6 @@ const LeetCodePage = () => {
     });
   };
 
-  // Calculate progress percentages
   const calculateProgress = () => {
     if (!stats)
       return {
@@ -107,7 +101,6 @@ const LeetCodePage = () => {
     return { easy, medium, hard, total };
   };
 
-  // Handle form submission
   const handleUpdateStats = async (data) => {
     try {
       await updateLeetCodeStats(data);
@@ -118,7 +111,6 @@ const LeetCodePage = () => {
     }
   };
 
-  // Loading state
   if (loading) {
     return <LeetCodeSkeletonLoader />;
   }
@@ -738,13 +730,12 @@ const LeetCodePage = () => {
   );
 };
 
-// Skeleton Loader
 const LeetCodeSkeletonLoader = () => {
   const { isDark } = useTheme();
 
   return (
     <section className={`py-20 relative ${isDark ? "bg-black" : "bg-white"}`}>
-      {/* Background Gradients */}
+      
       <div
         className={`absolute inset-0 bg-gradient-to-b ${
           isDark
@@ -761,7 +752,6 @@ const LeetCodeSkeletonLoader = () => {
       />
 
       <div className="mx-auto px-4 relative z-10">
-        {/* Header Skeleton */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <div className="space-y-4">
             <div
@@ -782,7 +772,6 @@ const LeetCodeSkeletonLoader = () => {
           ></div>
         </div>
 
-        {/* Stats Grid Skeleton */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[...Array(4)].map((_, i) => (
             <div
@@ -816,7 +805,6 @@ const LeetCodeSkeletonLoader = () => {
           ))}
         </div>
 
-        {/* Charts Skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div
             className={`lg:col-span-2 p-6 rounded-lg border ${
@@ -885,7 +873,6 @@ const LeetCodeSkeletonLoader = () => {
           </div>
         </div>
 
-        {/* Chart Section Skeleton */}
         <div
           className={`p-6 rounded-lg border mb-8 ${
             isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"

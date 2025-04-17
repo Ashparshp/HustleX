@@ -1,4 +1,3 @@
-// src/components/WorkingHours/ProgressChart.jsx
 import {
   AreaChart,
   Area,
@@ -15,7 +14,6 @@ import { formatDisplayDate } from "../../utils/dateUtils";
 const ProgressChart = ({ data }) => {
   const { isDark } = useTheme();
 
-  // Prepare and sort data for the chart
   const chartData = data
     .slice()
     .sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -164,7 +162,6 @@ const ProgressChart = ({ data }) => {
                 tick={{ fontSize: 12 }}
                 stroke={isDark ? "#9ca3af" : "#6b7280"}
                 tickFormatter={(value) => {
-                  // Show abbreviated date for better fit
                   const date = new Date(value);
                   return date.toLocaleDateString(undefined, {
                     month: "short",

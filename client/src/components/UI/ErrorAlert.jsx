@@ -1,18 +1,6 @@
-// src/components/UI/ErrorAlert.jsx
 import { motion } from "framer-motion";
 import { AlertCircle, X, RefreshCw } from "lucide-react";
 
-/**
- * Error alert component with retry and dismiss functionality
- *
- * @param {Object} props - Component props
- * @param {string} props.error - Error message to display
- * @param {Function} props.onDismiss - Function to call when dismissing the error
- * @param {Function} props.onRetry - Function to call when retrying the operation
- * @param {boolean} props.isDark - Whether dark mode is enabled
- * @param {string} props.className - Additional class names
- * @returns {JSX.Element} Error alert component
- */
 const ErrorAlert = ({ error, onDismiss, onRetry, isDark, className }) => {
   if (!error) return null;
 

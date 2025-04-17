@@ -1,4 +1,3 @@
-// src/components/Timetable/AddActivityModal.jsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Clock, Target, Layers, AlertCircle } from "lucide-react";
@@ -21,13 +20,11 @@ const AddActivityModal = ({
     category: "Core",
   });
 
-  // Time input specific state
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [rawStartTime, setRawStartTime] = useState("");
   const [rawEndTime, setRawEndTime] = useState("");
 
-  // Load initial data when editing
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -36,7 +33,6 @@ const AddActivityModal = ({
         category: initialData.category || "Core",
       });
 
-      // If time exists, split it into start and end times
       if (initialData.time) {
         const [start, end] = initialData.time.split("-");
         setStartTime(start || "");
@@ -65,89 +61,73 @@ const AddActivityModal = ({
     }));
   };
 
-  // Handle time input changes for start time
   const handleStartTimeChange = (e) => {
     const rawValue = e.target.value;
     setRawStartTime(rawValue);
 
-    // Allow empty input for better UX
     if (!rawValue) {
       setStartTime("");
       setFormData((prev) => ({ ...prev, time: endTime ? `-${endTime}` : "" }));
       return;
     }
-
-    // Only store the raw value while typing - don't format yet
     setStartTime(rawValue);
 
-    // Update the combined time value with raw input
     setFormData((prev) => ({
       ...prev,
       time: `${rawValue}${endTime ? `-${endTime}` : ""}`,
     }));
-  };
+    };
 
-  // Handle time input changes for end time
-  const handleEndTimeChange = (e) => {
+    const handleEndTimeChange = (e) => {
     const rawValue = e.target.value;
     setRawEndTime(rawValue);
 
-    // Allow empty input for better UX
     if (!rawValue) {
       setEndTime("");
       setFormData((prev) => ({
-        ...prev,
-        time: startTime ? `${startTime}-` : "",
+      ...prev,
+      time: startTime ? `${startTime}-` : "",
       }));
       return;
     }
 
-    // Only store the raw value while typing - don't format yet
     setEndTime(rawValue);
 
-    // Update the combined time value with raw input
     setFormData((prev) => ({
       ...prev,
       time: `${startTime ? startTime : ""}${rawValue ? `-${rawValue}` : ""}`,
     }));
-  };
+    };
 
-  // Format times when input loses focus
-  const handleTimeBlur = (field) => {
+    const handleTimeBlur = (field) => {
     setTimeout(() => {
-      // Format the time when the user finishes typing
       if (field === "start" && rawStartTime) {
-        const formattedTime = formatTimeInput(rawStartTime);
-        setStartTime(formattedTime);
-        setFormData((prev) => ({
-          ...prev,
-          time: `${formattedTime}${endTime ? `-${endTime}` : ""}`,
-        }));
+      const formattedTime = formatTimeInput(rawStartTime);
+      setStartTime(formattedTime);
+      setFormData((prev) => ({
+        ...prev,
+        time: `${formattedTime}${endTime ? `-${endTime}` : ""}`,
+      }));
       } else if (field === "end" && rawEndTime) {
-        const formattedTime = formatTimeInput(rawEndTime);
-        setEndTime(formattedTime);
-        setFormData((prev) => ({
-          ...prev,
-          time: `${startTime ? startTime : ""}${
-            formattedTime ? `-${formattedTime}` : ""
-          }`,
-        }));
+      const formattedTime = formatTimeInput(rawEndTime);
+      setEndTime(formattedTime);
+      setFormData((prev) => ({
+        ...prev,
+        time: `${startTime ? startTime : ""}${
+        formattedTime ? `-${formattedTime}` : ""
+        }`,
+      }));
       }
     }, 200);
-  };
+    };
 
-  // Format time input to HH:MM format, handling various input patterns
-  const formatTimeInput = (input) => {
-    // Remove all non-digit characters
+    const formatTimeInput = (input) => {
     let digits = input.replace(/\D/g, "");
 
-    // Special case: handle inputs like "930" to mean "9:30" not "93:0"
     if (digits.length === 3) {
-      // Interpret as 1 digit hour, 2 digit minute
       const hours = digits.slice(0, 1).padStart(2, "0");
       const minutes = digits.slice(1).padStart(2, "0");
 
-      // Validate hours and minutes
       const hoursInt = parseInt(hours);
       const minutesInt = parseInt(minutes);
 
@@ -157,30 +137,22 @@ const AddActivityModal = ({
       return `${hours}:${minutes}`;
     }
 
-    // Handle other common time formats
     if (digits.length <= 1) {
-      // Single digit treated as hour (e.g., "9" -> "09:00")
       const hours = digits.padStart(2, "0");
       return `${hours}:00`;
     } else if (digits.length === 2) {
-      // Two digits could be hour or minutes depending on value
       const num = parseInt(digits);
       if (num <= 23) {
-        // Likely an hour (e.g., "14" -> "14:00")
-        return `${digits}:00`;
+      return `${digits}:00`;
       } else if (num < 60) {
-        // Likely minutes (e.g., "45" -> "00:45")
-        return `00:${digits}`;
+      return `00:${digits}`;
       } else {
-        // Over 59, treat as invalid minutes
-        return "00:59";
+      return "00:59";
       }
     } else if (digits.length === 4) {
-      // Four digits is standard HHMM format (e.g., "1430" -> "14:30")
       const hours = digits.slice(0, 2);
       const minutes = digits.slice(2, 4);
 
-      // Validate hours and minutes
       const hoursInt = parseInt(hours);
       const minutesInt = parseInt(minutes);
 
@@ -189,11 +161,9 @@ const AddActivityModal = ({
 
       return `${hours}:${minutes}`;
     } else {
-      // Truncate to hours and minutes if too long
       const hours = digits.slice(0, 2);
       const minutes = digits.slice(2, 4);
 
-      // Validate hours and minutes
       const hoursInt = parseInt(hours);
       const minutesInt = parseInt(minutes);
 
@@ -202,97 +172,88 @@ const AddActivityModal = ({
 
       return `${hours}:${minutes}`;
     }
-  };
+    };
 
-  // Try to intelligently interpret time input for validation
-  const validateTime = (timeStr) => {
+    const validateTime = (timeStr) => {
     if (!timeStr) return false;
 
-    // Check if we have both start and end times
     const parts = timeStr.split("-");
     if (parts.length !== 2) return false;
 
-    // Empty parts are not valid
     if (!parts[0].trim() || !parts[1].trim()) return false;
 
     const [start, end] = parts;
 
-    // Basic format check for each part
     const timePattern = /^([0-1][0-9]|2[0-3]):([0-5][0-9])$/;
     if (!timePattern.test(start) || !timePattern.test(end)) return false;
 
     return true;
-  };
+    };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
 
-    // Validate form
-    if (!formData.name.trim()) {
-      setError("Activity name is required");
-      return;
-    }
+      if (!formData.name.trim()) {
+        setError("Activity name is required");
+        return;
+      }
 
-    // Apply final formatting to any raw input
-    let finalStartTime = startTime;
-    let finalEndTime = endTime;
+      let finalStartTime = startTime;
+      let finalEndTime = endTime;
 
-    if (rawStartTime) {
-      finalStartTime = formatTimeInput(rawStartTime);
-    }
+      if (rawStartTime) {
+        finalStartTime = formatTimeInput(rawStartTime);
+      }
 
-    if (rawEndTime) {
-      finalEndTime = formatTimeInput(rawEndTime);
-    }
+      if (rawEndTime) {
+        finalEndTime = formatTimeInput(rawEndTime);
+      }
 
-    // Construct the final time string
-    const timeString = `${finalStartTime}-${finalEndTime}`;
+      const timeString = `${finalStartTime}-${finalEndTime}`;
 
-    // Validate the final time string
-    if (!validateTime(timeString)) {
-      setError("Please enter valid start and end times (e.g., 09:00-11:30)");
-      return;
-    }
+      if (!validateTime(timeString)) {
+        setError("Please enter valid start and end times (e.g., 09:00-11:30)");
+        return;
+      }
 
-    try {
-      setError(null);
+      try {
+        setError(null);
 
-      // Submit with properly formatted time
-      const finalFormData = {
+        const finalFormData = {
         ...formData,
         time: timeString,
+        };
+
+        await onSubmit(finalFormData);
+      } catch (err) {
+        setError(err.message || "Failed to save activity");
+      }
       };
 
-      await onSubmit(finalFormData);
-    } catch (err) {
-      setError(err.message || "Failed to save activity");
-    }
-  };
+      const timeSlots = [
+      { label: "Morning (8-10)", start: "08:00", end: "10:00" },
+      { label: "Mid-Morning (10-12)", start: "10:00", end: "12:00" },
+      { label: "Lunch (12-1)", start: "12:00", end: "13:00" },
+      { label: "Afternoon (1-5)", start: "13:00", end: "17:00" },
+      { label: "Evening (5-8)", start: "17:00", end: "20:00" },
+      { label: "30 min", start: "09:00", end: "09:30" },
+      { label: "1 hour", start: "10:00", end: "11:00" },
+      { label: "Work AM", start: "09:00", end: "12:00" },
+      { label: "Work PM", start: "13:00", end: "17:00" },
+      { label: "Workday", start: "09:00", end: "17:00" },
+      ];
 
-  // Time suggestions for quick selection (limited to 10 essential options)
-  const timeSlots = [
-    { label: "Morning (8-10)", start: "08:00", end: "10:00" },
-    { label: "Mid-Morning (10-12)", start: "10:00", end: "12:00" },
-    { label: "Lunch (12-1)", start: "12:00", end: "13:00" },
-    { label: "Afternoon (1-5)", start: "13:00", end: "17:00" },
-    { label: "Evening (5-8)", start: "17:00", end: "20:00" },
-    { label: "30 min", start: "09:00", end: "09:30" },
-    { label: "1 hour", start: "10:00", end: "11:00" },
-    { label: "Work AM", start: "09:00", end: "12:00" },
-    { label: "Work PM", start: "13:00", end: "17:00" },
-    { label: "Workday", start: "09:00", end: "17:00" },
-  ];
-
-  const applyTimeSlot = (start, end) => {
-    setStartTime(start);
-    setEndTime(end);
-    setRawStartTime(start);
-    setRawEndTime(end);
-    setFormData((prev) => ({
-      ...prev,
-      time: `${start}-${end}`,
-    }));
+      const applyTimeSlot = (start, end) => {
+      setStartTime(start);
+      setEndTime(end);
+      setRawStartTime(start);
+      setRawEndTime(end);
+      setFormData((prev) => ({
+        ...prev,
+        time: `${start}-${end}`,
+      }));
   };
 
   if (!isOpen) return null;
@@ -560,14 +521,12 @@ const AddActivityModal = ({
                 disabled={isSubmitting}
               >
                 {categories && categories.length > 0 ? (
-                  // Map through the provided categories
                   categories.map((category, index) => (
                     <option key={`${category}-${index}`} value={category}>
                       {category}
                     </option>
                   ))
                 ) : (
-                  // Default categories if none provided
                   <>
                     <option value="Career">Career</option>
                     <option value="Backend">Backend</option>

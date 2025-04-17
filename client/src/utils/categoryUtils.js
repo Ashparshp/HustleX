@@ -1,15 +1,5 @@
-// src/utils/categoryUtils.js
-
-/**
- * Gets a color for a category based on category name
- * @param {string} category - The category name
- * @param {boolean} isDark - Whether dark mode is enabled
- * @returns {string} CSS color class
- */
 export const getCategoryColor = (category, isDark = false) => {
-  // Base colors for common categories
   const colorMap = {
-    // Working Hours / Tasks
     Coding: isDark
       ? "bg-blue-500/20 text-blue-300"
       : "bg-blue-100 text-blue-700",
@@ -22,8 +12,6 @@ export const getCategoryColor = (category, isDark = false) => {
     Other: isDark
       ? "bg-gray-500/20 text-gray-300"
       : "bg-gray-100 text-gray-700",
-
-    // Skills
     "MERN Stack": isDark
       ? "bg-emerald-500/20 text-emerald-300"
       : "bg-emerald-100 text-emerald-700",
@@ -40,8 +28,6 @@ export const getCategoryColor = (category, isDark = false) => {
     "Go Backend": isDark
       ? "bg-cyan-500/20 text-cyan-300"
       : "bg-cyan-100 text-cyan-700",
-
-    // Schedule
     DSA: isDark ? "bg-blue-500/20 text-blue-300" : "bg-blue-100 text-blue-700",
     "System Design": isDark
       ? "bg-purple-500/20 text-purple-300"
@@ -52,8 +38,6 @@ export const getCategoryColor = (category, isDark = false) => {
     "Problem Solving": isDark
       ? "bg-yellow-500/20 text-yellow-300"
       : "bg-yellow-100 text-yellow-700",
-
-    // Timetable
     Career: isDark
       ? "bg-blue-500/20 text-blue-300"
       : "bg-blue-100 text-blue-700",
@@ -67,8 +51,6 @@ export const getCategoryColor = (category, isDark = false) => {
     Mobile: isDark
       ? "bg-purple-500/20 text-purple-300"
       : "bg-purple-100 text-purple-700",
-
-    // Contest/Goals platforms
     LeetCode: isDark
       ? "bg-yellow-500/20 text-yellow-300"
       : "bg-yellow-100 text-yellow-700",
@@ -83,48 +65,33 @@ export const getCategoryColor = (category, isDark = false) => {
       : "bg-green-100 text-green-700",
   };
 
-  // Return the color for the category or a default color
   return (
     colorMap[category] ||
     (isDark ? "bg-gray-500/20 text-gray-300" : "bg-gray-100 text-gray-700")
   );
 };
 
-/**
- * Gets an icon name for a category
- * @param {string} category - The category name
- * @returns {string} Icon name
- */
 export const getCategoryIcon = (category) => {
   const iconMap = {
-    // Working Hours / Tasks
     Coding: "code",
     Learning: "book-open",
     "Project Work": "briefcase",
     Other: "more-horizontal",
-
-    // Skills
     "MERN Stack": "server",
     "Java & Ecosystem": "coffee",
     DevOps: "settings",
     "Data Science & ML": "bar-chart-2",
     "Mobile Development": "smartphone",
     "Go Backend": "send",
-
-    // Schedule
     DSA: "code",
     "System Design": "git-branch",
     Development: "code-sandbox",
     "Problem Solving": "zap",
-
-    // Timetable
     Career: "briefcase",
     Backend: "server",
     Core: "cpu",
     Frontend: "layout",
     Mobile: "smartphone",
-
-    // Contest/Goals platforms
     LeetCode: "code",
     CodeChef: "hash",
     CodeForces: "activity",
@@ -134,12 +101,6 @@ export const getCategoryIcon = (category) => {
   return iconMap[category] || "circle";
 };
 
-/**
- * Generates a category object with name, color and icon
- * @param {string} name - Category name
- * @param {boolean} isDark - Whether dark mode is enabled
- * @returns {Object} Category object with name, color and icon
- */
 export const createCategory = (name, isDark = false) => {
   return {
     name,
@@ -148,21 +109,12 @@ export const createCategory = (name, isDark = false) => {
   };
 };
 
-/**
- * Generates a deterministic color based on a string
- * Useful for generating colors for arbitrary category names
- * @param {string} str - String to generate color from
- * @param {boolean} isDark - Whether dark mode is enabled
- * @returns {string} CSS color class
- */
 export const getHashColor = (str, isDark = false) => {
-  // Convert string to a number hash
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
 
-  // List of available colors
   const colors = [
     {
       light: "bg-blue-100 text-blue-700",
@@ -211,16 +163,10 @@ export const getHashColor = (str, isDark = false) => {
     },
   ];
 
-  // Use the hash to select a color
   const colorIndex = Math.abs(hash) % colors.length;
   return isDark ? colors[colorIndex].dark : colors[colorIndex].light;
 };
 
-/**
- * Gets the default categories for a specific type
- * @param {string} type - Category type ('working-hours', 'skills', 'schedule', 'timetable', 'goals')
- * @returns {Array} Array of default categories
- */
 export const getDefaultCategories = (type) => {
   const defaultCategories = {
     "working-hours": [

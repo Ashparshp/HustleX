@@ -1,28 +1,24 @@
-// src/components/WorkingHours/CategoryChart.jsx
 import { motion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 
 const CategoryChart = ({ data }) => {
   const { isDark } = useTheme();
 
-  // Color mapping for common categories
   const getCategoryColor = (category) => {
     const COLORS = {
-      Coding: isDark ? "#ef4444" : "#dc2626", // Red
-      Learning: isDark ? "#f59e0b" : "#d97706", // Amber
-      "Project Work": isDark ? "#10b981" : "#059669", // Emerald
-      Other: isDark ? "#6366f1" : "#4f46e5", // Indigo
-      // Add more colors for other categories
-      Development: isDark ? "#8b5cf6" : "#7c3aed", // Violet
-      Research: isDark ? "#3b82f6" : "#2563eb", // Blue
-      Meeting: isDark ? "#ec4899" : "#db2777", // Pink
-      Planning: isDark ? "#14b8a6" : "#0d9488", // Teal
+      Coding: isDark ? "#ef4444" : "#dc2626",
+      Learning: isDark ? "#f59e0b" : "#d97706",
+      "Project Work": isDark ? "#10b981" : "#059669",
+      Other: isDark ? "#6366f1" : "#4f46e5",
+      Development: isDark ? "#8b5cf6" : "#7c3aed",
+      Research: isDark ? "#3b82f6" : "#2563eb",
+      Meeting: isDark ? "#ec4899" : "#db2777",
+      Planning: isDark ? "#14b8a6" : "#0d9488",
     };
 
     return COLORS[category] || (isDark ? "#6366f1" : "#4f46e5"); // Default to Indigo
   };
 
-  // Prepare and sort data
   const chartData = Object.entries(data || {})
     .map(([name, value]) => ({
       name,
@@ -31,7 +27,6 @@ const CategoryChart = ({ data }) => {
     }))
     .sort((a, b) => b.value - a.value);
 
-  // Calculate percentages
   const totalHours = chartData.reduce((sum, item) => sum + item.value, 0);
   chartData.forEach((item) => {
     item.percentage = ((item.value / totalHours) * 100).toFixed(1);

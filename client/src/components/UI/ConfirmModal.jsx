@@ -1,4 +1,3 @@
-// src/components/UI/ConfirmModal.jsx
 import { motion } from "framer-motion";
 import { AlertTriangle, X } from "lucide-react";
 
@@ -13,7 +12,6 @@ const ConfirmModal = ({
   onCancel,
   isDark,
 }) => {
-  // Animation variants
   const overlayVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.3 } },
@@ -36,7 +34,6 @@ const ConfirmModal = ({
     },
   };
 
-  // Button classes
   const cancelButtonClass = `px-4 py-2 rounded-lg font-medium ${
     isDark
       ? "bg-gray-700 hover:bg-gray-600 text-gray-300"
@@ -59,7 +56,6 @@ const ConfirmModal = ({
 
   return (
     <>
-      {/* Overlay */}
       <motion.div
         initial="hidden"
         animate="visible"
@@ -69,7 +65,6 @@ const ConfirmModal = ({
         onClick={onCancel}
       />
 
-      {/* Modal */}
       <motion.div
         initial="hidden"
         animate="visible"
@@ -83,7 +78,6 @@ const ConfirmModal = ({
             isDark ? "bg-gray-800" : "bg-white"
           }`}
         >
-          {/* Icon and Title */}
           <div className="flex items-start mb-4">
             <div
               className={`p-2 rounded-full ${
@@ -135,7 +129,6 @@ const ConfirmModal = ({
             </button>
           </div>
 
-          {/* Buttons */}
           <div className="flex justify-end space-x-3 mt-6">
             <button
               type="button"

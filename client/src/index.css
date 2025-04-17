@@ -1,9 +1,7 @@
-/* src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles */
 .dark {
   color-scheme: dark;
 }
@@ -16,7 +14,6 @@ body {
   @apply antialiased;
 }
 
-/* Date picker customization */
 .react-datepicker-wrapper {
   @apply w-full;
 }

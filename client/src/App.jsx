@@ -14,7 +14,6 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // Layout Components
 import Navbar from "./components/Layout/Navbar";
-import Footer from "./components/Layout/Footer";
 
 // Auth Components
 import LoginForm from "./components/Auth/LoginForm";
@@ -41,9 +40,7 @@ function AppContent() {
   const { isDark } = useTheme();
   const { isAuthenticated, currentUser } = useAuth();
 
-  // Get user theme preference
   useEffect(() => {
-    // Set body background and text color based on theme
     if (isDark) {
       document.body.classList.add("bg-black", "text-white");
       document.body.classList.remove("bg-gray-50", "text-gray-900");
@@ -59,7 +56,6 @@ function AppContent() {
         isDark ? "bg-black text-white" : "bg-white text-gray-900"
       }`}
     >
-      {/* Gradient Background */}
       <div
         className="absolute inset-0 pointer-events-none z-0 overflow-hidden"
         style={{
@@ -70,7 +66,6 @@ function AppContent() {
         }}
       />
 
-      {/* Blurred Overlay */}
       <div
         className="absolute inset-0 pointer-events-none z-0"
         style={{
@@ -84,7 +79,6 @@ function AppContent() {
 
       <main className="relative">
         <Routes>
-          {/* Public Routes */}
           <Route
             path="/login"
             element={
@@ -111,8 +105,6 @@ function AppContent() {
             }
           />
 
-
-          {/* Working Hours Feature */}
           <Route
             path="/working-hours"
             element={
@@ -122,7 +114,6 @@ function AppContent() {
             }
           />
 
-          {/* Skills Feature */}
           <Route
             path="/skills"
             element={
@@ -132,7 +123,6 @@ function AppContent() {
             }
           />
 
-          {/* Timetable Feature */}
           <Route
             path="/timetable"
             element={
@@ -142,7 +132,6 @@ function AppContent() {
             }
           />
 
-          {/* leetcode Feature */}
           <Route
             path="/leetcode"
             element={
@@ -152,7 +141,6 @@ function AppContent() {
             }
           />
 
-          {/* Schedule Feature */}
           <Route
             path="/schedule"
             element={
@@ -162,7 +150,6 @@ function AppContent() {
             }
           />
 
-          {/* User Profile Routes */}
           <Route
             path="/profile"
             element={
@@ -190,7 +177,6 @@ function AppContent() {
             }
           />
 
-          {/* Redirect root to working-hours or login */}
           <Route
             path="/"
             element={
@@ -202,7 +188,6 @@ function AppContent() {
             }
           />
 
-          {/* Fallback route for unmatched paths */}
           <Route
             path="*"
             element={
@@ -243,31 +228,27 @@ function AppContent() {
         </Routes>
       </main>
 
-      {/* <Footer /> */}
-
-      {/* Toast notifications */}
       <Toaster
         position="top-right"
         toastOptions={{
           duration: 4000,
           style: {
-            background: isDark ? "#111827" : "#FFFFFF", // Darker background for dark mode
+            background: isDark ? "#111827" : "#FFFFFF",
             color: isDark ? "#F3F4F6" : "#1F2937",
             border: `1px solid ${isDark ? "#1F2937" : "#E5E7EB"}`,
             boxShadow: isDark
               ? "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
               : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-            borderRadius: "0.75rem", // Rounded corners
           },
           success: {
             iconTheme: {
-              primary: "#10B981", // Emerald green
+              primary: "#10B981",
               secondary: isDark ? "#111827" : "#FFFFFF",
             },
           },
           error: {
             iconTheme: {
-              primary: "#EF4444", // Red
+              primary: "#EF4444",
               secondary: isDark ? "#111827" : "#FFFFFF",
             },
           },

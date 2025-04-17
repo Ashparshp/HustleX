@@ -1,11 +1,9 @@
-// src/components/UI/LoadingSpinner.jsx
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 
 const LoadingSpinner = ({ size = 'md', className = '', text = '' }) => {
   const { isDark } = useTheme();
   
-  // Size mappings
   const sizeClasses = {
     sm: 'w-5 h-5 border-2',
     md: 'w-8 h-8 border-2',
@@ -19,7 +17,6 @@ const LoadingSpinner = ({ size = 'md', className = '', text = '' }) => {
       : 'border-indigo-200 border-t-indigo-600'
   }`;
   
-  // Determine the container classes based on whether we have text
   const containerClass = text 
     ? 'flex flex-col items-center justify-center gap-3' 
     : 'inline-block';
