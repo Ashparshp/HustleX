@@ -1,4 +1,3 @@
-// src/components/Skills/ConfirmDeleteModal.jsx
 import { motion } from "framer-motion";
 import { AlertTriangle, X } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
@@ -13,7 +12,6 @@ const ConfirmDeleteModal = ({
 }) => {
   const { isDark } = useTheme();
 
-  // Animation variants
   const overlayVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.3 } },
@@ -36,7 +34,6 @@ const ConfirmDeleteModal = ({
     },
   };
 
-  // Button classes
   const cancelButtonClass = `px-4 py-2 rounded-lg font-medium ${
     isDark
       ? "bg-gray-700 hover:bg-gray-600 text-gray-300"
@@ -53,7 +50,6 @@ const ConfirmDeleteModal = ({
 
   return (
     <>
-      {/* Overlay */}
       <motion.div
         initial="hidden"
         animate="visible"
@@ -63,7 +59,6 @@ const ConfirmDeleteModal = ({
         onClick={onCancel}
       />
 
-      {/* Modal */}
       <motion.div
         initial="hidden"
         animate="visible"
@@ -77,7 +72,6 @@ const ConfirmDeleteModal = ({
           }`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Icon and Title */}
           <div className="flex items-start mb-4">
             <div
               className={`p-2 rounded-full ${
@@ -116,7 +110,6 @@ const ConfirmDeleteModal = ({
             </button>
           </div>
 
-          {/* Buttons */}
           <div className="flex justify-end space-x-3 mt-6">
             <button
               type="button"
