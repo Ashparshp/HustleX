@@ -58,7 +58,6 @@ const ManageSkillsModal = ({
           typeof skill.orderIndex === "number" ? skill.orderIndex : index,
       }));
 
-      // Sort by orderIndex if available
       orderedSkills.sort((a, b) => {
         if (
           typeof a.orderIndex === "number" &&
@@ -81,7 +80,6 @@ const ManageSkillsModal = ({
     }
   }, [categorySkills]);
 
-  // Get priority color mapping
   const getPriorityColor = (priority) => {
     switch (priority) {
       case "high":
@@ -95,7 +93,6 @@ const ManageSkillsModal = ({
     }
   };
 
-  // Get status color mapping
   const getStatusColor = (status) => {
     switch (status) {
       case "completed":
@@ -120,15 +117,12 @@ const ManageSkillsModal = ({
     const updatedSkills = [...managedSkills];
     const newIndex = direction === "up" ? index - 1 : index + 1;
 
-    // Swap array elements
     [updatedSkills[index], updatedSkills[newIndex]] = [
       updatedSkills[newIndex],
       updatedSkills[index],
     ];
 
-    // Update order indices
     updatedSkills.forEach((skill, idx) => {
-      // Make sure to explicitly set orderIndex as a number
       skill.orderIndex = Number(idx);
     });
 
@@ -139,22 +133,18 @@ const ManageSkillsModal = ({
     setManagedSkills(updatedSkills);
   };
 
-  // Handle editing a skill
   const handleEditSkill = (skill) => {
     setEditingSkill(skill);
   };
 
-  // Handle closing the edit modal
   const handleCloseEditModal = () => {
     setEditingSkill(null);
   };
 
-  // Handle deleting a skill
   const handleDeleteSkill = (skill) => {
     setSkillToDelete(skill);
   };
 
-  // Confirm delete action
   const confirmDeleteSkill = async () => {
     if (!skillToDelete) return;
 
@@ -162,12 +152,10 @@ const ManageSkillsModal = ({
     try {
       await deleteSkill(skillToDelete.id || skillToDelete._id);
 
-      // Remove from local state
       const updatedSkills = managedSkills.filter(
         (s) => (s.id || s._id) !== (skillToDelete.id || skillToDelete._id)
       );
 
-      // Update order indices
       updatedSkills.forEach((skill, idx) => {
         skill.orderIndex = idx;
       });
@@ -182,13 +170,11 @@ const ManageSkillsModal = ({
     }
   };
 
-  // Save the reordered skills
   const handleSave = async () => {
     setIsSubmitting(true);
     setError(null);
 
     try {
-      // Use the updateSkillOrder function
       await updateSkillOrder(category, managedSkills);
       onClose();
     } catch (error) {
@@ -280,7 +266,6 @@ const ManageSkillsModal = ({
                 <Reorder.Group
                   values={managedSkills}
                   onReorder={(newOrder) => {
-                    // Update order indices
                     const updatedSkills = newOrder.map((skill, idx) => ({
                       ...skill,
                       orderIndex: Number(idx),
@@ -488,7 +473,6 @@ const ManageSkillsModal = ({
         </div>
       </motion.div>
 
-      {/* Delete Confirmation Modal */}
       {skillToDelete && (
         <ConfirmDeleteModal
           title="Delete Skill"
@@ -499,14 +483,13 @@ const ManageSkillsModal = ({
         />
       )}
 
-      {/* Edit Modal with higher z-index */}
       <AnimatePresence>
         {editingSkill && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto" // Higher z-index (60 vs 50)
+            className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto"
           >
             <div
               className="fixed inset-0 bg-black/40 backdrop-blur-sm"
@@ -516,12 +499,12 @@ const ManageSkillsModal = ({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative z-[60] w-full max-w-xl" // Same z-index for consistency
+              className="relative z-[60] w-full max-w-xl"
             >
               <EditSkillModal
                 skill={editingSkill}
                 onClose={handleCloseEditModal}
-                categories={[category]} // Pass the current category
+                categories={[category]}
               />
             </motion.div>
           </motion.div>
