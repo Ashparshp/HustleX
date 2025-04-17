@@ -29,7 +29,6 @@ const SkillFilters = ({
     status: true,
   });
 
-  // Calculate category and status counts based on current skills
   const categoryCounts = useMemo(() => {
     if (!skills) return {};
 
@@ -42,23 +41,18 @@ const SkillFilters = ({
     );
   }, [skills]);
 
-  // Calculate filtered counts based on current filters
   const filteredCounts = useMemo(() => {
     if (!skills) return {};
 
     return Object.entries(skills).reduce(
       (counts, [category, categorySkills]) => {
-        // Filter skills within the category
         const filteredSkills = categorySkills.filter((skill) => {
-          // Category filter
           const categoryMatch =
             !selectedCategory || category === selectedCategory;
 
-          // Status filter
           const statusMatch =
             !selectedStatus || skill.status === selectedStatus;
 
-          // Search filter
           const searchMatch =
             !searchQuery ||
             skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -77,7 +71,6 @@ const SkillFilters = ({
     );
   }, [skills, selectedCategory, selectedStatus, searchQuery]);
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -94,7 +87,6 @@ const SkillFilters = ({
     visible: { opacity: 1, y: 0 },
   };
 
-  // Status options
   const statuses = [
     {
       value: "completed",
@@ -116,7 +108,6 @@ const SkillFilters = ({
     },
   ];
 
-  // Toggle section expansion
   const toggleSection = (section) => {
     setExpandedSections((prev) => ({
       ...prev,
@@ -124,7 +115,6 @@ const SkillFilters = ({
     }));
   };
 
-  // Helper to get category color
   const getCategoryColor = (category) => {
     const colorMap = {
       "MERN Stack": isDark ? "text-blue-400" : "text-blue-600",
@@ -147,7 +137,6 @@ const SkillFilters = ({
       animate="visible"
       className="space-y-4"
     >
-      {/* Search Section */}
       <motion.div
         variants={itemVariants}
         className={`p-4 rounded-lg border shadow-sm ${
@@ -205,7 +194,6 @@ const SkillFilters = ({
         </div>
       </motion.div>
 
-      {/* Categories Section */}
       <motion.div
         variants={itemVariants}
         className={`p-4 rounded-lg border shadow-sm ${
@@ -332,7 +320,6 @@ const SkillFilters = ({
         </AnimatePresence>
       </motion.div>
 
-      {/* Status Section */}
       <motion.div
         variants={itemVariants}
         className={`p-4 rounded-lg border shadow-sm ${
@@ -389,7 +376,6 @@ const SkillFilters = ({
                   const StatusIcon = status.icon;
                   const isSelected = status.value === selectedStatus;
 
-                  // Calculate status counts
                   const totalStatusCount = Object.values(skills || {})
                     .flat()
                     .filter((skill) => skill.status === status.value).length;
