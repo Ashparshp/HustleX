@@ -4,7 +4,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff, Lock, ArrowLeft, Save } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import LoadingSpinner from "../UI/LoadingSpinner";
 
 const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -26,7 +25,6 @@ const ChangePassword = () => {
 
     if (isSubmitting) return;
 
-    // Form validation
     if (!currentPassword) {
       setFormError("Current password is required");
       return;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 

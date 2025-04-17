@@ -12,7 +12,6 @@ import {
   AlertCircle,
   TrendingUp,
   Users,
-  Clock,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { formatDisplayDate } from "../../utils/dateUtils";

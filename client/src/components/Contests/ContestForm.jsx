@@ -6,7 +6,6 @@ import {
   Target,
   Tag,
   MessageSquare,
-  AlertTriangle,
   Trophy,
   Code,
 } from "lucide-react";

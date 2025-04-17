@@ -1,4 +1,3 @@
-// src/components/Contests/VisualizeModal.jsx
 import { useState } from "react";
 import { Calendar, PieChart } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";

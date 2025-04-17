@@ -7,7 +7,6 @@ import {
   MessageSquare,
   Award,
   Clock,
-  Target,
   Code,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
