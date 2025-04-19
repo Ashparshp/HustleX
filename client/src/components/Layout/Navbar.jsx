@@ -113,19 +113,19 @@ const Navbar = () => {
     {
       text: "Working Hours",
       path: "/working-hours",
-      icon: <Clock size={16} />,
+      icon: <Clock size={18} />,
       authRequired: true,
     },
     {
       text: "Skills",
       path: "/skills",
-      icon: <Award size={16} />,
+      icon: <Award size={18} />,
       authRequired: true,
     },
     {
       text: "Timetable",
       path: "/timetable",
-      icon: <Layout size={16} />,
+      icon: <Layout size={18} />,
       authRequired: true,
     },
   ];
@@ -134,24 +134,24 @@ const Navbar = () => {
     {
       text: "Schedule",
       path: "/schedule",
-      icon: <Calendar size={16} />,
+      icon: <Calendar size={18} />,
       authRequired: true,
     },
     {
       text: "Contest",
       path: "/contests",
-      icon: <Home size={16} />,
+      icon: <Home size={18} />,
       authRequired: true,
     },
     {
       text: "LeetCode",
       path: "/leetcode",
-      icon: <Target size={16} />,
+      icon: <Target size={18} />,
       authRequired: true,
     },
   ];
 
- 
+  // Updated styling for better aesthetics on larger screens
   const navbarClass = isDark
     ? `bg-gray-900/95 text-white border-gray-800 backdrop-blur-md ${
         scrolled ? "shadow-lg shadow-black/20" : ""
@@ -160,28 +160,31 @@ const Navbar = () => {
         scrolled ? "shadow-lg shadow-black/5" : ""
       }`;
 
+  // Enhanced link styling with better hover effects
   const generateLinkClass = (active) => {
     const baseClasses =
-      "transition-all duration-300 rounded-md flex items-center gap-2";
+      "transition-all duration-300 rounded-lg flex items-center gap-2 text-sm font-medium";
 
     if (isDark) {
       return active
-        ? `${baseClasses} text-indigo-300 bg-indigo-500/15 font-medium`
-        : `${baseClasses} text-gray-300 hover:text-indigo-300 hover:bg-indigo-500/10`;
+        ? `${baseClasses} text-indigo-300 bg-indigo-500/20 border border-indigo-500/30`
+        : `${baseClasses} text-gray-300 hover:text-indigo-300 hover:bg-indigo-500/10 hover:border-indigo-500/20 border border-transparent`;
     } else {
       return active
-        ? `${baseClasses} text-indigo-600 bg-indigo-50 font-medium`
-        : `${baseClasses} text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/70`;
+        ? `${baseClasses} text-indigo-600 bg-indigo-50 border border-indigo-200/70`
+        : `${baseClasses} text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/70 hover:border-indigo-200/50 border border-transparent`;
     }
   };
 
+  // Enhanced button styling
   const buttonClass = isDark
-    ? "transition-colors duration-300 rounded-full hover:bg-gray-800/80 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-1 focus:ring-offset-gray-900"
-    : "transition-colors duration-300 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-1 focus:ring-offset-white";
+    ? "transition-all duration-300 rounded-full hover:bg-gray-800/80 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-1 focus:ring-offset-gray-900"
+    : "transition-all duration-300 rounded-full hover:bg-gray-100 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-1 focus:ring-offset-white";
 
+  // Enhanced dropdown menu styling
   const dropdownMenuClass = isDark
-    ? "absolute mt-2 py-2 rounded-lg shadow-lg border border-gray-700 bg-gray-900 z-50 transform origin-top-right transition-all duration-200 ease-out"
-    : "absolute mt-2 py-2 rounded-lg shadow-lg border border-gray-200 bg-white z-50 transform origin-top-right transition-all duration-200 ease-out";
+    ? "absolute mt-2 py-2 rounded-xl shadow-xl border border-gray-700/70 bg-gray-800/95 backdrop-blur-sm z-50 transform origin-top-right transition-all duration-200 ease-out"
+    : "absolute mt-2 py-2 rounded-xl shadow-xl border border-gray-200/70 bg-white/95 backdrop-blur-sm z-50 transform origin-top-right transition-all duration-200 ease-out";
 
   return (
     <nav
@@ -189,20 +192,20 @@ const Navbar = () => {
       role="navigation"
       aria-label="Main Navigation"
     >
-      <div className="px-4 sm:px-6 lg:px-8 mx-auto">
-        <div className="flex justify-between h-14 md:h-16">
-          {/* Logo and brand */}
+      <div className="px-4 sm:px-6 lg:px-10 mx-auto max-w-7xl">
+        <div className="flex justify-between h-16 md:h-18">
+          {/* Logo and brand - Enhanced with better spacing */}
           <div className="flex items-center">
             <Link
               to={isAuthenticated ? "/working-hours" : "/login"}
-              className="flex-shrink-0 flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500/50 rounded-md"
+              className="flex-shrink-0 flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500/50 rounded-md transition-all duration-300 hover:scale-105"
               aria-label="Hustle X Homepage"
             >
               {/* SVG Logo */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 300 80"
-                className="h-9 w-auto transition-transform duration-300 hover:scale-105"
+                className="h-10 w-auto"
               >
                 {/* Background shapes */}
                 <g opacity="0.2">
@@ -283,30 +286,36 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Desktop nav links - primary always visible on md+, secondary in dropdown on md, visible on lg+ */}
-          <div className="hidden md:flex md:items-center md:space-x-1 lg:space-x-2">
-            {isAuthenticated &&
-              primaryNavLinks
-                .filter((link) => link.authRequired === isAuthenticated)
-                .map((link) => (
-                  <div key={link.path}>
-                    <Link
-                      to={link.path}
-                      className={`px-2 lg:px-3 py-2 ${generateLinkClass(
-                        isActive(link.path)
-                      )}`}
-                      title={link.text}
-                      aria-current={isActive(link.path) ? "page" : undefined}
-                    >
-                      <span className="md:mr-1">{link.icon}</span>
-                      <span className="hidden md:inline-block">
-                        {link.text}
-                      </span>
-                    </Link>
-                  </div>
-                ))}
+          {/* Desktop nav links - Redesigned with better spacing and visual hierarchy */}
+          <div className="hidden md:flex md:items-center md:space-x-2 lg:space-x-3">
+            {/* Pill-shaped container for primary navigation */}
+            {isAuthenticated && (
+              <div className={`p-1 rounded-xl mr-1 ${isDark ? 'bg-gray-800/50' : 'bg-gray-100/70'}`}>
+                <div className="flex items-center space-x-1">
+                  {primaryNavLinks
+                    .filter((link) => link.authRequired === isAuthenticated)
+                    .map((link) => (
+                      <div key={link.path}>
+                        <Link
+                          to={link.path}
+                          className={`px-3 py-2 ${generateLinkClass(
+                            isActive(link.path)
+                          )}`}
+                          title={link.text}
+                          aria-current={isActive(link.path) ? "page" : undefined}
+                        >
+                          <span className="mr-1.5">{link.icon}</span>
+                          <span className="hidden md:inline-block">
+                            {link.text}
+                          </span>
+                        </Link>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
 
-            {/* More menu for medium screens */}
+            {/* More menu for medium screens - enhanced with better styling */}
             {isAuthenticated &&
               secondaryNavLinks.some(
                 (link) => link.authRequired === isAuthenticated
@@ -314,7 +323,7 @@ const Navbar = () => {
                 <div className="relative md:block lg:hidden" ref={moreMenuRef}>
                   <button
                     onClick={() => setShowMoreMenu(!showMoreMenu)}
-                    className={`px-2 py-2 rounded-md ${generateLinkClass(
+                    className={`px-3 py-2 rounded-lg ${generateLinkClass(
                       false
                     )}`}
                     aria-label="More navigation options"
@@ -323,11 +332,12 @@ const Navbar = () => {
                     title="More"
                   >
                     <MoreHorizontal size={18} />
+                    <span className="ml-1">More</span>
                   </button>
 
                   {showMoreMenu && (
                     <div
-                      className={`${dropdownMenuClass} right-0 w-48`}
+                      className={`${dropdownMenuClass} right-0 w-56`}
                       role="menu"
                       aria-orientation="vertical"
                       aria-labelledby="more-menu-button"
@@ -338,17 +348,25 @@ const Navbar = () => {
                           <Link
                             key={link.path}
                             to={link.path}
-                            className={`block px-4 py-2 ${generateLinkClass(
-                              isActive(link.path)
-                            )}`}
+                            className={`block px-4 py-2.5 ${
+                              isDark
+                                ? isActive(link.path)
+                                  ? "bg-indigo-500/20 text-indigo-300"
+                                  : "hover:bg-gray-700/50 text-gray-300"
+                                : isActive(link.path)
+                                ? "bg-indigo-50 text-indigo-600"
+                                : "hover:bg-gray-50 text-gray-700"
+                            } rounded-lg mx-2 my-1 transition-colors duration-200`}
                             onClick={closeMenu}
                             role="menuitem"
                             aria-current={
                               isActive(link.path) ? "page" : undefined
                             }
                           >
-                            {link.icon}
-                            <span className="ml-2">{link.text}</span>
+                            <div className="flex items-center">
+                              {link.icon}
+                              <span className="ml-2">{link.text}</span>
+                            </div>
                           </Link>
                         ))}
                     </div>
@@ -356,34 +374,43 @@ const Navbar = () => {
                 </div>
               )}
 
-            {/* Secondary links visible on large screens */}
-            <div className="hidden lg:flex lg:items-center lg:space-x-2">
-              {isAuthenticated &&
-                secondaryNavLinks
-                  .filter((link) => link.authRequired === isAuthenticated)
-                  .map((link) => (
-                    <div key={link.path}>
-                      <Link
-                        to={link.path}
-                        className={`px-3 py-2 ${generateLinkClass(
-                          isActive(link.path)
-                        )}`}
-                        aria-current={isActive(link.path) ? "page" : undefined}
-                      >
-                        {link.icon}
-                        <span className="ml-1">{link.text}</span>
-                      </Link>
-                    </div>
-                  ))}
+            {/* Secondary links visible on large screens - enhanced with better styling */}
+            <div className="hidden lg:flex lg:items-center">
+              {isAuthenticated && (
+                <div className={`p-1 rounded-xl ${isDark ? 'bg-gray-800/50' : 'bg-gray-100/70'}`}>
+                  <div className="flex items-center space-x-1">
+                    {secondaryNavLinks
+                      .filter((link) => link.authRequired === isAuthenticated)
+                      .map((link) => (
+                        <div key={link.path}>
+                          <Link
+                            to={link.path}
+                            className={`px-3 py-2 ${generateLinkClass(
+                              isActive(link.path)
+                            )}`}
+                            aria-current={isActive(link.path) ? "page" : undefined}
+                          >
+                            {link.icon}
+                            <span className="ml-1.5">{link.text}</span>
+                          </Link>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Right side - theme toggle & user menu */}
-          <div className="flex items-center space-x-1 md:space-x-2">
-            {/* Theme toggle */}
+          {/* Right side - theme toggle & user menu - enhanced with better styling */}
+          <div className="flex items-center space-x-2 md:space-x-3">
+            {/* Theme toggle - enhanced */}
             <button
               onClick={toggleTheme}
-              className={`p-2 ${buttonClass}`}
+              className={`p-2 ${buttonClass} ${
+                isDark 
+                  ? "bg-gray-800/70 hover:bg-gray-700/50" 
+                  : "bg-gray-100 hover:bg-gray-200/70"
+              }`}
               aria-label={
                 isDark ? "Switch to light mode" : "Switch to dark mode"
               }
@@ -397,12 +424,14 @@ const Navbar = () => {
             </button>
 
             {isAuthenticated ? (
-              /* User menu (desktop) */
+              /* User menu (desktop) - completely redesigned */
               <div className="hidden md:relative md:block" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className={`flex items-center gap-2 p-1.5 rounded-full ${
-                    isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"
+                  className={`flex items-center gap-2.5 px-3 py-1.5 rounded-xl ${
+                    isDark 
+                      ? "bg-gray-800/70 hover:bg-gray-700/60 border border-gray-700/50" 
+                      : "bg-gray-100 hover:bg-gray-200/70 border border-gray-200/70"
                   } transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-1 ${
                     isDark
                       ? "focus:ring-offset-gray-900"
@@ -415,8 +444,8 @@ const Navbar = () => {
                   <div
                     className={`h-8 w-8 rounded-full grid place-items-center transition-all duration-300 ${
                       isDark
-                        ? "bg-indigo-500/20 border border-indigo-500/30 hover:bg-indigo-500/30"
-                        : "bg-indigo-100 border border-indigo-200/50 hover:bg-indigo-200"
+                        ? "bg-indigo-500/30 border border-indigo-500/40"
+                        : "bg-indigo-100 border border-indigo-200"
                     }`}
                   >
                     <User
@@ -432,13 +461,6 @@ const Navbar = () => {
                     >
                       {currentUser?.name || "User"}
                     </p>
-                    <p
-                      className={`text-xs ${
-                        isDark ? "text-gray-400" : "text-gray-500"
-                      }`}
-                    >
-                      Account
-                    </p>
                   </div>
                   <div>
                     <ChevronDown
@@ -452,14 +474,14 @@ const Navbar = () => {
 
                 {showUserMenu && (
                   <div
-                    className={`${dropdownMenuClass} right-0 w-56`}
+                    className={`${dropdownMenuClass} right-0 w-64`}
                     role="menu"
                     aria-orientation="vertical"
                     aria-labelledby="user-menu-button"
                   >
                     <div
-                      className={`px-4 py-2 mb-1 border-b ${
-                        isDark ? "border-gray-800" : "border-gray-100"
+                      className={`px-4 py-3 mb-1 border-b ${
+                        isDark ? "border-gray-700" : "border-gray-200"
                       }`}
                     >
                       <p
@@ -478,14 +500,14 @@ const Navbar = () => {
                       </p>
                     </div>
 
-                    <div role="none">
+                    <div role="none" className="px-2">
                       <Link
                         to="/profile"
-                        className={`block px-4 py-2 text-sm ${
+                        className={`block px-4 py-2.5 text-sm ${
                           isDark
-                            ? "hover:bg-gray-800 text-gray-300"
+                            ? "hover:bg-gray-700/50 text-gray-300"
                             : "hover:bg-gray-50 text-gray-700"
-                        } transition-colors duration-200`}
+                        } rounded-lg transition-colors duration-200`}
                         onClick={() => setShowUserMenu(false)}
                         role="menuitem"
                       >
@@ -498,38 +520,40 @@ const Navbar = () => {
 
                     <div
                       className={`mt-1 pt-1 border-t ${
-                        isDark ? "border-gray-800" : "border-gray-100"
+                        isDark ? "border-gray-700" : "border-gray-200"
                       }`}
                       role="none"
                     >
-                      <button
-                        onClick={handleLogout}
-                        className={`block w-full text-left px-4 py-2 text-sm ${
-                          isDark
-                            ? "hover:bg-red-900/20 text-red-400"
-                            : "hover:bg-red-50 text-red-600"
-                        } transition-colors duration-200`}
-                        role="menuitem"
-                      >
-                        <div className="flex items-center gap-2">
-                          <LogOut size={16} />
-                          <span>Sign out</span>
-                        </div>
-                      </button>
+                      <div className="px-2 pb-1">
+                        <button
+                          onClick={handleLogout}
+                          className={`block w-full text-left px-4 py-2.5 text-sm rounded-lg ${
+                            isDark
+                              ? "hover:bg-red-900/20 text-red-400 bg-red-900/10"
+                              : "hover:bg-red-50 text-red-600 bg-red-50/50"
+                          } transition-colors duration-200`}
+                          role="menuitem"
+                        >
+                          <div className="flex items-center gap-2">
+                            <LogOut size={16} />
+                            <span>Sign out</span>
+                          </div>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              /* Login / Register buttons (desktop) */
-              <div className="hidden md:flex md:items-center md:space-x-2">
+              /* Login / Register buttons (desktop) - enhanced styling */
+              <div className="hidden md:flex md:items-center md:space-x-3">
                 <div>
                   <Link
                     to="/login"
-                    className={`px-3 py-1.5 md:py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                       isDark
-                        ? "text-indigo-300 hover:bg-indigo-900/30 border border-indigo-500/30 hover:border-indigo-500/50"
-                        : "text-indigo-600 hover:bg-indigo-50 border border-indigo-200 hover:border-indigo-300"
+                        ? "text-indigo-300 bg-indigo-900/20 hover:bg-indigo-900/40 border border-indigo-500/30 hover:border-indigo-500/50"
+                        : "text-indigo-600 bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-200 hover:border-indigo-300"
                     }`}
                   >
                     Sign in
@@ -538,11 +562,11 @@ const Navbar = () => {
                 <div>
                   <Link
                     to="/register"
-                    className={`px-3 py-1.5 md:py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                       isDark
                         ? "bg-indigo-600 hover:bg-indigo-500 text-white"
                         : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                    } hover:scale-105 transform`}
+                    } hover:scale-105 transform shadow-md hover:shadow-lg`}
                   >
                     Sign up
                   </Link>
@@ -575,7 +599,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu - keeping this the same as it's not part of the larger screen redesign */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
           isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
