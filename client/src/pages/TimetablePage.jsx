@@ -138,21 +138,21 @@ const TimetablePage = () => {
   }, []);
 
   useEffect(() => {
-    if (!loading && (currentWeek || error)) {
+    if (!loading && (currentWeek || error || (timetables && timetables.length === 0))) {
       let isMounted = true;
-
+  
       const timer = setTimeout(() => {
         if (isMounted) {
           setPageReady(true);
         }
       }, 300);
-
+  
       return () => {
         isMounted = false;
         clearTimeout(timer);
       };
     }
-  }, [loading, currentWeek, error]);
+  }, [loading, currentWeek, error, timetables]);
 
   useEffect(() => {
     if (timetables.length > 0 && currentTimetable) {
