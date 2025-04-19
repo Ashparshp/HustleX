@@ -55,7 +55,7 @@ const Footer = () => {
                 isDark ? "text-white" : "text-gray-900"
               }`}
             >
-              ServiceXchange
+              HustleX
             </span>
             <span
               className={`text-sm ${
