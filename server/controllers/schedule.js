@@ -1,22 +1,16 @@
-// server/controllers/schedule.js
 const Schedule = require("../models/Schedule");
 const Category = require("../models/Category");
 
-// Helper function for error handling
 const handleError = (res, error, message = "Server error") => {
   console.error(`Error: ${message}`, error);
   res.status(500).json({ success: false, message: error.message || message });
 };
 
-// @desc    Get schedules for a date range
-// @route   GET /api/schedules
-// @access  Private
 exports.getSchedules = async (req, res) => {
   try {
     const { startDate, endDate, status } = req.query;
     let query = { user: req.user.id };
 
-    // Apply date range filter
     if (startDate && endDate) {
       query.date = {
         $gte: new Date(startDate),
@@ -24,7 +18,6 @@ exports.getSchedules = async (req, res) => {
       };
     }
 
-    // Apply status filter if provided
     if (status) {
       query.status = status;
     }
@@ -41,12 +34,8 @@ exports.getSchedules = async (req, res) => {
   }
 };
 
-// @desc    Get a single day's schedule
-// @route   GET /api/schedules/:id
-// @access  Private
 exports.getSchedule = async (req, res) => {
   try {
-    // Find schedule and verify ownership
     const schedule = await Schedule.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -68,18 +57,13 @@ exports.getSchedule = async (req, res) => {
   }
 };
 
-// @desc    Create a new schedule
-// @route   POST /api/schedules
-// @access  Private
 exports.createSchedule = async (req, res) => {
   try {
     const { date, items } = req.body;
 
-    // Format date to remove time component
     const scheduleDate = new Date(date);
     scheduleDate.setHours(0, 0, 0, 0);
 
-    // Check if schedule already exists for this date and user
     const existingSchedule = await Schedule.findOne({
       user: req.user.id,
       date: scheduleDate,
@@ -92,7 +76,6 @@ exports.createSchedule = async (req, res) => {
       });
     }
 
-    // Determine day type (Weekend or Weekday)
     const dayType = scheduleDate.getDay() % 6 === 0 ? "Weekend" : "Weekday";
 
     const schedule = new Schedule({
@@ -113,14 +96,10 @@ exports.createSchedule = async (req, res) => {
   }
 };
 
-// @desc    Update a schedule
-// @route   PUT /api/schedules/:id
-// @access  Private
 exports.updateSchedule = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find schedule and verify ownership
     const schedule = await Schedule.findOne({
       _id: id,
       user: req.user.id,
@@ -133,10 +112,8 @@ exports.updateSchedule = async (req, res) => {
       });
     }
 
-    // Extract fields to update
     const { date, items, dayType, status } = req.body;
 
-    // Update fields if provided
     if (date) {
       schedule.date = new Date(date);
     }
@@ -153,7 +130,6 @@ exports.updateSchedule = async (req, res) => {
       schedule.status = status;
     }
 
-    // Save the updated schedule
     const updatedSchedule = await schedule.save();
 
     res.json({
@@ -165,12 +141,8 @@ exports.updateSchedule = async (req, res) => {
   }
 };
 
-// @desc    Delete a schedule
-// @route   DELETE /api/schedules/:id
-// @access  Private
 exports.deleteSchedule = async (req, res) => {
   try {
-    // Find schedule and verify ownership
     const schedule = await Schedule.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -194,12 +166,8 @@ exports.deleteSchedule = async (req, res) => {
   }
 };
 
-// @desc    Add item to schedule
-// @route   POST /api/schedules/:id/items
-// @access  Private
 exports.addScheduleItem = async (req, res) => {
   try {
-    // Find schedule and verify ownership
     const schedule = await Schedule.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -212,7 +180,6 @@ exports.addScheduleItem = async (req, res) => {
       });
     }
 
-    // Validate required fields
     const { title, startTime, endTime, category } = req.body;
     if (!title || !startTime || !endTime || !category) {
       return res.status(400).json({
@@ -233,12 +200,8 @@ exports.addScheduleItem = async (req, res) => {
   }
 };
 
-// @desc    Update schedule item
-// @route   PUT /api/schedules/:id/items/:itemId
-// @access  Private
 exports.updateScheduleItem = async (req, res) => {
   try {
-    // Find schedule and verify ownership
     const schedule = await Schedule.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -259,7 +222,6 @@ exports.updateScheduleItem = async (req, res) => {
       });
     }
 
-    // Update item fields
     Object.keys(req.body).forEach((key) => {
       item[key] = req.body[key];
     });
@@ -275,12 +237,8 @@ exports.updateScheduleItem = async (req, res) => {
   }
 };
 
-// @desc    Delete schedule item
-// @route   DELETE /api/schedules/:id/items/:itemId
-// @access  Private
 exports.deleteScheduleItem = async (req, res) => {
   try {
-    // Find schedule and verify ownership
     const schedule = await Schedule.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -293,7 +251,6 @@ exports.deleteScheduleItem = async (req, res) => {
       });
     }
 
-    // Remove the item
     schedule.items = schedule.items.filter(
       (item) => item._id.toString() !== req.params.itemId
     );
@@ -309,12 +266,8 @@ exports.deleteScheduleItem = async (req, res) => {
   }
 };
 
-// @desc    Get schedule categories
-// @route   GET /api/schedules/categories
-// @access  Private
 exports.getScheduleCategories = async (req, res) => {
   try {
-    // Find all unique categories used in schedules
     const schedules = await Schedule.find({ user: req.user.id });
 
     const categoriesSet = new Set();
@@ -325,7 +278,6 @@ exports.getScheduleCategories = async (req, res) => {
       });
     });
 
-    // Get user-defined categories
     const userCategories = await Category.find({
       user: req.user.id,
       type: "schedule",
