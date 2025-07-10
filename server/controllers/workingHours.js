@@ -1,8 +1,6 @@
-// server/controllers/workingHours.js
 const WorkingHours = require("../models/WorkingHours");
 const Category = require("../models/Category");
 
-// Helper function to handle errors
 const handleError = (res, error, message = "Server error") => {
   console.error(`Error: ${message}`, error);
   res.status(500).json({ success: false, message: error.message || message });
@@ -13,7 +11,6 @@ exports.getWorkingHours = async (req, res) => {
     const { startDate, endDate, category } = req.query;
     let query = { user: req.user.id };
 
-    // Date range filter
     if (startDate && endDate) {
       query.date = {
         $gte: new Date(startDate),
@@ -21,7 +18,6 @@ exports.getWorkingHours = async (req, res) => {
       };
     }
 
-    // Category filter
     if (category) {
       query.category = category;
     }
@@ -30,7 +26,6 @@ exports.getWorkingHours = async (req, res) => {
       .sort({ date: -1 })
       .limit(30);
 
-    // Calculate statistics
     const stats = {
       totalDays: workingHours.length,
       totalTargetHours: workingHours.reduce(
@@ -72,14 +67,12 @@ exports.addWorkingHours = async (req, res) => {
       });
     }
 
-    // Check if entry already exists for this date and user
     let existingEntry = await WorkingHours.findOne({
       user: req.user.id,
       date: new Date(date).setHours(0, 0, 0, 0),
     });
 
     if (existingEntry) {
-      // Update existing entry
       existingEntry.targetHours = targetHours;
       existingEntry.achievedHours = achievedHours;
       existingEntry.category = category;
@@ -88,7 +81,6 @@ exports.addWorkingHours = async (req, res) => {
       await existingEntry.save();
       res.json({ success: true, data: existingEntry });
     } else {
-      // Create new entry
       const workingHours = new WorkingHours({
         user: req.user.id,
         date,
@@ -111,12 +103,10 @@ exports.updateWorkingHours = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
-    // Ensure user can't update the user field
     if (updates.user) {
       delete updates.user;
     }
 
-    // Find the working hours entry and verify ownership
     const workingHours = await WorkingHours.findOne({
       _id: id,
       user: req.user.id
@@ -129,7 +119,6 @@ exports.updateWorkingHours = async (req, res) => {
       });
     }
 
-    // Apply updates
     Object.keys(updates).forEach(key => {
       workingHours[key] = updates[key];
     });
@@ -145,7 +134,6 @@ exports.deleteWorkingHours = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find and ensure user owns the record
     const workingHours = await WorkingHours.findOne({
       _id: id,
       user: req.user.id
@@ -225,19 +213,15 @@ exports.getStats = async (req, res) => {
   }
 };
 
-// Get all categories for the user
 exports.getCategories = async (req, res) => {
   try {
-    // Find all unique categories used by this user
     const categories = await WorkingHours.distinct('category', { user: req.user.id });
     
-    // Get all categories created by the user
     const userCategories = await Category.find({ 
       user: req.user.id,
       type: 'working-hours'
     });
     
-    // Combine and deduplicate
     const allCategories = [...new Set([
       ...categories,
       ...userCategories.map(cat => cat.name)
