@@ -1,20 +1,14 @@
-// server/controllers/category.js
 const Category = require("../models/Category");
 
-// Handle errors
 const handleError = (res, error, message = "Server error") => {
   console.error(`Error: ${message}`, error);
   res.status(500).json({ success: false, message: error.message || message });
 };
 
-// @desc    Get all categories for a specific type
-// @route   GET /api/categories?type=working-hours
-// @access  Private
 exports.getCategories = async (req, res) => {
   try {
     const { type } = req.query;
 
-    // Validate type
     if (!type) {
       return res.status(400).json({
         success: false,
@@ -37,14 +31,10 @@ exports.getCategories = async (req, res) => {
   }
 };
 
-// @desc    Create a new category
-// @route   POST /api/categories
-// @access  Private
 exports.createCategory = async (req, res) => {
   try {
     const { name, type, color, icon, description } = req.body;
 
-    // Validate required fields
     if (!name || !type) {
       return res.status(400).json({
         success: false,
@@ -52,7 +42,6 @@ exports.createCategory = async (req, res) => {
       });
     }
 
-    // Check for duplicates
     const existingCategory = await Category.findOne({
       user: req.user.id,
       name: name.trim(),
@@ -66,7 +55,6 @@ exports.createCategory = async (req, res) => {
       });
     }
 
-    // Create new category
     const category = await Category.create({
       user: req.user.id,
       name: name.trim(),
@@ -85,14 +73,10 @@ exports.createCategory = async (req, res) => {
   }
 };
 
-// @desc    Update a category
-// @route   PUT /api/categories/:id
-// @access  Private
 exports.updateCategory = async (req, res) => {
   try {
     const { name, color, icon, description } = req.body;
 
-    // Find category and check ownership
     let category = await Category.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -105,7 +89,6 @@ exports.updateCategory = async (req, res) => {
       });
     }
 
-    // Check for duplicates if name is changed
     if (name && name !== category.name) {
       const existingCategory = await Category.findOne({
         user: req.user.id,
@@ -122,7 +105,6 @@ exports.updateCategory = async (req, res) => {
       }
     }
 
-    // Update fields
     if (name) category.name = name.trim();
     if (color) category.color = color;
     if (icon) category.icon = icon;
@@ -139,12 +121,8 @@ exports.updateCategory = async (req, res) => {
   }
 };
 
-// @desc    Delete a category
-// @route   DELETE /api/categories/:id
-// @access  Private
 exports.deleteCategory = async (req, res) => {
   try {
-    // Find category and check ownership
     const category = await Category.findOne({
       _id: req.params.id,
       user: req.user.id,
@@ -157,9 +135,7 @@ exports.deleteCategory = async (req, res) => {
       });
     }
 
-    // Use deleteOne() instead of remove()
     await category.deleteOne();
-    // Alternatively: await Category.deleteOne({ _id: req.params.id, user: req.user.id });
 
     res.json({
       success: true,
@@ -170,16 +146,12 @@ exports.deleteCategory = async (req, res) => {
   }
 };
 
-// @desc    Get predefined categories for a module
-// @route   GET /api/categories/defaults/:type
-// @access  Private
 exports.getDefaultCategories = async (req, res) => {
   try {
     const { type } = req.params;
 
     let defaultCategories = [];
 
-    // Different defaults based on module type
     switch (type) {
       case "working-hours":
         defaultCategories = [
