@@ -1,22 +1,16 @@
-// server/controllers/leetcode.js
 const LeetCode = require("../models/LeetCode");
 
-// Helper function for error handling
 const handleError = (res, error, message = "Server error") => {
   console.error(`Error: ${message}`, error);
   res.status(500).json({ success: false, message: error.message || message });
 };
 
-// @desc    Get LeetCode stats for the authenticated user
-// @route   GET /api/leetcode/stats
-// @access  Private
 exports.getLeetCodeStats = async (req, res) => {
   try {
     let stats = await LeetCode.findOne({ user: req.user.id }).sort({
       createdAt: -1,
     });
 
-    // If no stats exist, return default values
     if (!stats) {
       return res.json({
         success: true,
@@ -46,9 +40,6 @@ exports.getLeetCodeStats = async (req, res) => {
   }
 };
 
-// @desc    Update LeetCode stats for the authenticated user
-// @route   POST /api/leetcode/stats
-// @access  Private
 exports.updateLeetCodeStats = async (req, res) => {
   try {
     const {
@@ -65,7 +56,6 @@ exports.updateLeetCodeStats = async (req, res) => {
       completionStreak,
     } = req.body;
 
-    // Create a new record
     const newStats = new LeetCode({
       user: req.user.id,
       totalSolved,
@@ -93,9 +83,6 @@ exports.updateLeetCodeStats = async (req, res) => {
   }
 };
 
-// @desc    Get LeetCode history for the authenticated user
-// @route   GET /api/leetcode/history
-// @access  Private
 exports.getLeetCodeHistory = async (req, res) => {
   try {
     const { limit = 10 } = req.query;
@@ -111,7 +98,6 @@ exports.getLeetCodeHistory = async (req, res) => {
       });
     }
 
-    // Calculate progress over time
     const progressHistory = history.map((entry) => ({
       date: entry.createdAt,
       totalSolved: entry.totalSolved,
@@ -133,14 +119,10 @@ exports.getLeetCodeHistory = async (req, res) => {
   }
 };
 
-// @desc    Delete LeetCode stats entry
-// @route   DELETE /api/leetcode/stats/:id
-// @access  Private
 exports.deleteLeetCodeStats = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find and verify ownership
     const stats = await LeetCode.findOne({
       _id: id,
       user: req.user.id,

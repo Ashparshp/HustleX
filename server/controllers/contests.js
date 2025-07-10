@@ -1,16 +1,11 @@
-// server/controllers/contests.js
 const Contest = require("../models/Contest");
 const Category = require("../models/Category");
 
-// Helper function for error handling
 const handleError = (res, error, message = "Server error") => {
   console.error(`Error: ${message}`, error);
   res.status(500).json({ success: false, message: error.message || message });
 };
 
-// @desc    Get all contests for the authenticated user
-// @route   GET /api/contests
-// @access  Private
 const getContests = async (req, res) => {
   try {
     const {
@@ -22,7 +17,6 @@ const getContests = async (req, res) => {
     } = req.query;
     let query = { user: req.user.id };
 
-    // Apply filters if provided
     if (platform) {
       query.platform = platform;
     }
@@ -31,7 +25,6 @@ const getContests = async (req, res) => {
       query.participated = participated === "true";
     }
 
-    // Date range filter
     if (startDate && endDate) {
       query.date = {
         $gte: new Date(startDate),
@@ -39,8 +32,7 @@ const getContests = async (req, res) => {
       };
     }
 
-    // Determine sort direction
-    let sortDirection = -1; // Default to descending (newest first)
+    let sortDirection = -1;
     let sortField = "date";
 
     if (sort) {
@@ -57,14 +49,12 @@ const getContests = async (req, res) => {
 
     const contests = await Contest.find(query).sort(sortOptions);
 
-    // Calculate stats
     const stats = {
       total: contests.length,
       participated: contests.filter((c) => c.participated).length,
       platforms: {},
     };
 
-    // Group by platform
     contests.forEach((contest) => {
       if (!stats.platforms[contest.platform]) {
         stats.platforms[contest.platform] = {
@@ -91,9 +81,6 @@ const getContests = async (req, res) => {
   }
 };
 
-// @desc    Add a new contest
-// @route   POST /api/contests
-// @access  Private
 const addContest = async (req, res) => {
   try {
     const {
@@ -139,9 +126,6 @@ const addContest = async (req, res) => {
   }
 };
 
-// @desc    Update a contest
-// @route   PUT /api/contests/:id
-// @access  Private
 const updateContest = async (req, res) => {
   try {
     const { id } = req.params;
@@ -157,7 +141,6 @@ const updateContest = async (req, res) => {
       notes,
     } = req.body;
 
-    // Find contest and verify ownership
     const contest = await Contest.findOne({
       _id: id,
       user: req.user.id,
@@ -170,7 +153,6 @@ const updateContest = async (req, res) => {
       });
     }
 
-    // Update fields
     if (platform) contest.platform = platform;
     if (name) contest.name = name.trim();
     if (date) contest.date = date;
@@ -178,7 +160,6 @@ const updateContest = async (req, res) => {
     if (participated !== undefined) {
       contest.participated = participated;
 
-      // Reset rank and solved if not participated
       if (!participated) {
         contest.rank = null;
         contest.solved = null;
@@ -216,14 +197,10 @@ const updateContest = async (req, res) => {
   }
 };
 
-// @desc    Delete a contest
-// @route   DELETE /api/contests/:id
-// @access  Private
 const deleteContest = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find contest and verify ownership
     const contest = await Contest.findOne({
       _id: id,
       user: req.user.id,
@@ -247,23 +224,17 @@ const deleteContest = async (req, res) => {
   }
 };
 
-// @desc    Get contest platforms for the user
-// @route   GET /api/contests/platforms
-// @access  Private
 const getPlatforms = async (req, res) => {
   try {
-    // Get all unique platforms used in contests by this user
     const usedPlatforms = await Contest.distinct("platform", {
       user: req.user.id,
     });
 
-    // Get all categories (platforms) created by the user
     const userPlatforms = await Category.find({
       user: req.user.id,
       type: "goals",
     });
 
-    // Combine and deduplicate
     const allPlatforms = [
       ...new Set([...usedPlatforms, ...userPlatforms.map((p) => p.name)]),
     ];
@@ -277,15 +248,11 @@ const getPlatforms = async (req, res) => {
   }
 };
 
-// @desc    Get contest statistics
-// @route   GET /api/contests/stats
-// @access  Private
 const getContestStats = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
     let query = { user: req.user.id };
 
-    // Apply date range filter if provided
     if (startDate && endDate) {
       query.date = {
         $gte: new Date(startDate),
@@ -311,10 +278,8 @@ const getContestStats = async (req, res) => {
       });
     }
 
-    // Basic stats
     const participated = contests.filter((c) => c.participated);
 
-    // Calculate platform breakdown
     const platforms = contests.reduce((acc, contest) => {
       if (!acc[contest.platform]) {
         acc[contest.platform] = {
@@ -330,14 +295,12 @@ const getContestStats = async (req, res) => {
       if (contest.participated) {
         acc[contest.platform].participated++;
 
-        // Collect ranks for averaging
         if (contest.rank) {
           if (!acc[contest.platform].ranks) {
             acc[contest.platform].ranks = [];
           }
           acc[contest.platform].ranks.push(contest.rank);
 
-          // Track best rank
           if (
             !acc[contest.platform].best_rank ||
             contest.rank < acc[contest.platform].best_rank
@@ -350,25 +313,22 @@ const getContestStats = async (req, res) => {
       return acc;
     }, {});
 
-    // Calculate average ranks for each platform
     Object.keys(platforms).forEach((platform) => {
       if (platforms[platform].ranks && platforms[platform].ranks.length > 0) {
         platforms[platform].avg_rank = Math.round(
           platforms[platform].ranks.reduce((sum, rank) => sum + rank, 0) /
             platforms[platform].ranks.length
         );
-        delete platforms[platform].ranks; // Remove temporary ranks array
+        delete platforms[platform].ranks;
       }
     });
 
-    // Find best rank overall
     const rankedContests = participated.filter((c) => c.rank);
     const bestRank =
       rankedContests.length > 0
         ? Math.min(...rankedContests.map((c) => c.rank))
         : null;
 
-    // Calculate average rank overall
     const averageRank =
       rankedContests.length > 0
         ? Math.round(
@@ -377,7 +337,6 @@ const getContestStats = async (req, res) => {
           )
         : null;
 
-    // Calculate average solve rate
     const contestsWithSolveRate = participated.filter(
       (c) => c.solved !== null && c.totalProblems !== null
     );
@@ -389,7 +348,6 @@ const getContestStats = async (req, res) => {
           ) / contestsWithSolveRate.length
         : null;
 
-    // Calculate recent trend (last 10 contests)
     const recentContests = [...participated]
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, 10)
