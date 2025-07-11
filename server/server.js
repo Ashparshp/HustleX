@@ -18,6 +18,14 @@ if (process.env.NODE_ENV === "production") {
 app.use(helmet());
 app.use(xss());
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "API is running",
+    serverTime: new Date(),
+  });
+});
+
 const limiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 100,
@@ -26,14 +34,6 @@ const limiter = rateLimit({
 app.use("/api/auth", limiter);
 
 app.use(hpp());
-
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    status: "success",
-    message: "API is running",
-    serverTime: new Date(),
-  });
-});
 
 const allowedOrigins = process.env.CLIENT_URLS
   ? process.env.CLIENT_URLS.split(",")
