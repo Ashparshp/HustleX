@@ -1,4 +1,3 @@
-// server/routes/workingHours.js
 const express = require("express");
 const router = express.Router();
 const {
@@ -7,23 +6,17 @@ const {
   updateWorkingHours,
   deleteWorkingHours,
   getStats,
-  getCategories
+  getCategories,
 } = require("../controllers/workingHours");
-const { protect } = require('../middleware/auth');
+const { protect } = require("../middleware/auth");
 
-// Protect all routes
 router.use(protect);
 
-// Routes
-router.route('/')
-  .get(getWorkingHours)
-  .post(addWorkingHours);
+router.route("/").get(getWorkingHours).post(addWorkingHours);
 
-router.route('/:id')
-  .put(updateWorkingHours)
-  .delete(deleteWorkingHours);
+router.route("/:id").put(updateWorkingHours).delete(deleteWorkingHours);
 
-router.get('/stats', getStats);
-router.get('/categories', getCategories);
+router.get("/stats", getStats);
+router.get("/categories", getCategories);
 
 module.exports = router;

@@ -1,5 +1,4 @@
-// server/utils/jwtUtils.js
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 // Create JWT token
 const generateToken = (id) => {
@@ -21,24 +20,21 @@ const sendTokenResponse = (user, statusCode, res) => {
   };
 
   // Set secure flag in production
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === "production") {
     options.secure = true;
   }
 
   // Remove password from response
   user.password = undefined;
 
-  res
-    .status(statusCode)
-    .cookie('token', token, options)
-    .json({
-      success: true,
-      token,
-      user
-    });
+  res.status(statusCode).cookie("token", token, options).json({
+    success: true,
+    token,
+    user,
+  });
 };
 
 module.exports = {
   generateToken,
-  sendTokenResponse
+  sendTokenResponse,
 };

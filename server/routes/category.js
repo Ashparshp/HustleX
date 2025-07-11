@@ -1,27 +1,20 @@
-// server/routes/category.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
   getCategories,
   createCategory,
   updateCategory,
   deleteCategory,
-  getDefaultCategories
-} = require('../controllers/category');
-const { protect } = require('../middleware/auth');
+  getDefaultCategories,
+} = require("../controllers/category");
+const { protect } = require("../middleware/auth");
 
-// Protect all routes
 router.use(protect);
 
-// Routes
-router.route('/')
-  .get(getCategories)
-  .post(createCategory);
+router.route("/").get(getCategories).post(createCategory);
 
-router.route('/:id')
-  .put(updateCategory)
-  .delete(deleteCategory);
+router.route("/:id").put(updateCategory).delete(deleteCategory);
 
-router.get('/defaults/:type', getDefaultCategories);
+router.get("/defaults/:type", getDefaultCategories);
 
 module.exports = router;

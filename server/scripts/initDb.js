@@ -1,4 +1,3 @@
-// server/scripts/initDb.js
 const mongoose = require("mongoose");
 const Skill = require("../models/Skills");
 

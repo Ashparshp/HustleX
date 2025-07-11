@@ -1,4 +1,3 @@
-// server/routes/schedule.js
 const express = require("express");
 const router = express.Router();
 const {
@@ -14,10 +13,8 @@ const {
 } = require("../controllers/schedule");
 const { protect } = require("../middleware/auth");
 
-// Protect all routes
 router.use(protect);
 
-// Schedule routes
 router.route("/").get(getSchedules).post(createSchedule);
 
 router
@@ -26,7 +23,6 @@ router
   .put(updateSchedule)
   .delete(deleteSchedule);
 
-// Schedule item routes
 router.route("/:id/items").post(addScheduleItem);
 
 router
@@ -34,7 +30,6 @@ router
   .put(updateScheduleItem)
   .delete(deleteScheduleItem);
 
-// Category routes
 router.get("/categories", getScheduleCategories);
 
 module.exports = router;

@@ -1,4 +1,3 @@
-// server/routes/leetcode.js
 const express = require("express");
 const router = express.Router();
 const {
@@ -9,7 +8,6 @@ const {
 } = require("../controllers/leetcode");
 const { protect } = require("../middleware/auth");
 
-// Protect all routes
 router.use(protect);
 
 // Routes
