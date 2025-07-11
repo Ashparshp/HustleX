@@ -11,19 +11,20 @@ require("dotenv").config();
 
 const app = express();
 
-// Enhanced security middleware
-app.use(helmet()); // Set security headers
-app.use(xss()); // Prevent XSS attacks
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
 
-// Rate limiting to prevent abuse
+app.use(helmet());
+app.use(xss());
+
 const limiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 10 * 60 * 1000,
+  max: 100,
   message: "Too many requests from this IP, please try again after 10 minutes",
 });
-app.use("/api/auth", limiter); // Apply rate limiting to auth routes
+app.use("/api/auth", limiter);
 
-// Prevent HTTP param pollution
 app.use(hpp());
 
 app.get("/api/health", (req, res) => {
@@ -34,7 +35,6 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Configure CORS dynamically from environment variables
 const allowedOrigins = process.env.CLIENT_URLS
   ? process.env.CLIENT_URLS.split(",")
   : ["http://localhost:5173"];
@@ -52,12 +52,10 @@ app.use(
   })
 );
 
-// Middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 
-// MongoDB Connection
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
@@ -71,10 +69,8 @@ const connectDB = async () => {
   }
 };
 
-// Connect to MongoDB
 connectDB();
 
-// Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/categories", require("./routes/category"));
 app.use("/api/working-hours", require("./routes/workingHours"));
@@ -84,7 +80,6 @@ app.use("/api/leetcode", require("./routes/leetcode"));
 app.use("/api/schedules", require("./routes/schedule"));
 app.use("/api/timetables", require("./routes/timetable"));
 
-// API Health check
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     status: "success",
@@ -93,7 +88,6 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
 
