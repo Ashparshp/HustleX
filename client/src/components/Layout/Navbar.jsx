@@ -30,7 +30,6 @@ const Navbar = () => {
   const userMenuRef = useRef(null);
   const moreMenuRef = useRef(null);
 
-  // Handle scroll event to add shadow on scroll
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -42,10 +41,8 @@ const Navbar = () => {
     };
   }, []);
 
-  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Close user menu when clicking outside
       if (
         showUserMenu &&
         userMenuRef.current &&
@@ -54,7 +51,6 @@ const Navbar = () => {
         setShowUserMenu(false);
       }
 
-      // Close more menu when clicking outside
       if (
         showMoreMenu &&
         moreMenuRef.current &&
@@ -70,10 +66,8 @@ const Navbar = () => {
     };
   }, [showUserMenu, showMoreMenu]);
 
-  // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event) => {
-      // Close all menus on Escape
       if (event.key === "Escape") {
         setShowUserMenu(false);
         setShowMoreMenu(false);
@@ -137,7 +131,6 @@ const Navbar = () => {
     },
   ];
 
-  // Updated styling for better aesthetics on larger screens
   const navbarClass = isDark
     ? `bg-gray-900/95 text-white border-gray-800 backdrop-blur-md ${
         scrolled ? "shadow-lg shadow-black/20" : ""
@@ -146,7 +139,6 @@ const Navbar = () => {
         scrolled ? "shadow-lg shadow-black/5" : ""
       }`;
 
-  // Enhanced link styling with better hover effects
   const generateLinkClass = (active) => {
     const baseClasses =
       "transition-all duration-300 rounded-lg flex items-center gap-2 text-sm font-medium";
@@ -162,12 +154,10 @@ const Navbar = () => {
     }
   };
 
-  // Enhanced button styling
   const buttonClass = isDark
     ? "transition-all duration-300 rounded-full hover:bg-gray-800/80 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-1 focus:ring-offset-gray-900"
     : "transition-all duration-300 rounded-full hover:bg-gray-100 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-1 focus:ring-offset-white";
 
-  // Enhanced dropdown menu styling
   const dropdownMenuClass = isDark
     ? "absolute mt-2 py-2 rounded-xl shadow-xl border border-gray-700/70 bg-gray-800/95 backdrop-blur-sm z-50 transform origin-top-right transition-all duration-200 ease-out"
     : "absolute mt-2 py-2 rounded-xl shadow-xl border border-gray-200/70 bg-white/95 backdrop-blur-sm z-50 transform origin-top-right transition-all duration-200 ease-out";
@@ -180,10 +170,10 @@ const Navbar = () => {
     >
       <div className="px-4 sm:px-6 lg:px-10 mx-auto max-w-7xl">
         <div className="flex justify-between h-16 md:h-18">
-          {/* Logo and brand - Enhanced with better spacing */}
+          {/* Logo and brand */}
           <div className="flex items-center">
             <Link
-              to={isAuthenticated ? "/working-hours" : "/login"}
+              to={isAuthenticated ? "/" : "/login"}
               className="flex-shrink-0 flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500/50 rounded-md transition-all duration-300 hover:scale-105"
               aria-label="Hustle X Homepage"
             >
@@ -212,7 +202,6 @@ const Navbar = () => {
                   />
                 </g>
 
-                {/* Enhanced abstract productivity arrow */}
                 <g transform="translate(40, 40) scale(0.9)">
                   <path
                     d="M0,0 L20,0 L20,10 L30,5 L20,0 L20,0"
@@ -220,7 +209,6 @@ const Navbar = () => {
                     transform="rotate(45)"
                   />
                   <circle cx="0" cy="0" r="3.5" fill="#818cf8" />
-                  {/* Added subtle pulse circle */}
                   <circle
                     cx="0"
                     cy="0"
@@ -232,7 +220,6 @@ const Navbar = () => {
                   />
                 </g>
 
-                {/* "Hustle" text */}
                 <text
                   x="80"
                   y="52"
@@ -244,7 +231,6 @@ const Navbar = () => {
                   Hustle
                 </text>
 
-                {/* "X" with enhanced special styling */}
                 <g>
                   <text
                     x="190"
@@ -258,7 +244,6 @@ const Navbar = () => {
                   </text>
                 </g>
 
-                {/* Additional decorative elements */}
                 <line
                   x1="80"
                   y1="58"
@@ -307,7 +292,6 @@ const Navbar = () => {
               </div>
             )}
 
-            {/* More menu for medium screens - enhanced with better styling */}
             {isAuthenticated &&
               secondaryNavLinks.some(
                 (link) => link.authRequired === isAuthenticated
