@@ -42,8 +42,7 @@ const useTimetable = (timetableId = null) => {
         setLoading(true);
       }
 
-      const timestamp = new Date().getTime();
-      const response = await fetch(`${API_URL}/api/timetables?t=${timestamp}`, {
+      const response = await fetch(`${API_URL}/api/timetables`, {
         headers: getAuthHeaders(),
       });
 
@@ -227,9 +226,8 @@ const useTimetable = (timetableId = null) => {
           return null;
         }
 
-        const timestamp = new Date().getTime();
         const response = await fetch(
-          `${API_URL}/api/timetables/${timetableIdToUse}/current-week?t=${timestamp}`,
+          `${API_URL}/api/timetables/${timetableIdToUse}/current-week`,
           {
             headers: getAuthHeaders(),
           }
@@ -293,9 +291,8 @@ const useTimetable = (timetableId = null) => {
           };
         });
 
-        const timestamp = new Date().getTime();
         const response = await fetch(
-          `${API_URL}/api/timetables/${currentTimetable.id}/toggle?t=${timestamp}`,
+          `${API_URL}/api/timetables/${currentTimetable.id}/toggle`,
           {
             method: "POST",
             headers: getAuthHeaders(),
@@ -340,9 +337,8 @@ const useTimetable = (timetableId = null) => {
           throw new Error("No timetable selected");
         }
 
-        const timestamp = new Date().getTime();
         const response = await fetch(
-          `${API_URL}/api/timetables/${timetableIdToUse}/history?page=${page}&t=${timestamp}`,
+          `${API_URL}/api/timetables/${timetableIdToUse}/history?page=${page}`,
           {
             headers: getAuthHeaders(),
           }
@@ -384,9 +380,8 @@ const useTimetable = (timetableId = null) => {
           throw new Error("No timetable selected");
         }
 
-        const timestamp = new Date().getTime();
         const response = await fetch(
-          `${API_URL}/api/timetables/${timetableIdToUse}/stats?t=${timestamp}`,
+          `${API_URL}/api/timetables/${timetableIdToUse}/stats`,
           {
             headers: getAuthHeaders(),
           }
@@ -420,13 +415,9 @@ const useTimetable = (timetableId = null) => {
     if (!token) return [];
 
     try {
-      const timestamp = new Date().getTime();
-      const response = await fetch(
-        `${API_URL}/api/timetables/categories?t=${timestamp}`,
-        {
-          headers: getAuthHeaders(),
-        }
-      );
+      const response = await fetch(`${API_URL}/api/timetables/categories`, {
+        headers: getAuthHeaders(),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch categories");

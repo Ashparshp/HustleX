@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
 import { useAuth } from "../context/AuthContext";
@@ -8,18 +8,18 @@ const useCategories = (type = "working-hours") => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [defaultCategories, setDefaultCategories] = useState([]);
+  const isMountedRef = useRef(true);
 
   const { isAuthenticated } = useAuth();
 
   const fetchCategories = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !isMountedRef.current) return;
 
     try {
       setLoading(true);
-      const timestamp = new Date().getTime();
-      const response = await apiClient.get(
-        `/categories?type=${type}&t=${timestamp}`
-      );
+      const response = await apiClient.get(`/categories?type=${type}`);
+
+      if (!isMountedRef.current) return;
 
       if (response.data && Array.isArray(response.data)) {
         setCategories(response.data);
@@ -31,11 +31,15 @@ const useCategories = (type = "working-hours") => {
       return response.data?.data || response.data || [];
     } catch (err) {
       console.error("Error fetching categories:", err);
-      setError(err.message);
-      toast.error("Failed to fetch categories");
+      if (isMountedRef.current) {
+        setError(err.message);
+        toast.error("Failed to fetch categories");
+      }
       return [];
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   }, [isAuthenticated, type]);
 
@@ -43,10 +47,7 @@ const useCategories = (type = "working-hours") => {
     if (!isAuthenticated) return;
 
     try {
-      const timestamp = new Date().getTime();
-      const response = await apiClient.get(
-        `/categories/defaults/${type}?t=${timestamp}`
-      );
+      const response = await apiClient.get(`/categories/defaults/${type}`);
 
       if (response.data && Array.isArray(response.data)) {
         setDefaultCategories(response.data);
@@ -123,10 +124,16 @@ const useCategories = (type = "working-hours") => {
   );
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     if (isAuthenticated) {
       fetchCategories();
       fetchDefaultCategories();
     }
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [isAuthenticated, type]); // Remove function dependencies to prevent infinite loop
 
   return {
