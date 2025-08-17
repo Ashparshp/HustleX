@@ -173,7 +173,7 @@ const Navbar = () => {
           {/* Logo and brand */}
           <div className="flex items-center">
             <Link
-              to={isAuthenticated ? "/" : "/login"}
+              to={isAuthenticated ? "/" : "/"}
               className="flex-shrink-0 flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500/50 rounded-md transition-all duration-300 hover:scale-105"
               aria-label="Hustle X Homepage"
             >
