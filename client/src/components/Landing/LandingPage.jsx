@@ -212,10 +212,7 @@ const LandingPage = () => {
               </div>
 
               {/* Quick Stats Preview or Welcome Message */}
-              <QuickStatsPreview 
-                isDark={isDark} 
-                showWelcomeInstead={false}
-              />
+              <QuickStatsPreview isDark={isDark} showWelcomeInstead={false} />
             </>
           ) : (
             // Content for non-authenticated users

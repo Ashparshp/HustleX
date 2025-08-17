@@ -9,64 +9,129 @@ import {
   Zap,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import useTimetable from "../../hooks/useTimetable";
+import useWorkingHours from "../../hooks/useWorkingHours";
+import useSkills from "../../hooks/useSkills";
 
 const QuickStatsPreview = ({ isDark, showWelcomeInstead = false }) => {
-  const [stats, setStats] = useState({
+  const [realStats, setRealStats] = useState({
     weeklyCompletion: 0,
     hoursThisWeek: 0,
     activeTimetables: 0,
     skillsInProgress: 0,
+    hasData: false,
     loading: true,
   });
 
   const { token } = useAuth();
-  const API_URL = import.meta.env.VITE_API_URL;
+
+  // Use existing hooks to get real data
+  const { timetables, currentWeek, loading: timetableLoading } = useTimetable();
+  const { stats: workingHoursStats, loading: hoursLoading } = useWorkingHours();
+  const { skills, loading: skillsLoading } = useSkills();
 
   useEffect(() => {
-    const fetchQuickStats = async () => {
-      if (!token) return;
+    if (!token) return;
 
-      // For now, show mock data immediately instead of loading from API
-      // This can be connected to real API later
-      setTimeout(() => {
-        setStats({
-          weeklyCompletion: Math.floor(Math.random() * 40) + 60, // 60-100%
-          hoursThisWeek: Math.floor(Math.random() * 20) + 20, // 20-40 hours
-          activeTimetables: Math.floor(Math.random() * 3) + 1, // 1-4 timetables
-          skillsInProgress: Math.floor(Math.random() * 5) + 3, // 3-8 skills
-          loading: false,
-        });
-      }, 150); // Very short delay to show smooth transition
+    // Wait for all data to load
+    if (timetableLoading || hoursLoading || skillsLoading) {
+      return;
+    }
+
+    // Calculate real stats
+    const calculateRealStats = () => {
+      // Calculate weekly completion rate
+      let weeklyCompletion = 0;
+      if (
+        currentWeek &&
+        currentWeek.activities &&
+        currentWeek.activities.length > 0
+      ) {
+        const totalActivities = currentWeek.activities.length * 7; // 7 days
+        const completedActivities = currentWeek.activities.reduce(
+          (total, activity) => {
+            return total + activity.dailyStatus.filter(Boolean).length;
+          },
+          0
+        );
+        weeklyCompletion =
+          totalActivities > 0
+            ? Math.round((completedActivities / totalActivities) * 100)
+            : 0;
+      }
+
+      // Get hours this week from working hours stats
+      const hoursThisWeek = workingHoursStats?.totalAchievedHours || 0;
+
+      // Count active timetables
+      const activeTimetables =
+        timetables?.filter((t) => t.isActive)?.length || 0;
+
+      // Count skills in progress (assume skills with progress > 0 and < 100 are in progress)
+      let skillsInProgress = 0;
+      if (skills && typeof skills === "object") {
+        skillsInProgress = Object.values(skills)
+          .flat()
+          .filter(
+            (skill) =>
+              skill.currentLevel > 0 && skill.currentLevel < skill.targetLevel
+          ).length;
+      }
+
+      // Check if user has any meaningful data
+      const hasData =
+        weeklyCompletion > 0 ||
+        hoursThisWeek > 0 ||
+        activeTimetables > 0 ||
+        skillsInProgress > 0;
+
+      setRealStats({
+        weeklyCompletion,
+        hoursThisWeek: Math.round(hoursThisWeek * 10) / 10, // Round to 1 decimal
+        activeTimetables,
+        skillsInProgress,
+        hasData,
+        loading: false,
+      });
     };
 
-    fetchQuickStats();
-  }, [token]);
+    calculateRealStats();
+  }, [
+    token,
+    timetables,
+    currentWeek,
+    workingHoursStats,
+    skills,
+    timetableLoading,
+    hoursLoading,
+    skillsLoading,
+  ]);
 
   const statItems = [
     {
       label: "Weekly Progress",
-      value: `${stats.weeklyCompletion}%`,
+      value: `${realStats.weeklyCompletion}%`,
       icon: CheckCircle,
       color: "emerald",
       description: "Activities completed",
     },
     {
-      label: "Hours This Week",
-      value: `${stats.hoursThisWeek}h`,
+      label: "Hours",
+      value: `${realStats.hoursThisWeek}h`,
       icon: Clock,
       color: "blue",
       description: "Time tracked",
     },
     {
       label: "Active Timetables",
-      value: stats.activeTimetables,
+      value: realStats.activeTimetables,
       icon: Calendar,
       color: "indigo",
       description: "Schedules managed",
     },
     {
       label: "Skills in Progress",
-      value: stats.skillsInProgress,
+      value: realStats.skillsInProgress,
       icon: TrendingUp,
       color: "purple",
       description: "Areas developing",
@@ -100,15 +165,21 @@ const QuickStatsPreview = ({ isDark, showWelcomeInstead = false }) => {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="mt-8"
       >
-        <div className={`text-center p-8 rounded-xl border ${
-          isDark 
-            ? 'bg-indigo-500/5 border-indigo-500/20 text-indigo-300' 
-            : 'bg-indigo-50 border-indigo-200 text-indigo-700'
-        }`}>
+        <div
+          className={`text-center p-8 rounded-xl border ${
+            isDark
+              ? "bg-indigo-500/5 border-indigo-500/20 text-indigo-300"
+              : "bg-indigo-50 border-indigo-200 text-indigo-700"
+          }`}
+        >
           <Zap className="w-8 h-8 mx-auto mb-4" />
           <h3 className="font-semibold text-lg mb-2">Welcome to HustleX!</h3>
-          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Start by creating your first timetable or tracking your working hours.<br/>
+          <p
+            className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+          >
+            Start by creating your first timetable or tracking your working
+            hours.
+            <br />
             Your productivity journey begins here.
           </p>
         </div>
@@ -116,7 +187,8 @@ const QuickStatsPreview = ({ isDark, showWelcomeInstead = false }) => {
     );
   }
 
-  if (stats.loading) {
+  // If still loading, show minimal loading state
+  if (realStats.loading) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
         {[1, 2, 3, 4].map((i) => (
@@ -147,6 +219,11 @@ const QuickStatsPreview = ({ isDark, showWelcomeInstead = false }) => {
         ))}
       </div>
     );
+  }
+
+  // If user has no meaningful data, don't show the stats
+  if (!realStats.hasData) {
+    return null;
   }
 
   return (
