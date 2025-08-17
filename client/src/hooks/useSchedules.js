@@ -526,7 +526,7 @@ const useSchedules = () => {
     if (isAuthenticated) {
       fetchSchedules();
     }
-  }, [isAuthenticated, fetchSchedules]);
+  }, [isAuthenticated]); // Remove fetchSchedules to prevent infinite loop
 
   return {
     schedules,

@@ -164,7 +164,7 @@ const useWorkingHours = () => {
       fetchWorkingHours();
       fetchCategories();
     }
-  }, [isAuthenticated, fetchWorkingHours, fetchCategories]);
+  }, [isAuthenticated]); // Remove function dependencies to prevent infinite loop
 
   return {
     workingHours,

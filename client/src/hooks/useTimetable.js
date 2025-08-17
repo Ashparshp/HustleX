@@ -561,7 +561,7 @@ const useTimetable = (timetableId = null) => {
         clearInterval(weekCheckIntervalRef.current);
       }
     };
-  }, [checkWeekTransition, currentTimetable, fetchCurrentWeek, token]);
+  }, [currentTimetable, token]); // Remove function dependencies to prevent infinite loop
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -595,7 +595,7 @@ const useTimetable = (timetableId = null) => {
     };
 
     loadInitialData();
-  }, [token, fetchTimetables, fetchCurrentWeek, currentTimetable]);
+  }, [token]); // Remove function dependencies to prevent infinite loop
 
   useEffect(() => {
     if (
@@ -608,7 +608,20 @@ const useTimetable = (timetableId = null) => {
         console.error("Failed to load data for new timetable:", err);
       });
     }
-  }, [currentTimetable?.id, fetchCurrentWeek, token, currentWeek]);
+  }, [currentTimetable?.id, token, currentWeek]); // Remove fetchCurrentWeek to prevent infinite loop
+
+  useEffect(() => {
+    if (
+      token &&
+      currentTimetable &&
+      initialLoadComplete.current &&
+      !currentWeek
+    ) {
+      fetchCurrentWeek(currentTimetable.id).catch((err) => {
+        console.error("Failed to load data for new timetable:", err);
+      });
+    }
+  }, [token, currentTimetable, currentWeek]); // Remove fetchCurrentWeek to prevent infinite loop
 
   return {
     timetables,
