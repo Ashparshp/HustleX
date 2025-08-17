@@ -12,6 +12,10 @@ import { motion } from "framer-motion";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
+// SEO Components
+import SEOHead from "./components/SEO/SEOHead";
+import { PAGE_SEO } from "./utils/seoConfig";
+
 // Layout Components
 import Navbar from "./components/Layout/Navbar";
 

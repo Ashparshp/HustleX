@@ -17,6 +17,8 @@ import {
 import { useTheme } from "../context/ThemeContext";
 import useWorkingHours from "../hooks/useWorkingHours";
 import useCategories from "../hooks/useCategories";
+import SEOHead from "../components/SEO/SEOHead";
+import { PAGE_SEO } from "../utils/seoConfig";
 import WorkingHoursForm from "../components/WorkingHours/WorkingHoursForm";
 import WorkingHoursStats from "../components/WorkingHours/WorkingHoursStats";
 import WorkingHoursFilters from "../components/WorkingHours/WorkingHoursFilters";
@@ -183,670 +185,676 @@ const WorkingHoursPage = () => {
   }
 
   return (
-    <section
-      className={`py-16 min-h-screen relative ${
-        isDark ? "bg-black" : "bg-gray-50"
-      }`}
-    >
-      {/* Background Gradients */}
-      <div
-        className={`absolute inset-0 bg-gradient-to-b ${
-          isDark
-            ? "from-indigo-900/10 via-black to-black"
-            : "from-indigo-100/50 via-white to-white"
-        }`}
-      />
-      <div
-        className={`absolute inset-0 ${
-          isDark
-            ? "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.1),transparent_50%)]"
-            : "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.15),transparent_50%)]"
-        }`}
-      />
-      {/* Additional subtle patterns for visual depth */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-
-      <div
-        className={`w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 transition-all duration-300 ${
-          isAnyModalOpen ? "blur-sm" : ""
+    <>
+      <SEOHead {...PAGE_SEO.workingHours} />
+      <section
+        className={`py-16 min-h-screen relative ${
+          isDark ? "bg-black" : "bg-gray-50"
         }`}
       >
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1
-            className={`text-3xl font-bold mb-2 ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            Working Hours
-          </h1>
-          <div
-            className={`w-32 h-1 bg-gradient-to-r ${
-              isDark
-                ? "from-white to-gray-500"
-                : "from-indigo-600 to-indigo-300"
-            } rounded-full`}
-          />
-        </div>
+        {/* Background Gradients */}
+        <div
+          className={`absolute inset-0 bg-gradient-to-b ${
+            isDark
+              ? "from-indigo-900/10 via-black to-black"
+              : "from-indigo-100/50 via-white to-white"
+          }`}
+        />
+        <div
+          className={`absolute inset-0 ${
+            isDark
+              ? "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.1),transparent_50%)]"
+              : "bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.15),transparent_50%)]"
+          }`}
+        />
+        {/* Additional subtle patterns for visual depth */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
-        {/* Stats Grid - Moved to top for better information hierarchy */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatsCard
-            title="Total Days"
-            value={stats.totalDays}
-            icon={Calendar}
-            color={isDark ? "text-indigo-400" : "text-indigo-600"}
-          />
-          <StatsCard
-            title="Target Hours"
-            value={stats.totalTargetHours?.toFixed(1)}
-            icon={Target}
-            color={isDark ? "text-emerald-400" : "text-emerald-600"}
-          />
-          <StatsCard
-            title="Achieved Hours"
-            value={stats.totalAchievedHours?.toFixed(1)}
-            icon={Clock}
-            color={isDark ? "text-blue-400" : "text-blue-600"}
-          />
-          <StatsCard
-            title="Completion Rate"
-            value={`${stats.averageCompletion?.toFixed(1)}%`}
-            icon={Activity}
-            color={isDark ? "text-purple-400" : "text-purple-600"}
-          />
-        </div>
-
-        {/* Controls Row - Improved alignment with consistent spacing */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          {/* Search Input */}
-          <div className="relative w-full sm:w-auto sm:min-w-72">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search
-                className={`w-5 h-5 ${
-                  isDark ? "text-indigo-400" : "text-indigo-500"
-                }`}
-              />
-            </div>
-            <input
-              type="text"
-              placeholder="Search entries"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-full pl-10 pr-4 py-2.5 rounded-lg text-sm border transition-colors ${
-                isDark
-                  ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
-                  : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+        <div
+          className={`w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 transition-all duration-300 ${
+            isAnyModalOpen ? "blur-sm" : ""
+          }`}
+        >
+          {/* Page Header */}
+          <div className="mb-8">
+            <h1
+              className={`text-3xl font-bold mb-2 ${
+                isDark ? "text-white" : "text-gray-900"
               }`}
+            >
+              Working Hours
+            </h1>
+            <div
+              className={`w-32 h-1 bg-gradient-to-r ${
+                isDark
+                  ? "from-white to-gray-500"
+                  : "from-indigo-600 to-indigo-300"
+              } rounded-full`}
             />
           </div>
 
-          {/* Action Buttons - Better organized */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-            className="flex flex-wrap gap-2 justify-end"
-          >
-            <FilterButton
-              active={showFilters}
-              onClick={() => setShowFilters(!showFilters)}
+          {/* Stats Grid - Moved to top for better information hierarchy */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <StatsCard
+              title="Total Days"
+              value={stats.totalDays}
+              icon={Calendar}
+              color={isDark ? "text-indigo-400" : "text-indigo-600"}
+            />
+            <StatsCard
+              title="Target Hours"
+              value={stats.totalTargetHours?.toFixed(1)}
+              icon={Target}
+              color={isDark ? "text-emerald-400" : "text-emerald-600"}
+            />
+            <StatsCard
+              title="Achieved Hours"
+              value={stats.totalAchievedHours?.toFixed(1)}
+              icon={Clock}
+              color={isDark ? "text-blue-400" : "text-blue-600"}
+            />
+            <StatsCard
+              title="Completion Rate"
+              value={`${stats.averageCompletion?.toFixed(1)}%`}
+              icon={Activity}
+              color={isDark ? "text-purple-400" : "text-purple-600"}
+            />
+          </div>
+
+          {/* Controls Row - Improved alignment with consistent spacing */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            {/* Search Input */}
+            <div className="relative w-full sm:w-auto sm:min-w-72">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search
+                  className={`w-5 h-5 ${
+                    isDark ? "text-indigo-400" : "text-indigo-500"
+                  }`}
+                />
+              </div>
+              <input
+                type="text"
+                placeholder="Search entries"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={`w-full pl-10 pr-4 py-2.5 rounded-lg text-sm border transition-colors ${
+                  isDark
+                    ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+                    : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+                }`}
+              />
+            </div>
+
+            {/* Action Buttons - Better organized */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-wrap gap-2 justify-end"
             >
-              <Filter className="w-4 h-4" />
-              <span className="hidden sm:inline">Filters</span>
-            </FilterButton>
+              <FilterButton
+                active={showFilters}
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter className="w-4 h-4" />
+                <span className="hidden sm:inline">Filters</span>
+              </FilterButton>
 
-            <FilterButton active={showStats} onClick={() => setShowStats(true)}>
-              <BarChart2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Stats</span>
-            </FilterButton>
+              <FilterButton
+                active={showStats}
+                onClick={() => setShowStats(true)}
+              >
+                <BarChart2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Stats</span>
+              </FilterButton>
 
-            <FilterButton
-              active={showCategoryManagement}
-              onClick={() => setShowCategoryManagement(true)}
-            >
-              <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">Categories</span>
-            </FilterButton>
+              <FilterButton
+                active={showCategoryManagement}
+                onClick={() => setShowCategoryManagement(true)}
+              >
+                <Settings className="w-4 h-4" />
+                <span className="hidden sm:inline">Categories</span>
+              </FilterButton>
 
-            <FilterButton
-              type="add"
-              onClick={() => {
-                setSelectedEntry(null);
-                setShowForm(true);
-              }}
-            >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Add Hours</span>
-            </FilterButton>
+              <FilterButton
+                type="add"
+                onClick={() => {
+                  setSelectedEntry(null);
+                  setShowForm(true);
+                }}
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Add Hours</span>
+              </FilterButton>
 
-            <button
-              onClick={() => fetchWorkingHours()}
-              className={`p-2 rounded-lg transition-colors shadow-sm ${
+              <button
+                onClick={() => fetchWorkingHours()}
+                className={`p-2 rounded-lg transition-colors shadow-sm ${
+                  isDark
+                    ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+                    : "bg-indigo-100/50 hover:bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
+                }`}
+                aria-label="Refresh"
+              >
+                <RefreshCcw size={18} />
+              </button>
+            </motion.div>
+          </div>
+
+          {/* Show active filters if any */}
+          {(filters.startDate || filters.endDate || filters.category) && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`mb-6 p-4 rounded-lg border ${
                 isDark
-                  ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
-                  : "bg-indigo-100/50 hover:bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
-              }`}
-              aria-label="Refresh"
+                  ? "bg-gray-900/70 border-indigo-500/30"
+                  : "bg-white/90 border-indigo-300/50"
+              } shadow-md`}
             >
-              <RefreshCcw size={18} />
-            </button>
-          </motion.div>
-        </div>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex flex-wrap gap-2 items-center">
+                  <span
+                    className={`font-medium ${
+                      isDark ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    Active Filters:
+                  </span>
+                  {filters.startDate && (
+                    <span
+                      className={`px-2 py-1 rounded-md ${
+                        isDark
+                          ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
+                          : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
+                      }`}
+                    >
+                      From: {formatDisplayDate(filters.startDate)}
+                    </span>
+                  )}
+                  {filters.endDate && (
+                    <span
+                      className={`px-2 py-1 rounded-md ${
+                        isDark
+                          ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
+                          : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
+                      }`}
+                    >
+                      To: {formatDisplayDate(filters.endDate)}
+                    </span>
+                  )}
+                  {filters.category && (
+                    <span
+                      className={`px-2 py-1 rounded-md ${
+                        isDark
+                          ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
+                          : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
+                      }`}
+                    >
+                      Category: {filters.category}
+                    </span>
+                  )}
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={clearFilters}
+                  className={`text-sm px-3 py-1 rounded-lg whitespace-nowrap ${
+                    isDark
+                      ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
+                      : "bg-red-100/50 text-red-600 hover:bg-red-200/70 border border-red-300/50"
+                  }`}
+                >
+                  Clear Filters
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
 
-        {/* Show active filters if any */}
-        {(filters.startDate || filters.endDate || filters.category) && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`mb-6 p-4 rounded-lg border ${
-              isDark
-                ? "bg-gray-900/70 border-indigo-500/30"
-                : "bg-white/90 border-indigo-300/50"
-            } shadow-md`}
-          >
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex flex-wrap gap-2 items-center">
-                <span
-                  className={`font-medium ${
+          {/* Error message */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`p-4 mb-6 rounded-lg border ${
+                isDark
+                  ? "bg-red-900/30 text-red-300 border-red-500/30"
+                  : "bg-red-100/70 text-red-700 border-red-300/50"
+              }`}
+            >
+              <p>Error: {error}</p>
+              <button
+                onClick={() => fetchWorkingHours()}
+                className={`mt-2 text-sm underline ${
+                  isDark
+                    ? "text-red-300 hover:text-red-200"
+                    : "text-red-700 hover:text-red-800"
+                }`}
+              >
+                Try again
+              </button>
+            </motion.div>
+          )}
+
+          {/* Working Hours Cards Section - Consistent section heading style */}
+          <div className="mb-16">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
+              <div>
+                <h2
+                  className={`text-2xl font-bold ${
                     isDark ? "text-white" : "text-gray-900"
                   }`}
                 >
-                  Active Filters:
-                </span>
-                {filters.startDate && (
-                  <span
-                    className={`px-2 py-1 rounded-md ${
-                      isDark
-                        ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
-                        : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
-                    }`}
-                  >
-                    From: {formatDisplayDate(filters.startDate)}
-                  </span>
-                )}
-                {filters.endDate && (
-                  <span
-                    className={`px-2 py-1 rounded-md ${
-                      isDark
-                        ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
-                        : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
-                    }`}
-                  >
-                    To: {formatDisplayDate(filters.endDate)}
-                  </span>
-                )}
-                {filters.category && (
-                  <span
-                    className={`px-2 py-1 rounded-md ${
-                      isDark
-                        ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/30"
-                        : "bg-indigo-100/60 text-indigo-700 border border-indigo-300/50"
-                    }`}
-                  >
-                    Category: {filters.category}
-                  </span>
-                )}
+                  Recent Entries
+                </h2>
+                <div
+                  className={`w-24 h-1 bg-gradient-to-r ${
+                    isDark
+                      ? "from-white to-gray-500"
+                      : "from-indigo-600 to-indigo-300"
+                  } mt-2 rounded-full`}
+                />
               </div>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={clearFilters}
-                className={`text-sm px-3 py-1 rounded-lg whitespace-nowrap ${
-                  isDark
-                    ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
-                    : "bg-red-100/50 text-red-600 hover:bg-red-200/70 border border-red-300/50"
-                }`}
-              >
-                Clear Filters
-              </motion.button>
-            </div>
-          </motion.div>
-        )}
 
-        {/* Error message */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`p-4 mb-6 rounded-lg border ${
-              isDark
-                ? "bg-red-900/30 text-red-300 border-red-500/30"
-                : "bg-red-100/70 text-red-700 border-red-300/50"
-            }`}
-          >
-            <p>Error: {error}</p>
-            <button
-              onClick={() => fetchWorkingHours()}
-              className={`mt-2 text-sm underline ${
-                isDark
-                  ? "text-red-300 hover:text-red-200"
-                  : "text-red-700 hover:text-red-800"
-              }`}
-            >
-              Try again
-            </button>
-          </motion.div>
-        )}
-
-        {/* Working Hours Cards Section - Consistent section heading style */}
-        <div className="mb-16">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-            <div>
-              <h2
-                className={`text-2xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                Recent Entries
-              </h2>
-              <div
-                className={`w-24 h-1 bg-gradient-to-r ${
-                  isDark
-                    ? "from-white to-gray-500"
-                    : "from-indigo-600 to-indigo-300"
-                } mt-2 rounded-full`}
-              />
+              {/* Sort Controls - Better aligned */}
+              <div className="flex items-center gap-2 mt-4 sm:mt-0">
+                <ArrowUpDown
+                  className={`w-4 h-4 ${
+                    isDark ? "text-indigo-400" : "text-indigo-600"
+                  }`}
+                />
+                <select
+                  className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+                    isDark
+                      ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500"
+                      : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500"
+                  }`}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                  value={sortOrder}
+                >
+                  <option value="desc">Newest First</option>
+                  <option value="asc">Oldest First</option>
+                </select>
+              </div>
             </div>
 
-            {/* Sort Controls - Better aligned */}
-            <div className="flex items-center gap-2 mt-4 sm:mt-0">
-              <ArrowUpDown
-                className={`w-4 h-4 ${
-                  isDark ? "text-indigo-400" : "text-indigo-600"
-                }`}
-              />
-              <select
-                className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+            {filteredWorkingHours.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={`text-center py-12 rounded-lg border ${
                   isDark
-                    ? "bg-gray-900/70 text-gray-200 border-gray-700 focus:border-indigo-500"
-                    : "bg-white text-gray-800 border-gray-300 focus:border-indigo-500"
+                    ? "bg-gray-900/50 border-gray-800 text-gray-400"
+                    : "bg-gray-50 border-gray-200 text-gray-600"
                 }`}
-                onChange={(e) => setSortOrder(e.target.value)}
-                value={sortOrder}
               >
-                <option value="desc">Newest First</option>
-                <option value="asc">Oldest First</option>
-              </select>
+                <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="text-base">No working hours entries found</p>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setShowForm(true);
+                    setSelectedEntry(null);
+                  }}
+                  className={`mt-4 inline-flex items-center px-4 py-2 rounded-lg ${
+                    isDark
+                      ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+                      : "bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600 border border-indigo-300/50"
+                  }`}
+                >
+                  <Plus size={18} className="mr-1" />
+                  Add Your First Entry
+                </motion.button>
+              </motion.div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <AnimatePresence>
+                  {filteredWorkingHours.map((entry) => (
+                    <motion.div
+                      key={entry._id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <WorkingHoursCard
+                        key={entry._id}
+                        entry={entry}
+                        onEdit={() => handleEdit(entry)}
+                        onDelete={() => handleDelete(entry)}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
+
+          {/* A nice visual separator like a curly underline */}
+          <div className="space-y-6">
+            <div className="relative h-16 w-full overflow-hidden">
+              <svg
+                viewBox="0 0 1200 120"
+                preserveAspectRatio="none"
+                className="absolute w-full h-12"
+              >
+                <path
+                  d="M0,0 C150,40 350,0 500,30 C650,60 700,0 900,20 C1050,40 1150,10 1200,30 L1200,120 L0,120 Z"
+                  className={isDark ? "fill-gray-800" : "fill-indigo-100"}
+                />
+                <path
+                  d="M0,30 C150,10 300,60 450,40 C600,20 750,60 900,40 C1050,20 1150,50 1200,30 L1200,120 L0,120 Z"
+                  className={isDark ? "fill-gray-700" : "fill-indigo-200"}
+                  opacity="0.5"
+                />
+                <path
+                  d="M0,60 C150,90 350,50 500,70 C650,90 750,50 900,70 C1050,90 1150,60 1200,80 L1200,120 L0,120 Z"
+                  className={isDark ? "fill-gray-600" : "fill-indigo-300"}
+                  opacity="0.7"
+                />
+              </svg>
             </div>
           </div>
 
-          {filteredWorkingHours.length === 0 ? (
+          {/* Chart Section - Moved before entries for better visual hierarchy */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`p-6 rounded-lg border shadow-md mb-8 ${
+              isDark
+                ? "bg-gray-900/70 border-indigo-500/30"
+                : "bg-white border-indigo-300/50"
+            }`}
+          >
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+              <h3
+                className={`text-xl font-semibold ${
+                  isDark ? "text-white" : "text-gray-800"
+                }`}
+              >
+                Working Hours Visualization
+              </h3>
+              <div
+                className={`inline-flex rounded-lg p-1 ${
+                  isDark
+                    ? "bg-gray-800/50 border border-gray-700/70"
+                    : "bg-gray-100/80 border border-gray-200/70"
+                }`}
+              >
+                {[
+                  {
+                    key: "progress",
+                    icon: BarChart2,
+                    label: "Progress Chart",
+                  },
+                  {
+                    key: "category",
+                    icon: PieChart,
+                    label: "Category Distribution",
+                  },
+                ].map((viz) => (
+                  <motion.button
+                    key={viz.key}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setActiveVisualization(viz.key)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                      activeVisualization === viz.key
+                        ? isDark
+                          ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                          : "bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
+                        : isDark
+                        ? "text-gray-400 hover:bg-gray-700/50"
+                        : "text-gray-600 hover:bg-gray-200/70"
+                    }`}
+                  >
+                    <viz.icon className="w-5 h-5" />
+                    <span className="hidden md:inline">{viz.label}</span>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+            <div className="h-96">
+              {activeVisualization === "progress" ? (
+                <ProgressChart data={workingHours} />
+              ) : (
+                <CategoryChart data={stats.categoryBreakdown} />
+              )}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Modal Styles with improved backdrop blur */}
+        <style jsx global>{`
+          .bg-grid-pattern {
+            background-image: linear-gradient(
+                to right,
+                rgba(99, 102, 241, 0.1) 1px,
+                transparent 1px
+              ),
+              linear-gradient(
+                to bottom,
+                rgba(99, 102, 241, 0.1) 1px,
+                transparent 1px
+              );
+            background-size: 20px 20px;
+          }
+        `}</style>
+
+        {/* Form Modal with improved backdrop */}
+        <AnimatePresence>
+          {showForm && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className={`text-center py-12 rounded-lg border ${
-                isDark
-                  ? "bg-gray-900/50 border-gray-800 text-gray-400"
-                  : "bg-gray-50 border-gray-200 text-gray-600"
-              }`}
+              className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
             >
-              <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="text-base">No working hours entries found</p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setShowForm(true);
-                  setSelectedEntry(null);
-                }}
-                className={`mt-4 inline-flex items-center px-4 py-2 rounded-lg ${
+              <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+                onClick={handleFormCancel}
+              ></div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={`relative w-full max-w-md p-6 rounded-lg shadow-xl border ${
                   isDark
-                    ? "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
-                    : "bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600 border border-indigo-300/50"
+                    ? "bg-gray-900 border-indigo-500/30"
+                    : "bg-white border-indigo-300/50"
                 }`}
               >
-                <Plus size={18} className="mr-1" />
-                Add Your First Entry
-              </motion.button>
-            </motion.div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AnimatePresence>
-                {filteredWorkingHours.map((entry) => (
-                  <motion.div
-                    key={entry._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.2 }}
+                <div className="flex justify-between items-center mb-4">
+                  <h2
+                    className={`text-xl font-bold ${
+                      isDark ? "text-white" : "text-gray-900"
+                    }`}
                   >
-                    <WorkingHoursCard
-                      key={entry._id}
-                      entry={entry}
-                      onEdit={() => handleEdit(entry)}
-                      onDelete={() => handleDelete(entry)}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
+                    {selectedEntry ? "Edit Working Hours" : "Add Working Hours"}
+                  </h2>
+                  <button
+                    onClick={handleFormCancel}
+                    className={`p-2 rounded-full transition-colors ${
+                      isDark
+                        ? "hover:bg-gray-700 text-gray-400"
+                        : "hover:bg-gray-200 text-gray-500"
+                    }`}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <WorkingHoursForm
+                  initialData={selectedEntry}
+                  onSubmit={handleFormSubmit}
+                  onCancel={handleFormCancel}
+                  categories={workingHoursCategories}
+                />
+              </motion.div>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
 
-        {/* A nice visual separator like a curly underline */}
-        <div className="space-y-6">
-          <div className="relative h-16 w-full overflow-hidden">
-            <svg
-              viewBox="0 0 1200 120"
-              preserveAspectRatio="none"
-              className="absolute w-full h-12"
-            >
-              <path
-                d="M0,0 C150,40 350,0 500,30 C650,60 700,0 900,20 C1050,40 1150,10 1200,30 L1200,120 L0,120 Z"
-                className={isDark ? "fill-gray-800" : "fill-indigo-100"}
-              />
-              <path
-                d="M0,30 C150,10 300,60 450,40 C600,20 750,60 900,40 C1050,20 1150,50 1200,30 L1200,120 L0,120 Z"
-                className={isDark ? "fill-gray-700" : "fill-indigo-200"}
-                opacity="0.5"
-              />
-              <path
-                d="M0,60 C150,90 350,50 500,70 C650,90 750,50 900,70 C1050,90 1150,60 1200,80 L1200,120 L0,120 Z"
-                className={isDark ? "fill-gray-600" : "fill-indigo-300"}
-                opacity="0.7"
-              />
-            </svg>
-          </div>
-        </div>
-
-        {/* Chart Section - Moved before entries for better visual hierarchy */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`p-6 rounded-lg border shadow-md mb-8 ${
-            isDark
-              ? "bg-gray-900/70 border-indigo-500/30"
-              : "bg-white border-indigo-300/50"
-          }`}
-        >
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-            <h3
-              className={`text-xl font-semibold ${
-                isDark ? "text-white" : "text-gray-800"
-              }`}
-            >
-              Working Hours Visualization
-            </h3>
-            <div
-              className={`inline-flex rounded-lg p-1 ${
-                isDark
-                  ? "bg-gray-800/50 border border-gray-700/70"
-                  : "bg-gray-100/80 border border-gray-200/70"
-              }`}
-            >
-              {[
-                {
-                  key: "progress",
-                  icon: BarChart2,
-                  label: "Progress Chart",
-                },
-                {
-                  key: "category",
-                  icon: PieChart,
-                  label: "Category Distribution",
-                },
-              ].map((viz) => (
-                <motion.button
-                  key={viz.key}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => setActiveVisualization(viz.key)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                    activeVisualization === viz.key
-                      ? isDark
-                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
-                        : "bg-indigo-100/70 text-indigo-600 border border-indigo-300/50"
-                      : isDark
-                      ? "text-gray-400 hover:bg-gray-700/50"
-                      : "text-gray-600 hover:bg-gray-200/70"
-                  }`}
-                >
-                  <viz.icon className="w-5 h-5" />
-                  <span className="hidden md:inline">{viz.label}</span>
-                </motion.button>
-              ))}
-            </div>
-          </div>
-          <div className="h-96">
-            {activeVisualization === "progress" ? (
-              <ProgressChart data={workingHours} />
-            ) : (
-              <CategoryChart data={stats.categoryBreakdown} />
-            )}
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Modal Styles with improved backdrop blur */}
-      <style jsx global>{`
-        .bg-grid-pattern {
-          background-image: linear-gradient(
-              to right,
-              rgba(99, 102, 241, 0.1) 1px,
-              transparent 1px
-            ),
-            linear-gradient(
-              to bottom,
-              rgba(99, 102, 241, 0.1) 1px,
-              transparent 1px
-            );
-          background-size: 20px 20px;
-        }
-      `}</style>
-
-      {/* Form Modal with improved backdrop */}
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
-          >
-            <div
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
-              onClick={handleFormCancel}
-            ></div>
+        {/* Stats Modal with improved backdrop */}
+        <AnimatePresence>
+          {showStats && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className={`relative w-full max-w-md p-6 rounded-lg shadow-xl border ${
-                isDark
-                  ? "bg-gray-900 border-indigo-500/30"
-                  : "bg-white border-indigo-300/50"
-              }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
             >
-              <div className="flex justify-between items-center mb-4">
-                <h2
-                  className={`text-xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {selectedEntry ? "Edit Working Hours" : "Add Working Hours"}
-                </h2>
-                <button
-                  onClick={handleFormCancel}
-                  className={`p-2 rounded-full transition-colors ${
-                    isDark
-                      ? "hover:bg-gray-700 text-gray-400"
-                      : "hover:bg-gray-200 text-gray-500"
-                  }`}
-                >
-                  ✕
-                </button>
-              </div>
-              <WorkingHoursForm
-                initialData={selectedEntry}
-                onSubmit={handleFormSubmit}
-                onCancel={handleFormCancel}
-                categories={workingHoursCategories}
-              />
+              <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+                onClick={() => setShowStats(false)}
+              ></div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={`relative w-full max-w-4xl p-6 rounded-lg shadow-xl border ${
+                  isDark
+                    ? "bg-gray-900 border-indigo-500/30"
+                    : "bg-white border-indigo-300/50"
+                }`}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h2
+                    className={`text-xl font-bold ${
+                      isDark ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    Working Hours Statistics
+                  </h2>
+                  <button
+                    onClick={() => setShowStats(false)}
+                    className={`p-2 rounded-full transition-colors ${
+                      isDark
+                        ? "hover:bg-gray-700 text-gray-400"
+                        : "hover:bg-gray-200 text-gray-500"
+                    }`}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <WorkingHoursStats stats={stats} />
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
 
-      {/* Stats Modal with improved backdrop */}
-      <AnimatePresence>
-        {showStats && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
-          >
-            <div
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
-              onClick={() => setShowStats(false)}
-            ></div>
+        {/* Filters Modal with improved backdrop */}
+        <AnimatePresence>
+          {showFilters && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className={`relative w-full max-w-4xl p-6 rounded-lg shadow-xl border ${
-                isDark
-                  ? "bg-gray-900 border-indigo-500/30"
-                  : "bg-white border-indigo-300/50"
-              }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
             >
-              <div className="flex justify-between items-center mb-4">
-                <h2
-                  className={`text-xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  Working Hours Statistics
-                </h2>
-                <button
-                  onClick={() => setShowStats(false)}
-                  className={`p-2 rounded-full transition-colors ${
-                    isDark
-                      ? "hover:bg-gray-700 text-gray-400"
-                      : "hover:bg-gray-200 text-gray-500"
-                  }`}
-                >
-                  ✕
-                </button>
-              </div>
-              <WorkingHoursStats stats={stats} />
+              <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+                onClick={() => setShowFilters(false)}
+              ></div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="relative z-10 max-w-lg w-full"
+              >
+                <WorkingHoursFilters
+                  initialFilters={filters}
+                  onApply={handleFilterApply}
+                  onCancel={() => setShowFilters(false)}
+                  categories={workingHoursCategories}
+                />
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
 
-      {/* Filters Modal with improved backdrop */}
-      <AnimatePresence>
-        {showFilters && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
-          >
-            <div
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
-              onClick={() => setShowFilters(false)}
-            ></div>
+        {/* Category Management Modal with improved backdrop */}
+        <AnimatePresence>
+          {showCategoryManagement && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative z-10 max-w-lg w-full"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
             >
-              <WorkingHoursFilters
-                initialFilters={filters}
-                onApply={handleFilterApply}
-                onCancel={() => setShowFilters(false)}
-                categories={workingHoursCategories}
-              />
+              <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+                onClick={() => setShowCategoryManagement(false)}
+              ></div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={`relative w-full max-w-4xl p-6 rounded-lg shadow-xl border ${
+                  isDark
+                    ? "bg-gray-900 border-indigo-500/30"
+                    : "bg-white border-indigo-300/50"
+                }`}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h2
+                    className={`text-xl font-bold ${
+                      isDark ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    Manage Categories
+                  </h2>
+                  <button
+                    onClick={() => setShowCategoryManagement(false)}
+                    className={`p-2 rounded-full transition-colors ${
+                      isDark
+                        ? "hover:bg-gray-700 text-gray-400"
+                        : "hover:bg-gray-200 text-gray-500"
+                    }`}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <CategoryManagement
+                  categories={categories}
+                  defaultCategories={defaultCategories}
+                  loading={categoriesLoading}
+                  onAdd={async (data) => {
+                    await addCategory(data);
+                    handleCategoryChange();
+                  }}
+                  onUpdate={async (id, data) => {
+                    await updateCategory(id, data);
+                    handleCategoryChange();
+                  }}
+                  onDelete={async (id) => {
+                    await deleteCategory(id);
+                    handleCategoryChange();
+                  }}
+                  onRefresh={async () => {
+                    await fetchCategories();
+                    handleCategoryChange();
+                  }}
+                  type="working-hours"
+                />
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
 
-      {/* Category Management Modal with improved backdrop */}
-      <AnimatePresence>
-        {showCategoryManagement && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
-          >
-            <div
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
-              onClick={() => setShowCategoryManagement(false)}
-            ></div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className={`relative w-full max-w-4xl p-6 rounded-lg shadow-xl border ${
-                isDark
-                  ? "bg-gray-900 border-indigo-500/30"
-                  : "bg-white border-indigo-300/50"
-              }`}
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h2
-                  className={`text-xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  Manage Categories
-                </h2>
-                <button
-                  onClick={() => setShowCategoryManagement(false)}
-                  className={`p-2 rounded-full transition-colors ${
-                    isDark
-                      ? "hover:bg-gray-700 text-gray-400"
-                      : "hover:bg-gray-200 text-gray-500"
-                  }`}
-                >
-                  ✕
-                </button>
-              </div>
-              <CategoryManagement
-                categories={categories}
-                defaultCategories={defaultCategories}
-                loading={categoriesLoading}
-                onAdd={async (data) => {
-                  await addCategory(data);
-                  handleCategoryChange();
-                }}
-                onUpdate={async (id, data) => {
-                  await updateCategory(id, data);
-                  handleCategoryChange();
-                }}
-                onDelete={async (id) => {
-                  await deleteCategory(id);
-                  handleCategoryChange();
-                }}
-                onRefresh={async () => {
-                  await fetchCategories();
-                  handleCategoryChange();
-                }}
-                type="working-hours"
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Confirm Delete Dialog with improved backdrop */}
-      <ConfirmDialog
-        isOpen={entryToDelete !== null}
-        onClose={() => setEntryToDelete(null)}
-        onConfirm={confirmDelete}
-        title="Delete Entry"
-        message="Are you sure you want to delete this working hours entry? This action cannot be undone."
-        confirmText="Delete Entry"
-        type="danger"
-      />
-    </section>
+        {/* Confirm Delete Dialog with improved backdrop */}
+        <ConfirmDialog
+          isOpen={entryToDelete !== null}
+          onClose={() => setEntryToDelete(null)}
+          onConfirm={confirmDelete}
+          title="Delete Entry"
+          message="Are you sure you want to delete this working hours entry? This action cannot be undone."
+          confirmText="Delete Entry"
+          type="danger"
+        />
+      </section>
+    </>
   );
 };
 
