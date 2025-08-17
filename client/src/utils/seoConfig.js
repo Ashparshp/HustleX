@@ -2,14 +2,14 @@
 export const SITE_CONFIG = {
   name: "HustleX",
   description:
-    "Transform your productivity with HustleX - the ultimate time management and skill tracking platform. Organize schedules, track working hours, develop skills, and achieve your goals efficiently.",
+    "Transform your productivity with HustleX - the ultimate time management and skill tracking platform. Create weekly timetables, organize schedules, track working hours, develop skills, and achieve your goals efficiently.",
   url: "https://hustlex.app",
   ogImage: "https://hustlex.app/og-image.jpg",
   twitterImage: "https://hustlex.app/twitter-image.jpg",
   twitterHandle: "@hustlex_app",
   author: "HustleX Team",
   keywords:
-    "productivity app, time management, skill tracking, schedule planner, working hours tracker, goal achievement, personal development, task management, productivity tools, time tracker",
+    "productivity app, time management, weekly timetable creator, schedule planner, working hours tracker, goal achievement, personal development, task management, productivity tools, time tracker, weekly planner, daily scheduler",
 };
 
 // Page-specific SEO configurations
@@ -93,11 +93,11 @@ export const PAGE_SEO = {
   },
 
   timetable: {
-    title: "Smart Timetable & Schedule Planner | HustleX - Organize Your Day",
+    title: "Create Weekly Timetable & Daily Schedule Planner | HustleX - Smart Time Management",
     description:
-      "Create and manage your daily timetable with HustleX. Plan activities, track completion, and maintain a structured schedule for maximum productivity.",
+      "Create weekly timetables, daily schedules, and track your activities with HustleX. Build productive routines, manage time blocks, track completion status, and optimize your weekly planning for maximum productivity.",
     keywords:
-      "timetable planner, schedule management, daily planner, activity tracker, time blocking, schedule organizer",
+      "create weekly timetable, weekly schedule maker, daily timetable planner, weekly time table creator, schedule management, daily planner, activity tracker, time blocking, schedule organizer, weekly planner, timetable generator, weekly schedule template, daily routine planner, time management tool, productivity scheduler",
     canonical: `${SITE_CONFIG.url}/timetable`,
     structuredData: {
       "@context": "https://schema.org",
@@ -107,9 +107,22 @@ export const PAGE_SEO = {
       url: `${SITE_CONFIG.url}/timetable`,
       mainEntity: {
         "@type": "SoftwareApplication",
-        name: "Timetable Planner",
+        name: "Weekly Timetable Creator",
         applicationCategory: "ProductivityApplication",
-        description: "Plan and track your daily activities and schedule",
+        description: "Create, manage and track weekly timetables and daily schedules",
+        featureList: [
+          "Weekly timetable creation",
+          "Daily schedule planning", 
+          "Activity completion tracking",
+          "Time block management",
+          "Progress analytics",
+          "Category organization"
+        ],
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "USD"
+        }
       },
     },
   },
@@ -164,6 +177,53 @@ export const PAGE_SEO = {
       "user profile, account settings, profile management, user preferences",
     canonical: `${SITE_CONFIG.url}/profile`,
     noIndex: true, // Private page
+  },
+
+  // Additional SEO configurations for better search targeting
+  createTimetable: {
+    title: "Create Weekly Timetable Online Free | HustleX - Weekly Schedule Maker",
+    description:
+      "Create your weekly timetable online for free with HustleX. Design custom weekly schedules, organize daily activities, track progress, and optimize your time management with our intuitive timetable creator.",
+    keywords:
+      "create weekly timetable online, free weekly timetable maker, weekly schedule creator, online timetable generator, weekly planner tool, create schedule online, weekly time table maker, daily schedule planner",
+    canonical: `${SITE_CONFIG.url}/timetable/create`,
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      name: "How to Create a Weekly Timetable",
+      description: "Step-by-step guide to creating an effective weekly timetable",
+      step: [
+        {
+          "@type": "HowToStep",
+          name: "Choose Your Template",
+          text: "Select from weekly timetable templates or create from scratch"
+        },
+        {
+          "@type": "HowToStep", 
+          name: "Add Activities",
+          text: "Input your daily activities, classes, or tasks with time slots"
+        },
+        {
+          "@type": "HowToStep",
+          name: "Organize by Categories",
+          text: "Group activities by type using color-coded categories"
+        },
+        {
+          "@type": "HowToStep",
+          name: "Track Progress",
+          text: "Monitor completion status and analyze your productivity"
+        }
+      ]
+    }
+  },
+
+  weeklyPlanner: {
+    title: "Weekly Planner & Schedule Template | HustleX - Organize Your Week",
+    description:
+      "Plan your perfect week with HustleX weekly planner. Use customizable templates, track daily activities, manage time blocks, and achieve better work-life balance with our comprehensive weekly scheduling tool.",
+    keywords:
+      "weekly planner, weekly schedule template, weekly organizer, week planner online, weekly calendar planner, weekly agenda maker, weekly planning tool, weekly schedule organizer",
+    canonical: `${SITE_CONFIG.url}/weekly-planner`,
   },
 };
 
