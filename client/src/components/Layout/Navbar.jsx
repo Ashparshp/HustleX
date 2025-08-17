@@ -543,7 +543,6 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              /* Login / Register buttons (desktop) - enhanced styling */
               <div className="hidden md:flex md:items-center md:space-x-3">
                 <div>
                   <Link

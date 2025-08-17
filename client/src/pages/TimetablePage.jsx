@@ -18,6 +18,7 @@ import useTimetable from "../hooks/useTimetable";
 import useCategories from "../hooks/useCategories";
 import { toast } from "react-hot-toast";
 import SEOHead from "../components/SEO/SEOHead";
+import TimetableSEOEnhancer from "../components/SEO/TimetableSEOEnhancer";
 import { PAGE_SEO } from "../utils/seoConfig";
 
 import TimetableHistory from "../components/Timetable/TimetableHistory";
@@ -755,6 +756,7 @@ const TimetablePage = () => {
   return (
     <>
       <SEOHead {...PAGE_SEO.timetable} />
+      <TimetableSEOEnhancer />
       <section
         className={`py-6 lg:px-3 relative ${isDark ? "bg-black" : "bg-white"}`}
       >

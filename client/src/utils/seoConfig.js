@@ -93,7 +93,8 @@ export const PAGE_SEO = {
   },
 
   timetable: {
-    title: "Create Weekly Timetable & Daily Schedule Planner | HustleX - Smart Time Management",
+    title:
+      "Create Weekly Timetable & Daily Schedule Planner | HustleX - Smart Time Management",
     description:
       "Create weekly timetables, daily schedules, and track your activities with HustleX. Build productive routines, manage time blocks, track completion status, and optimize your weekly planning for maximum productivity.",
     keywords:
@@ -109,20 +110,21 @@ export const PAGE_SEO = {
         "@type": "SoftwareApplication",
         name: "Weekly Timetable Creator",
         applicationCategory: "ProductivityApplication",
-        description: "Create, manage and track weekly timetables and daily schedules",
+        description:
+          "Create, manage and track weekly timetables and daily schedules",
         featureList: [
           "Weekly timetable creation",
-          "Daily schedule planning", 
+          "Daily schedule planning",
           "Activity completion tracking",
           "Time block management",
           "Progress analytics",
-          "Category organization"
+          "Category organization",
         ],
         offers: {
           "@type": "Offer",
           price: "0",
-          priceCurrency: "USD"
-        }
+          priceCurrency: "USD",
+        },
       },
     },
   },
@@ -181,7 +183,8 @@ export const PAGE_SEO = {
 
   // Additional SEO configurations for better search targeting
   createTimetable: {
-    title: "Create Weekly Timetable Online Free | HustleX - Weekly Schedule Maker",
+    title:
+      "Create Weekly Timetable Online Free | HustleX - Weekly Schedule Maker",
     description:
       "Create your weekly timetable online for free with HustleX. Design custom weekly schedules, organize daily activities, track progress, and optimize your time management with our intuitive timetable creator.",
     keywords:
@@ -191,30 +194,31 @@ export const PAGE_SEO = {
       "@context": "https://schema.org",
       "@type": "HowTo",
       name: "How to Create a Weekly Timetable",
-      description: "Step-by-step guide to creating an effective weekly timetable",
+      description:
+        "Step-by-step guide to creating an effective weekly timetable",
       step: [
         {
           "@type": "HowToStep",
           name: "Choose Your Template",
-          text: "Select from weekly timetable templates or create from scratch"
+          text: "Select from weekly timetable templates or create from scratch",
         },
         {
-          "@type": "HowToStep", 
+          "@type": "HowToStep",
           name: "Add Activities",
-          text: "Input your daily activities, classes, or tasks with time slots"
+          text: "Input your daily activities, classes, or tasks with time slots",
         },
         {
           "@type": "HowToStep",
           name: "Organize by Categories",
-          text: "Group activities by type using color-coded categories"
+          text: "Group activities by type using color-coded categories",
         },
         {
           "@type": "HowToStep",
           name: "Track Progress",
-          text: "Monitor completion status and analyze your productivity"
-        }
-      ]
-    }
+          text: "Monitor completion status and analyze your productivity",
+        },
+      ],
+    },
   },
 
   weeklyPlanner: {

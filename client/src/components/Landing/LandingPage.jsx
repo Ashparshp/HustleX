@@ -1,9 +1,54 @@
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
+import {
+  Calendar,
+  Clock,
+  TrendingUp,
+  Target,
+  BarChart3,
+  CheckCircle,
+  ArrowRight,
+  Zap,
+} from "lucide-react";
 import AnimatedHero from "./AnimatedHero";
+import QuickStatsPreview from "./QuickStatsPreview";
 
 const LandingPage = () => {
   const { isDark } = useTheme();
+  const { isAuthenticated, currentUser, logout } = useAuth();
+
+  // Quick action items for logged-in users
+  const quickActions = [
+    {
+      title: "View Timetables",
+      description: "Check your weekly schedules",
+      icon: Calendar,
+      link: "/timetable",
+      color: "indigo",
+    },
+    {
+      title: "Track Working Hours",
+      description: "Log your productive time",
+      icon: Clock,
+      link: "/working-hours",
+      color: "blue",
+    },
+    {
+      title: "Skills Progress",
+      description: "Monitor your development",
+      icon: TrendingUp,
+      link: "/skills",
+      color: "emerald",
+    },
+    {
+      title: "Schedule Management",
+      description: "Organize your activities",
+      icon: Target,
+      link: "/schedule",
+      color: "purple",
+    },
+  ];
 
   const features = [
     {
@@ -35,8 +80,7 @@ const LandingPage = () => {
 
   const containerStyle = isDark
     ? {
-        background:
-          "linear-gradient(180deg, #000000 0%, #121212 100%)",
+        background: "linear-gradient(180deg, #000000 0%, #121212 100%)",
         color: "white",
         fontFamily: "'Eugene', serif",
         minHeight: "100vh",
@@ -79,31 +123,130 @@ const LandingPage = () => {
           <AnimatedHero />
         </div>
         <div className="lg:w-1/2">
-          <h1
-            className={`text-5xl font-bold mb-6 leading-tight ${headingColor}`}
-          >
-            Take Full Control Of Your Time
-          </h1>
-          <p
-            className={`text-lg mb-10 max-w-lg leading-relaxed ${textColorMuted}`}
-          >
-            Empower your productivity with intelligent time tracking,
-            customizable timetables, and insightful progress reports.
-          </p>
-          <div className="flex gap-6">
-            <Link
-              to="/register"
-              className={`${buttonPrimaryBg} ${buttonPrimaryText} font-semibold py-3 px-10 rounded-xl shadow-md transition`}
-            >
-              Get Started
-            </Link>
-            <Link
-              to="/login"
-              className={`border-2 py-3 px-10 rounded-xl font-semibold transition ${buttonSecondaryBorder} ${buttonSecondaryText}`}
-            >
-              Login
-            </Link>
-          </div>
+          {isAuthenticated ? (
+            // Content for authenticated users
+            <>
+              <div className="mb-4">
+                <span
+                  className={`text-sm font-medium ${
+                    isDark ? "text-indigo-400" : "text-indigo-600"
+                  }`}
+                >
+                  Welcome back!
+                </span>
+              </div>
+              <h1
+                className={`text-5xl font-bold mb-6 leading-tight ${headingColor}`}
+              >
+                {currentUser?.name
+                  ? `Hi ${currentUser.name.split(" ")[0]}!`
+                  : "Ready to Hustle?"}
+              </h1>
+              <p
+                className={`text-lg mb-10 max-w-lg leading-relaxed ${textColorMuted}`}
+              >
+                Jump back into your productivity journey. Check your timetables,
+                track your hours, or continue developing your skills.
+              </p>
+
+              {/* Quick Actions Grid */}
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                {quickActions.map((action, index) => {
+                  const Icon = action.icon;
+                  const colorClasses = {
+                    indigo: isDark
+                      ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
+                      : "bg-indigo-50 text-indigo-600 border-indigo-200",
+                    blue: isDark
+                      ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                      : "bg-blue-50 text-blue-600 border-blue-200",
+                    emerald: isDark
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      : "bg-emerald-50 text-emerald-600 border-emerald-200",
+                    purple: isDark
+                      ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                      : "bg-purple-50 text-purple-600 border-purple-200",
+                  };
+
+                  return (
+                    <Link
+                      key={index}
+                      to={action.link}
+                      className={`p-4 rounded-xl border transition-all duration-200 hover:scale-105 hover:shadow-md ${
+                        colorClasses[action.color]
+                      }`}
+                    >
+                      <Icon className="w-6 h-6 mb-2" />
+                      <h3 className="font-semibold text-sm mb-1">
+                        {action.title}
+                      </h3>
+                      <p
+                        className={`text-xs ${
+                          isDark ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        {action.description}
+                      </p>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Primary CTA */}
+              <div className="flex gap-4">
+                <Link
+                  to="/timetable"
+                  className={`${buttonPrimaryBg} ${buttonPrimaryText} font-semibold py-3 px-8 rounded-xl shadow-md transition flex items-center gap-2`}
+                >
+                  <Zap className="w-5 h-5" />
+                  Continue Journey
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/working-hours"
+                  className={`border-2 py-3 px-8 rounded-xl font-semibold transition ${buttonSecondaryBorder} ${buttonSecondaryText} flex items-center gap-2`}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  View Progress
+                </Link>
+              </div>
+
+              {/* Quick Stats Preview or Welcome Message */}
+              <QuickStatsPreview 
+                isDark={isDark} 
+                showWelcomeInstead={false}
+              />
+            </>
+          ) : (
+            // Content for non-authenticated users
+            <>
+              <h1
+                className={`text-5xl font-bold mb-6 leading-tight ${headingColor}`}
+              >
+                Take Full Control Of Your Time
+              </h1>
+              <p
+                className={`text-lg mb-10 max-w-lg leading-relaxed ${textColorMuted}`}
+              >
+                Empower your productivity with intelligent time tracking,
+                customizable timetables, and insightful progress reports.
+              </p>
+              <div className="flex gap-6">
+                <Link
+                  to="/register"
+                  className={`${buttonPrimaryBg} ${buttonPrimaryText} font-semibold py-3 px-10 rounded-xl shadow-md transition`}
+                >
+                  Get Started
+                </Link>
+                <Link
+                  to="/login"
+                  className={`border-2 py-3 px-10 rounded-xl font-semibold transition ${buttonSecondaryBorder} ${buttonSecondaryText}`}
+                >
+                  Login
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -143,32 +286,76 @@ const LandingPage = () => {
       <section
         className="py-20 px-4 text-center relative"
         style={{
-          background: isDark ? "#000000" : "radial-gradient(ellipse 70% 50% at 50% 10%, #c7d5ff 0%, #e3ebff 65%, #fefeff 100%)",
+          background: isDark
+            ? "#000000"
+            : "radial-gradient(ellipse 70% 50% at 50% 10%, #c7d5ff 0%, #e3ebff 65%, #fefeff 100%)",
         }}
       >
         <div className="max-w-xl mx-auto">
-          <h2
-            className={`text-3xl font-bold mb-6 ${
-              isDark ? "text-indigo-300" : "text-indigo-700"
-            }`}
-            style={{ fontFamily: "'Eugene', serif" }}
-          >
-            Pause. Reflect. Thrive.
-          </h2>
-          <p
-            className={`mb-10 text-lg leading-relaxed ${
-              isDark ? "text-gray-400" : "text-gray-700"
-            }`}
-          >
-            Take a quiet moment for yourself. Set your intentions, track your
-            growth, and enjoy the feeling of progress every single day.
-          </p>
-          <Link
-            to="/register"
-            className={`inline-block bg-gradient-to-r from-indigo-700 via-indigo-800 to-indigo-900 hover:from-indigo-800 hover:to-indigo-900 text-white text-lg font-semibold py-4 px-14 rounded-full shadow-md transition`}
-          >
-            Begin Your Journey
-          </Link>
+          {isAuthenticated ? (
+            // Content for authenticated users
+            <>
+              <h2
+                className={`text-3xl font-bold mb-6 ${
+                  isDark ? "text-indigo-300" : "text-indigo-700"
+                }`}
+                style={{ fontFamily: "'Eugene', serif" }}
+              >
+                Your Productivity Hub Awaits
+              </h2>
+              <p
+                className={`mb-10 text-lg leading-relaxed ${
+                  isDark ? "text-gray-400" : "text-gray-700"
+                }`}
+              >
+                Everything you need to stay organized and productive is just a
+                click away. Track your time, manage your schedule, and watch
+                your progress unfold.
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Link
+                  to="/timetable"
+                  className={`bg-gradient-to-r from-indigo-700 via-indigo-800 to-indigo-900 hover:from-indigo-800 hover:to-indigo-900 text-white text-lg font-semibold py-4 px-10 rounded-full shadow-md transition flex items-center gap-2`}
+                >
+                  <Calendar className="w-5 h-5" />
+                  View Timetables
+                </Link>
+                <Link
+                  to="/working-hours"
+                  className={`border-2 ${buttonSecondaryBorder} ${buttonSecondaryText} text-lg font-semibold py-4 px-10 rounded-full shadow-md transition flex items-center gap-2`}
+                >
+                  <Clock className="w-5 h-5" />
+                  Track Hours
+                </Link>
+              </div>
+            </>
+          ) : (
+            // Content for non-authenticated users
+            <>
+              <h2
+                className={`text-3xl font-bold mb-6 ${
+                  isDark ? "text-indigo-300" : "text-indigo-700"
+                }`}
+                style={{ fontFamily: "'Eugene', serif" }}
+              >
+                Pause. Reflect. Thrive.
+              </h2>
+              <p
+                className={`mb-10 text-lg leading-relaxed ${
+                  isDark ? "text-gray-400" : "text-gray-700"
+                }`}
+              >
+                Take a quiet moment for yourself. Set your intentions, track
+                your growth, and enjoy the feeling of progress every single day.
+              </p>
+              <Link
+                to="/register"
+                className={`inline-block bg-gradient-to-r from-indigo-700 via-indigo-800 to-indigo-900 hover:from-indigo-800 hover:to-indigo-900 text-white text-lg font-semibold py-4 px-14 rounded-full shadow-md transition`}
+              >
+                Begin Your Journey
+              </Link>
+            </>
+          )}
         </div>
       </section>
     </div>
