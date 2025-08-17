@@ -8,11 +8,9 @@ import {
   User,
   LogOut,
   ChevronDown,
-  Home,
   Clock,
   Award,
   Calendar,
-  Target,
   Layout,
   MoreHorizontal,
 } from "lucide-react";
@@ -135,18 +133,6 @@ const Navbar = () => {
       text: "Schedule",
       path: "/schedule",
       icon: <Calendar size={18} />,
-      authRequired: true,
-    },
-    {
-      text: "Contest",
-      path: "/contests",
-      icon: <Home size={18} />,
-      authRequired: true,
-    },
-    {
-      text: "LeetCode",
-      path: "/leetcode",
-      icon: <Target size={18} />,
       authRequired: true,
     },
   ];
@@ -290,7 +276,11 @@ const Navbar = () => {
           <div className="hidden md:flex md:items-center md:space-x-2 lg:space-x-3">
             {/* Pill-shaped container for primary navigation */}
             {isAuthenticated && (
-              <div className={`p-1 rounded-xl mr-1 ${isDark ? 'bg-gray-800/50' : 'bg-gray-100/70'}`}>
+              <div
+                className={`p-1 rounded-xl mr-1 ${
+                  isDark ? "bg-gray-800/50" : "bg-gray-100/70"
+                }`}
+              >
                 <div className="flex items-center space-x-1">
                   {primaryNavLinks
                     .filter((link) => link.authRequired === isAuthenticated)
@@ -302,7 +292,9 @@ const Navbar = () => {
                             isActive(link.path)
                           )}`}
                           title={link.text}
-                          aria-current={isActive(link.path) ? "page" : undefined}
+                          aria-current={
+                            isActive(link.path) ? "page" : undefined
+                          }
                         >
                           <span className="mr-1.5">{link.icon}</span>
                           <span className="hidden md:inline-block">
@@ -377,7 +369,11 @@ const Navbar = () => {
             {/* Secondary links visible on large screens - enhanced with better styling */}
             <div className="hidden lg:flex lg:items-center">
               {isAuthenticated && (
-                <div className={`p-1 rounded-xl ${isDark ? 'bg-gray-800/50' : 'bg-gray-100/70'}`}>
+                <div
+                  className={`p-1 rounded-xl ${
+                    isDark ? "bg-gray-800/50" : "bg-gray-100/70"
+                  }`}
+                >
                   <div className="flex items-center space-x-1">
                     {secondaryNavLinks
                       .filter((link) => link.authRequired === isAuthenticated)
@@ -388,7 +384,9 @@ const Navbar = () => {
                             className={`px-3 py-2 ${generateLinkClass(
                               isActive(link.path)
                             )}`}
-                            aria-current={isActive(link.path) ? "page" : undefined}
+                            aria-current={
+                              isActive(link.path) ? "page" : undefined
+                            }
                           >
                             {link.icon}
                             <span className="ml-1.5">{link.text}</span>
@@ -407,8 +405,8 @@ const Navbar = () => {
             <button
               onClick={toggleTheme}
               className={`p-2 ${buttonClass} ${
-                isDark 
-                  ? "bg-gray-800/70 hover:bg-gray-700/50" 
+                isDark
+                  ? "bg-gray-800/70 hover:bg-gray-700/50"
                   : "bg-gray-100 hover:bg-gray-200/70"
               }`}
               aria-label={
@@ -429,8 +427,8 @@ const Navbar = () => {
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className={`flex items-center gap-2.5 px-3 py-1.5 rounded-xl ${
-                    isDark 
-                      ? "bg-gray-800/70 hover:bg-gray-700/60 border border-gray-700/50" 
+                    isDark
+                      ? "bg-gray-800/70 hover:bg-gray-700/60 border border-gray-700/50"
                       : "bg-gray-100 hover:bg-gray-200/70 border border-gray-200/70"
                   } transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-1 ${
                     isDark

@@ -62,7 +62,7 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log("✅ MongoDB Connected Successfully");
+    console.log("✅ MongoDB Connected!");
   } catch (error) {
     console.error("❌ MongoDB Connection Error:", error);
     process.exit(1);
@@ -75,8 +75,6 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/categories", require("./routes/category"));
 app.use("/api/working-hours", require("./routes/workingHours"));
 app.use("/api/skills", require("./routes/skills"));
-app.use("/api/contests", require("./routes/contests"));
-app.use("/api/leetcode", require("./routes/leetcode"));
 app.use("/api/schedules", require("./routes/schedule"));
 app.use("/api/timetables", require("./routes/timetable"));
 

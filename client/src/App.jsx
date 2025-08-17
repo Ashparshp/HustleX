@@ -33,8 +33,6 @@ import WorkingHoursPage from "./pages/WorkingHoursPage";
 import SkillsPage from "./pages/SkillsPage";
 import SchedulePage from "./pages/SchedulePage";
 import TimetablePage from "./pages/TimetablePage";
-import LeetCodePage from "./pages/LeetCodePage";
-import ContestsPage from "./pages/ContestsPage";
 
 function AppContent() {
   const { isDark } = useTheme();
@@ -88,7 +86,11 @@ function AppContent() {
           <Route
             path="/register"
             element={
-              isAuthenticated ? <Navigate to="/working-hours" /> : <RegisterForm />
+              isAuthenticated ? (
+                <Navigate to="/working-hours" />
+              ) : (
+                <RegisterForm />
+              )
             }
           />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -133,15 +135,6 @@ function AppContent() {
           />
 
           <Route
-            path="/leetcode"
-            element={
-              <ProtectedRoute>
-                <LeetCodePage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
             path="/schedule"
             element={
               <ProtectedRoute>
@@ -164,15 +157,6 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <ChangePassword />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/contests"
-            element={
-              <ProtectedRoute>
-                <ContestsPage />
               </ProtectedRoute>
             }
           />

@@ -190,14 +190,6 @@ exports.getDefaultCategories = async (req, res) => {
           { name: "Mobile", color: "#9b59b6", icon: "smartphone" },
         ];
         break;
-      case "goals":
-        defaultCategories = [
-          { name: "LeetCode", color: "#f39c12", icon: "code" },
-          { name: "CodeChef", color: "#3498db", icon: "hash" },
-          { name: "CodeForces", color: "#e74c3c", icon: "activity" },
-          { name: "HackerRank", color: "#2ecc71", icon: "terminal" },
-        ];
-        break;
       default:
         break;
     }
