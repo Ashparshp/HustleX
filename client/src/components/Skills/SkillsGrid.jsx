@@ -13,7 +13,15 @@ import SkillCard from "./SkillCard";
 import EditSkillModal from "./EditSkillModal";
 import ManageSkillsModal from "./ManageSkillsModal";
 
-const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
+const SkillsGrid = ({
+  skills,
+  onAddSkill,
+  categories,
+  onSkillChange,
+  deleteSkill,
+  updateSkill,
+  updateSkillOrder,
+}) => {
   const { isDark } = useTheme();
   const [editingSkill, setEditingSkill] = useState(null);
   const [expandedCategories, setExpandedCategories] = useState({});
@@ -25,15 +33,11 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
 
   const handleCloseEditModal = () => {
     setEditingSkill(null);
-    if (typeof onSkillChange === "function") {
-      onSkillChange();
-    }
+    // onSkillChange is called automatically in the hook after edit operations
   };
 
   const handleSkillDeleted = () => {
-    if (typeof onSkillChange === "function") {
-      onSkillChange();
-    }
+    // onSkillChange is called automatically in the hook after delete operations
   };
 
   const handleManageSkills = (category, categorySkills) => {
@@ -45,9 +49,7 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
 
   const handleCloseManageModal = () => {
     setManagingCategory(null);
-    if (typeof onSkillChange === "function") {
-      onSkillChange();
-    }
+    // onSkillChange is called automatically in the hook after manage operations
   };
 
   const toggleCategory = (category) => {
@@ -482,6 +484,7 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                                   onEdit={handleEditSkill}
                                   categories={categories}
                                   onSkillDeleted={handleSkillDeleted}
+                                  deleteSkill={deleteSkill}
                                 />
                               </motion.div>
                             ))}
@@ -555,6 +558,8 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
                 skill={editingSkill}
                 onClose={handleCloseEditModal}
                 categories={categories}
+                updateSkill={updateSkill}
+                deleteSkill={deleteSkill}
               />
             </div>
           </motion.div>
@@ -569,6 +574,9 @@ const SkillsGrid = ({ skills, onAddSkill, categories, onSkillChange }) => {
             category={managingCategory.name}
             categorySkills={managingCategory.skills}
             onEditSkill={handleEditSkill}
+            updateSkill={updateSkill}
+            deleteSkill={deleteSkill}
+            updateSkillOrder={updateSkillOrder}
           />
         )}
       </AnimatePresence>

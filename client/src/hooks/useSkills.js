@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-hot-toast";
 import apiClient from "../utils/apiClient";
 import { useAuth } from "../context/AuthContext";
@@ -8,12 +8,25 @@ const useSkills = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(null);
+  const isMountedRef = useRef(true);
+  const lastFetchRef = useRef(null);
 
   const { isAuthenticated } = useAuth();
 
   const fetchSkills = useCallback(
-    async (category, status) => {
-      if (!isAuthenticated) return;
+    async (category, status, forceRefresh = false) => {
+      if (!isAuthenticated || !isMountedRef.current) return;
+
+      // Prevent duplicate requests within 1 second unless forced
+      const now = Date.now();
+      if (
+        !forceRefresh &&
+        lastFetchRef.current &&
+        now - lastFetchRef.current < 1000
+      ) {
+        return;
+      }
+      lastFetchRef.current = now;
 
       try {
         setLoading(true);
@@ -22,6 +35,8 @@ const useSkills = () => {
         if (status) params.status = status;
 
         const response = await apiClient.get("/skills", { params });
+
+        if (!isMountedRef.current) return;
 
         if (response.groupedSkills) {
           setSkills(response.groupedSkills);
@@ -44,11 +59,15 @@ const useSkills = () => {
         return response;
       } catch (err) {
         console.error("Error fetching skills:", err);
-        setError(err.message);
-        toast.error("Failed to fetch skills");
+        if (isMountedRef.current) {
+          setError(err.message);
+          toast.error("Failed to fetch skills");
+        }
         return {};
       } finally {
-        setLoading(false);
+        if (isMountedRef.current) {
+          setLoading(false);
+        }
       }
     },
     [isAuthenticated]
@@ -144,14 +163,14 @@ const useSkills = () => {
       if (!isAuthenticated) return;
 
       try {
-        const updatePromises = skillsData.map(skill => 
+        const updatePromises = skillsData.map((skill) =>
           updateSkill(skill.id || skill._id, skill)
         );
-        
+
         await Promise.all(updatePromises);
-        
+
         await fetchSkills();
-        
+
         toast.success("Skills updated successfully");
         return { success: true };
       } catch (err) {
@@ -166,30 +185,32 @@ const useSkills = () => {
   const updateSkillOrder = useCallback(
     async (category, orderedSkills) => {
       if (!isAuthenticated) return;
-      
+
       try {
         try {
           const skillsData = orderedSkills.map((skill, index) => ({
             id: skill.id || skill._id,
-            orderIndex: index
+            orderIndex: index,
           }));
-          
-          await apiClient.post('/skills/reorder', { skills: skillsData });
+
+          await apiClient.post("/skills/reorder", { skills: skillsData });
         } catch (err) {
-          console.log("Reorder endpoint failed, using individual updates instead");
-          
+          console.log(
+            "Reorder endpoint failed, using individual updates instead"
+          );
+
           for (let i = 0; i < orderedSkills.length; i++) {
             const skill = orderedSkills[i];
             await updateSkill(skill.id || skill._id, {
               orderIndex: i,
               name: skill.name,
-              category: skill.category
+              category: skill.category,
             });
           }
         }
-        
+
         await fetchSkills();
-        
+
         toast.success("Skills reordered successfully");
       } catch (err) {
         console.error("Error updating skill order:", err);
@@ -197,14 +218,20 @@ const useSkills = () => {
         throw err;
       }
     },
-    [isAuthenticated, fetchSkills, updateSkill, apiClient]
+    [isAuthenticated, fetchSkills, updateSkill]
   );
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     if (isAuthenticated) {
       fetchSkills();
     }
-  }, [isAuthenticated, fetchSkills]);
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [isAuthenticated]); // Remove fetchSkills from dependencies to prevent infinite loop
 
   return {
     skills,
@@ -218,7 +245,7 @@ const useSkills = () => {
     deleteSkill,
     getSkillCategories,
     getSkillStats,
-    updateSkillOrder
+    updateSkillOrder,
   };
 };
 

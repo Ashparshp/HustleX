@@ -13,7 +13,6 @@ import {
   Flag,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
-import useSkills from "../../hooks/useSkills";
 import LoadingSpinner from "../UI/LoadingSpinner";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import EditSkillModal from "./EditSkillModal";
@@ -39,9 +38,11 @@ const ManageSkillsModal = ({
   category,
   categorySkills,
   onEditSkill,
+  updateSkill,
+  deleteSkill,
+  updateSkillOrder,
 }) => {
   const { isDark } = useTheme();
-  const { updateSkill, deleteSkill, updateSkillOrder } = useSkills();
   const [managedSkills, setManagedSkills] = useState([]);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

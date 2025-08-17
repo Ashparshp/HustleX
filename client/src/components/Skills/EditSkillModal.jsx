@@ -2,14 +2,18 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Save, Calendar, Trash2, Plus, Check } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
-import useSkills from "../../hooks/useSkills";
 import useCategories from "../../hooks/useCategories";
 import LoadingSpinner from "../UI/LoadingSpinner";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 
-const EditSkillModal = ({ skill, onClose, categories = [] }) => {
+const EditSkillModal = ({
+  skill,
+  onClose,
+  categories = [],
+  updateSkill,
+  deleteSkill,
+}) => {
   const { isDark } = useTheme();
-  const { updateSkill, deleteSkill } = useSkills();
   const { addCategory } = useCategories("skills");
 
   const [formData, setFormData] = useState({

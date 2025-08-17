@@ -2,13 +2,11 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { X, Check } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
-import useSkills from "../../hooks/useSkills";
 import useCategories from "../../hooks/useCategories";
 import LoadingSpinner from "../UI/LoadingSpinner";
 
-const AddSkillModal = ({ onClose, categories = [] }) => {
+const AddSkillModal = ({ onClose, categories = [], addSkill }) => {
   const { isDark } = useTheme();
-  const { addSkill } = useSkills();
   const { addCategory } = useCategories("skills");
 
   const [formData, setFormData] = useState({
@@ -499,7 +497,9 @@ const AddSkillModal = ({ onClose, categories = [] }) => {
                   {isSubmitting ? (
                     <div className="flex items-center justify-center">
                       <LoadingSpinner size="sm" />
-                      <span className="ml-2 text-sm sm:text-base">Adding...</span>
+                      <span className="ml-2 text-sm sm:text-base">
+                        Adding...
+                      </span>
                     </div>
                   ) : (
                     <span className="text-sm sm:text-base">Add Skill</span>

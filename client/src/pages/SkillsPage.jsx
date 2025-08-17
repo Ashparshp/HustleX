@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -21,6 +21,8 @@ import LoadingSkillsSkeleton from "../components/Skills/LoadingSkillsSkeleton";
 
 const SkillsPage = () => {
   const { isDark } = useTheme();
+  const isMountedRef = useRef(true);
+
   const {
     skills,
     loading,
@@ -29,6 +31,10 @@ const SkillsPage = () => {
     fetchSkills,
     getSkillStats,
     getSkillCategories,
+    deleteSkill,
+    updateSkill,
+    updateSkillOrder,
+    addSkill,
   } = useSkills();
 
   const {
@@ -90,23 +96,28 @@ const SkillsPage = () => {
     if (showStats) {
       getSkillStats();
     }
-  }, [showStats, getSkillStats]);
+  }, [showStats]);
 
   useEffect(() => {
+    isMountedRef.current = true;
     fetchSkills();
-  }, [fetchSkills]);
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const handleAddSkill = () => {
     setShowAddModal(true);
   };
 
-  const handleCloseAddModal = async () => {
+  const handleCloseAddModal = () => {
     setShowAddModal(false);
-    await fetchSkills();
+    // fetchSkills is called automatically in the hook after add/update operations
   };
 
-  const handleSkillChange = async () => {
-    await fetchSkills();
+  const handleSkillChange = () => {
+    // fetchSkills is called automatically in the hook after add/update operations
   };
 
   const handleToggleStats = () => {
@@ -430,6 +441,9 @@ const SkillsPage = () => {
                 : []
             }
             onSkillChange={handleSkillChange}
+            deleteSkill={deleteSkill}
+            updateSkill={updateSkill}
+            updateSkillOrder={updateSkillOrder}
           />
         </motion.div>
       </div>
@@ -463,6 +477,7 @@ const SkillsPage = () => {
                     : []
                 }
                 onClose={handleCloseAddModal}
+                addSkill={addSkill}
               />
             </motion.div>
           </motion.div>

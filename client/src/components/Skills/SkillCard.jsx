@@ -18,12 +18,16 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
-import useSkills from "../../hooks/useSkills";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 
-const SkillCard = ({ skill, onEdit, listView = false, onSkillDeleted }) => {
+const SkillCard = ({
+  skill,
+  onEdit,
+  listView = false,
+  onSkillDeleted,
+  deleteSkill,
+}) => {
   const { isDark } = useTheme();
-  const { deleteSkill } = useSkills();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isHovered, setIsHovered] = useState(false);

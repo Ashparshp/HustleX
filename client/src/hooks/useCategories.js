@@ -127,7 +127,7 @@ const useCategories = (type = "working-hours") => {
       fetchCategories();
       fetchDefaultCategories();
     }
-  }, [isAuthenticated, fetchCategories, fetchDefaultCategories]);
+  }, [isAuthenticated, type]); // Remove function dependencies to prevent infinite loop
 
   return {
     categories,
