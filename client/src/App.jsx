@@ -38,6 +38,9 @@ import SkillsPage from "./pages/SkillsPage";
 import SchedulePage from "./pages/SchedulePage";
 import TimetablePage from "./pages/TimetablePage";
 
+// Landing Page
+import LandingPage from "./components/Landing/LandingPage";
+
 function AppContent() {
   const { isDark } = useTheme();
   const { isAuthenticated, currentUser } = useAuth();
@@ -165,16 +168,7 @@ function AppContent() {
             }
           />
 
-          <Route
-            path="/"
-            element={
-              isAuthenticated ? (
-                <Navigate to="/working-hours" />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
+          <Route path="/" element={<LandingPage />} />
 
           <Route
             path="*"
