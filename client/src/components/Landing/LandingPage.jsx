@@ -269,7 +269,7 @@ const LandingPage = () => {
     <div style={containerStyle}>
       {/* Hero Section */}
       <section className="flex flex-col lg:flex-row items-center max-w-7xl mx-auto px-6 py-20 gap-16">
-        <div className="lg:w-1/2 flex justify-center">
+        <div className="w-full lg:w-1/2 flex justify-center">
           <AnimatedHero />
         </div>
         <div className="lg:w-1/2">

@@ -89,7 +89,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate("/login");
+      navigate("/");
       setShowUserMenu(false);
       setIsOpen(false);
     } catch (error) {

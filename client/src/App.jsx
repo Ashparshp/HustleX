@@ -87,7 +87,7 @@ function AppContent() {
           <Route
             path="/login"
             element={
-              isAuthenticated ? <Navigate to="/working-hours" /> : <LoginForm />
+              isAuthenticated ? <Navigate to="/" /> : <LoginForm />
             }
           />
           <Route
@@ -193,7 +193,7 @@ function AppContent() {
                   The page you're looking for doesn't exist.
                 </p>
                 <motion.a
-                  href={isAuthenticated ? "/working-hours" : "/login"}
+                  href={isAuthenticated ? "/" : "/login"}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className={`inline-block py-2 px-4 rounded-lg transition duration-300 ${
@@ -202,7 +202,7 @@ function AppContent() {
                       : "bg-indigo-100/50 border border-indigo-300/50 text-indigo-600 hover:bg-indigo-200/70"
                   }`}
                 >
-                  Go to {isAuthenticated ? "Working Hours" : "Login"}
+                  Go to {isAuthenticated ? "Home Page" : "Login"}
                 </motion.a>
               </motion.div>
             }
